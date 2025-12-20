@@ -1,0 +1,59 @@
+# --- Simulation Outputs & Logs ---
+*.log
+*.vcd
+*.shm/
+*.dsn
+*.trn
+*.key
+*.diag
+*.history
+*.fst
+*.vst
+INCA_libs/
+xcelium.d/
+work/
+transcript
+vsim.wlf
+vsim_stacktrace.vstf
+
+# --- Hardware Compilation & Bitstreams ---
+*.bit
+*.bin
+*.mcs
+*.prm
+*.bit.bin
+*.rpt
+
+# --- Tool Specific Directories (Vivado, Quartus, Libero) ---
+.Xil/
+*.jou
+*.pb
+*.str
+*.dir/
+*.bak
+*.orig
+nm_db/
+synthesized/
+impl/
+db/
+incremental_db/
+greybox_tmp/
+
+# --- C/C++ (for HLS or Software drivers) ---
+*.o
+*.obj
+*.exe
+*.out
+*.app
+
+# --- System & Editor Files ---
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.vscode/
+.idea/
+
+# --- Environment & Credentials ---
+.env
+.venv/
