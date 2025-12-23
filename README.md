@@ -1,73 +1,77 @@
---------------------------------------------------------------------------------
+# 🚀 Transformer Accelerator on FPGA (taoFPGA)
 
-Transformer Accelerator on FPGA (taoFPGA)
+| **Project Info** | **Details** |
+| :--- | :--- |
+| **Project Number** | 309 |
+| **Team** | Eliran Turgeman & Shay Rask |
+| **Supervisor** | David Freud |
 
-Project Number: 309
-Team: Eliran Turgeman & Shay Rask
-Supervisor: David Freud
+---
 
-Project Overview:
+## 📖 Project Overview
 
-    The goal of this project is to design and implement a hardware accelerator on an FPGA platform (Xilinx/Intel) to optimize the inference of Transformer models. The accelerator focuses on improving Latency, Throughput, and Energy Efficiency by utilizing specialized hardware structures like Systolic Arrays and advanced Quantization techniques.
+The goal of this project is to design and implement a hardware accelerator on an **FPGA platform (Xilinx/Intel)** to optimize the inference of Transformer models.
 
-Directory Structure and Purpose:
+The accelerator focuses on improving **Latency**, **Throughput**, and **Energy Efficiency** by utilizing specialized hardware structures like **Systolic Arrays** and advanced **Quantization** techniques.
 
-    src/ (Source Code)
-    Contains all the core logic files for the hardware design.
+---
 
-        • src/hls/:
-        Stores C/C++ source files intended for High-Level Synthesis (HLS), allowing for faster development of complex algorithms like Softmax and LayerNorm.
+## 📂 Directory Structure
 
-        • src/rtl/:
-        Contains hardware description files (Verilog/SystemVerilog) for low-level structural design, such as the Systolic Array processing elements (PEs).
+```text
+taoFPGA/
+├── src/               # Core logic (HLS, RTL, IP)
+├── sim/               # Verification (Testbenches, Golden Models)
+├── sw/                # Host software & Drivers
+├── data/              # Model weights & Test sets
+├── docs/              # Documentation & Reports
+├── scripts/           # Automation & Build scripts
+└── constraints/       # Physical & Timing constraints
 
-        • src/ip/:
-        Houses configuration files for vendor-specific Intellectual Property (IP) cores, such as Xilinx DSP macros or memory controllers.
+Detailed Breakdown
+src/ (Source Code)
+Contains all the core logic files for the hardware design.
 
-    sim/ (Simulation & Verification)
-    Dedicated to verifying the functional correctness of the design before hardware deployment.
+src/hls/ – Stores C/C++ source files intended for High-Level Synthesis (HLS), allowing for faster development of complex algorithms like Softmax and LayerNorm.
 
-        • sim/testbenches/: 
-        Hardware-level testbenches (RTL) to simulate the signals and timing of the accelerator.
+src/rtl/ – Contains hardware description files (Verilog/SystemVerilog) for low-level structural design, such as the Systolic Array processing elements (PEs).
 
-        • sim/models/: 
-        High-level "Golden Models" (often in Python or C) used to generate expected results for comparison with hardware outputs.
+src/ip/ – Houses configuration files for vendor-specific Intellectual Property (IP) cores, such as Xilinx DSP macros or memory controllers.
 
-    sw/         (Software & Drivers)
-    Contains code that runs on the Host CPU or embedded processor to control the FPGA.
+sim/ (Simulation & Verification)
+Dedicated to verifying the functional correctness of the design before hardware deployment.
 
-        • sw/driver/:
-        Logic for managing communication between the CPU and FPGA, including DMA (Direct Memory Access) and PCIe interfaces.
+sim/testbenches/ – Hardware-level testbenches (RTL) to simulate the signals and timing of the accelerator.
 
-        • sw/app/:
-        Application-level scripts (e.g., Python/Jupyter) for loading data, running inference, and testing on platforms like PYNQ.
+sim/models/ – High-level "Golden Models" (often in Python or C) used to generate expected results for comparison with hardware outputs.
 
-    data/       (Model Data)
-    Storage for the inputs and parameters required for the Transformer model.
+sw/ (Software & Drivers)
+Contains code that runs on the Host CPU or embedded processor to control the FPGA.
 
-        • data/weights/:
-        Quantized model weights (e.g., INT8 or BCM format) that are loaded into the FPGA’s on-chip memory.
+sw/driver/ – Logic for managing communication between the CPU and FPGA, including DMA (Direct Memory Access) and PCIe interfaces.
 
-        • data/test_sets/:
-        Sample datasets used for evaluation, such as WikiText-2 or IMDB review sets.
+sw/app/ – Application-level scripts (e.g., Python/Jupyter) for loading data, running inference, and testing on platforms like PYNQ.
 
-    docs/       (Documentation)
-    Essential documentation for project deliverables as defined in the pre-project report.
+data/ (Model Data)
+Storage for the inputs and parameters required for the Transformer model.
 
-        • docs/architecture/: 
-        Detailed Micro-Architecture documentation, including block diagrams of PEs and memory hierarchies.
+data/weights/ – Quantized model weights (e.g., INT8 or BCM format) that are loaded into the FPGA’s on-chip memory.
 
-        • docs/reports/: 
-        Synthesis and implementation reports detailing hardware resource utilization (DSPs, BRAMs) and power consumption.
+data/test_sets/ – Sample datasets used for evaluation, such as WikiText-2 or IMDB review sets.
 
-    scripts/        (Automation)
-    Contains automation tools to streamline the build process.
+docs/ (Documentation)
+Essential documentation for project deliverables as defined in the pre-project report.
 
-        • prj.tcl: Tcl scripts for automated project creation, synthesis, and Bitstream generation in Vivado or Quartus.
+docs/architecture/ – Detailed Micro-Architecture documentation, including block diagrams of PEs and memory hierarchies.
 
-        • Python/Bash scripts for managing the end-to-end development flow.
-        
-    constraints/        (Hardware Constraints)
-        Stores XDC (Xilinx Design Constraints) files that map the logical signals of the design to the physical pins of the FPGA board and define timing requirements.
+docs/reports/ – Synthesis and implementation reports detailing hardware resource utilization (DSPs, BRAMs) and power consumption.
 
---------------------------------------------------------------------------------
+scripts/ (Automation)
+Contains automation tools to streamline the build process.
+
+prj.tcl – Tcl scripts for automated project creation, synthesis, and Bitstream generation in Vivado or Quartus.
+
+Python/Bash scripts for managing the end-to-end development flow.
+
+constraints/ (Hardware Constraints)
+Stores XDC (Xilinx Design Constraints) files that map the logical signals of the design to the physical pins of the FPGA board and define timing requirements.
