@@ -1,59 +1,101 @@
-# --- Simulation Outputs & Logs ---
-*.log
-*.vcd
-*.shm/
-*.dsn
-*.trn
-*.key
-*.diag
-*.history
-*.fst
-*.vst
-INCA_libs/
-xcelium.d/
-work/
-transcript
-vsim.wlf
-vsim_stacktrace.vstf
 
-# --- Hardware Compilation & Bitstreams ---
-*.bit
-*.bin
-*.mcs
-*.prm
-*.bit.bin
-*.rpt
+# ============================================================
 
-# --- Tool Specific Directories (Vivado, Quartus, Libero) ---
-.Xil/
+#  Transformer Accelerator FPGA — .gitignore
+
+# ============================================================
+
+# --- EDA Tool Runtime & Workspace ---
+
+workspace/
+
 *.jou
+
+*.log
+
 *.pb
-*.str
-*.dir/
-*.bak
-*.orig
-nm_db/
-synthesized/
-impl/
-db/
-incremental_db/
-greybox_tmp/
 
-# --- C/C++ (for HLS or Software drivers) ---
-*.o
-*.obj
-*.exe
-*.out
-*.app
+# --- Vivado Generated Directories ---
 
-# --- System & Editor Files ---
+*.cache/
+
+*.hw/
+
+*.ip_user_files/
+
+*.runs/
+
+*.sim/
+
+*.srcs/
+
+vivado_*.str
+
+.Xil/
+
+# --- Design Checkpoints (keep only intentional ones in dbs/) ---
+
+# Uncomment below if you want to exclude ALL .dcp files:
+
+# *.dcp
+
+# --- Bitstreams & Hardware Handoff (keep only final in exports/) ---
+
+# Uncomment below if you want to exclude from version control:
+
+# *.bit
+
+# *.xsa
+
+# *.ltx
+
+# --- Synthesis & Implementation Logs ---
+
+reports/*.rpt
+
+reports/*.xml
+
+# --- Python Artifacts (apps/) ---
+
+__pycache__/
+
+*.py[cod]
+
+*.egg-info/
+
+.venv/
+
+venv/
+
+*.pt
+
+*.pth
+
+*.onnx
+
+# --- HLS Build Artifacts (sourcecode/hls/) ---
+
+sourcecode/hls/**/solution*/
+
+sourcecode/hls/**/.autopilot/
+
+# --- Memory Initialization Files (large generated files) ---
+
+mem_gen/*.coe
+
+mem_gen/*.mem
+
+# --- OS & Editor Junk ---
+
 .DS_Store
+
 Thumbs.db
-*.swp
-*~
+
 .vscode/
+
 .idea/
 
-# --- Environment & Credentials ---
-.env
-.venv/
+*.swp
+
+*~
+
