@@ -1,0 +1,33 @@
+#!/bin/bash
+# PBS batch wrapper for the Xcelium Makefile in this directory.
+#
+# Usage:
+#   qsub -v TARGET=run_gelu run_xrun.pbs
+#   qsub -v TARGET=run_transformer run_xrun.pbs
+#   qsub -v TARGET=profile_mm run_xrun.pbs
+#
+# TARGET must be one of the Makefile targets in ./Makefile (run_gelu,
+# run_softmax, run_mm, run_transformer, waves_*, profile_*).
+#
+# No `-l select=...`/compute_node resource string is set here on purpose:
+# on this site's SOCA/PBS setup, the submission hook derives compute_node
+# and instance_type automatically from just `-q <queue>` + `-l walltime`
+# (confirmed empirically -- see project notes). Do not add a guessed
+# resource string; if you need a bigger instance than whatever this
+# queue's default maps to, that's a `-q <queue>` choice, not a `-l
+# select=` one.
+#PBS -N xrun_job
+#PBS -q normal
+#PBS -l walltime=02:00:00
+#PBS -j oe
+#PBS -o /project/tsmc65/users/turgeme/ws/taoFPGA/sourcecode/sim/run_xrun.log
+
+set -e
+
+if [ -z "$TARGET" ]; then
+    echo "Set TARGET, e.g.: qsub -v TARGET=run_gelu run_xrun.pbs" >&2
+    exit 1
+fi
+
+cd /project/tsmc65/users/turgeme/ws/taoFPGA/sourcecode/sim
+make "$TARGET"

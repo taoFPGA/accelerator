@@ -34,8 +34,19 @@ Softmax_control u_Softmax_control(
     .top_last_in(top_last_in),
 
     .top_data_out(top_data_out),
-    .top_valid_out(top_valid_out),    
+    .top_valid_out(top_valid_out),
     .top_last_out(top_last_out)
+);
+
+// ---------------------------------------------------------------------
+// Stall monitor on the input AXI-stream handshake (top_valid_in/top_ready_in).
+// Note: the output side (top_valid_out) has no ready/backpressure signal
+// in this core at all -- it is a fixed-rate producer -- so there is no
+// output handshake to monitor for stalls.
+// ---------------------------------------------------------------------
+stall_monitor #(.NAME("top_in")) u_stall_top_in (
+    .clk(clk), .rst_n(rst_n), .enable(1'b1),
+    .valid(top_valid_in), .ready(top_ready_in)
 );
 
 task Softmax_task(input real x[`length-1:0], output real y[`length-1:0] );
@@ -227,6 +238,11 @@ initial begin
     end
     $display("The ratio of error greater than the minimum precision: %6.5f%%",100 *error_cnt / `length);
     $display("real_max = %6.5f, hard_max = %6.5f",real_max, hard_max);
+
+    $display("---------------------------------------------------------");
+    u_stall_top_in.report();
+    $display("---------------------------------------------------------");
+
     #100 $finish();
 end
 
