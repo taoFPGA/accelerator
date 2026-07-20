@@ -26,8 +26,18 @@
 #   make clean                # remove all run/ output directories
 #
 # Every target compiles and runs in its own run/<name>/ subdirectory so
-# outputs never collide or land in the source tree.
+# outputs never collide or land in the source tree. Console output (the
+# same thing you'd see running xrun directly) is additionally teed into
+# reports/sim/sim_<top>.rpt, a dedicated subfolder alongside the existing
+# top-level Vivado synthesis/implementation reports -- each run overwrites
+# its own report with the latest result, same as timing_summary.rpt etc.
+# reflect the latest build.
 # ===========================================================================
+
+# bash + pipefail so a failing `xrun` inside a `... | tee ...` pipeline
+# still fails the make target, instead of `tee`'s exit status (0) hiding it.
+SHELL        := /bin/bash
+.SHELLFLAGS  := -eu -o pipefail -c
 
 XRUN         := xrun
 SIMDIR       := $(CURDIR)
@@ -35,6 +45,7 @@ CORE         := $(SIMDIR)/../core
 TB           := $(SIMDIR)/../tb
 TOP          := $(SIMDIR)/../top
 RUNROOT      := $(SIMDIR)/run
+REPORTS      := $(SIMDIR)/../../reports/sim
 
 # -sv is required project-wide now: stall_monitor.sv (SV, used by
 # MM_Ultra_tb.sv, Softmax_top_tb.sv and transformer_block_tb.sv) and
@@ -132,41 +143,41 @@ run_all: run_gelu run_softmax run_mm run_transformer
 
 # ---- plain compile + elaborate + run -------------------------------------
 run_gelu:
-	mkdir -p $(RUNROOT)/gelu
-	cd $(RUNROOT)/gelu && $(XRUN) $(COMMON_FLAGS) $(GELU_FILES) -top gelu_tb
+	mkdir -p $(RUNROOT)/gelu $(REPORTS)
+	cd $(RUNROOT)/gelu && $(XRUN) $(COMMON_FLAGS) $(GELU_FILES) -top gelu_tb 2>&1 | tee $(REPORTS)/sim_gelu_tb.rpt
 
 run_softmax:
-	mkdir -p $(RUNROOT)/softmax
-	cd $(RUNROOT)/softmax && $(XRUN) $(COMMON_FLAGS) $(SOFTMAX_FILES) -top Softmax_top_tb
+	mkdir -p $(RUNROOT)/softmax $(REPORTS)
+	cd $(RUNROOT)/softmax && $(XRUN) $(COMMON_FLAGS) $(SOFTMAX_FILES) -top Softmax_top_tb 2>&1 | tee $(REPORTS)/sim_softmax_top_tb.rpt
 
 run_mm:
-	mkdir -p $(RUNROOT)/mm
-	cd $(RUNROOT)/mm && $(XRUN) $(COMMON_FLAGS) $(MM_FILES) -top MM_Ultra_tb
+	mkdir -p $(RUNROOT)/mm $(REPORTS)
+	cd $(RUNROOT)/mm && $(XRUN) $(COMMON_FLAGS) $(MM_FILES) -top MM_Ultra_tb 2>&1 | tee $(REPORTS)/sim_mm_ultra_tb.rpt
 
 run_transformer:
-	mkdir -p $(RUNROOT)/transformer
-	cd $(RUNROOT)/transformer && $(XRUN) $(COMMON_FLAGS) $(TRANSFORMER_FILES) -top transformer_block_tb
+	mkdir -p $(RUNROOT)/transformer $(REPORTS)
+	cd $(RUNROOT)/transformer && $(XRUN) $(COMMON_FLAGS) $(TRANSFORMER_FILES) -top transformer_block_tb 2>&1 | tee $(REPORTS)/sim_transformer_block_tb.rpt
 
 # ---- same, but with a full-design waveform dump ---------------------------
 waves_gelu:
-	mkdir -p $(RUNROOT)/gelu_waves
+	mkdir -p $(RUNROOT)/gelu_waves $(REPORTS)
 	cp $(SIMDIR)/waves.tcl $(RUNROOT)/gelu_waves/
-	cd $(RUNROOT)/gelu_waves && $(XRUN) $(COMMON_FLAGS) $(GELU_FILES) -top gelu_tb -input waves.tcl
+	cd $(RUNROOT)/gelu_waves && $(XRUN) $(COMMON_FLAGS) $(GELU_FILES) -top gelu_tb -input waves.tcl 2>&1 | tee $(REPORTS)/sim_gelu_tb_waves.rpt
 
 waves_softmax:
-	mkdir -p $(RUNROOT)/softmax_waves
+	mkdir -p $(RUNROOT)/softmax_waves $(REPORTS)
 	cp $(SIMDIR)/waves.tcl $(RUNROOT)/softmax_waves/
-	cd $(RUNROOT)/softmax_waves && $(XRUN) $(COMMON_FLAGS) $(SOFTMAX_FILES) -top Softmax_top_tb -input waves.tcl
+	cd $(RUNROOT)/softmax_waves && $(XRUN) $(COMMON_FLAGS) $(SOFTMAX_FILES) -top Softmax_top_tb -input waves.tcl 2>&1 | tee $(REPORTS)/sim_softmax_top_tb_waves.rpt
 
 waves_mm:
-	mkdir -p $(RUNROOT)/mm_waves
+	mkdir -p $(RUNROOT)/mm_waves $(REPORTS)
 	cp $(SIMDIR)/waves.tcl $(RUNROOT)/mm_waves/
-	cd $(RUNROOT)/mm_waves && $(XRUN) $(COMMON_FLAGS) $(MM_FILES) -top MM_Ultra_tb -input waves.tcl
+	cd $(RUNROOT)/mm_waves && $(XRUN) $(COMMON_FLAGS) $(MM_FILES) -top MM_Ultra_tb -input waves.tcl 2>&1 | tee $(REPORTS)/sim_mm_ultra_tb_waves.rpt
 
 waves_transformer:
-	mkdir -p $(RUNROOT)/transformer_waves
+	mkdir -p $(RUNROOT)/transformer_waves $(REPORTS)
 	cp $(SIMDIR)/waves.tcl $(RUNROOT)/transformer_waves/
-	cd $(RUNROOT)/transformer_waves && $(XRUN) $(COMMON_FLAGS) $(TRANSFORMER_FILES) -top transformer_block_tb -input waves.tcl
+	cd $(RUNROOT)/transformer_waves && $(XRUN) $(COMMON_FLAGS) $(TRANSFORMER_FILES) -top transformer_block_tb -input waves.tcl 2>&1 | tee $(REPORTS)/sim_transformer_block_tb_waves.rpt
 
 # ---- same, but with -profile + toggle coverage + peak-memory capture -----
 # These are the heaviest targets (profiling/coverage instrumentation adds
@@ -174,20 +185,20 @@ waves_transformer:
 # queue, not directly on the interactive node, per the note at the top of
 # this file.
 profile_gelu:
-	mkdir -p $(RUNROOT)/gelu_profile
-	cd $(RUNROOT)/gelu_profile && $(TIME_WRAP) $(XRUN) $(COMMON_FLAGS) $(PROFILE_FLAGS) $(call COVERAGE_FLAGS,gelu_tb) $(GELU_FILES) -top gelu_tb
+	mkdir -p $(RUNROOT)/gelu_profile $(REPORTS)
+	cd $(RUNROOT)/gelu_profile && $(TIME_WRAP) $(XRUN) $(COMMON_FLAGS) $(PROFILE_FLAGS) $(call COVERAGE_FLAGS,gelu_tb) $(GELU_FILES) -top gelu_tb 2>&1 | tee $(REPORTS)/sim_gelu_tb_profile.rpt
 
 profile_softmax:
-	mkdir -p $(RUNROOT)/softmax_profile
-	cd $(RUNROOT)/softmax_profile && $(TIME_WRAP) $(XRUN) $(COMMON_FLAGS) $(PROFILE_FLAGS) $(call COVERAGE_FLAGS,softmax_tb) $(SOFTMAX_FILES) -top Softmax_top_tb
+	mkdir -p $(RUNROOT)/softmax_profile $(REPORTS)
+	cd $(RUNROOT)/softmax_profile && $(TIME_WRAP) $(XRUN) $(COMMON_FLAGS) $(PROFILE_FLAGS) $(call COVERAGE_FLAGS,softmax_tb) $(SOFTMAX_FILES) -top Softmax_top_tb 2>&1 | tee $(REPORTS)/sim_softmax_top_tb_profile.rpt
 
 profile_mm:
-	mkdir -p $(RUNROOT)/mm_profile
-	cd $(RUNROOT)/mm_profile && $(TIME_WRAP) $(XRUN) $(COMMON_FLAGS) $(PROFILE_FLAGS) $(call COVERAGE_FLAGS,mm_ultra_tb) $(MM_FILES) -top MM_Ultra_tb
+	mkdir -p $(RUNROOT)/mm_profile $(REPORTS)
+	cd $(RUNROOT)/mm_profile && $(TIME_WRAP) $(XRUN) $(COMMON_FLAGS) $(PROFILE_FLAGS) $(call COVERAGE_FLAGS,mm_ultra_tb) $(MM_FILES) -top MM_Ultra_tb 2>&1 | tee $(REPORTS)/sim_mm_ultra_tb_profile.rpt
 
 profile_transformer:
-	mkdir -p $(RUNROOT)/transformer_profile
-	cd $(RUNROOT)/transformer_profile && $(TIME_WRAP) $(XRUN) $(COMMON_FLAGS) $(PROFILE_FLAGS) $(call COVERAGE_FLAGS,transformer_block_tb) $(TRANSFORMER_FILES) -top transformer_block_tb
+	mkdir -p $(RUNROOT)/transformer_profile $(REPORTS)
+	cd $(RUNROOT)/transformer_profile && $(TIME_WRAP) $(XRUN) $(COMMON_FLAGS) $(PROFILE_FLAGS) $(call COVERAGE_FLAGS,transformer_block_tb) $(TRANSFORMER_FILES) -top transformer_block_tb 2>&1 | tee $(REPORTS)/sim_transformer_block_tb_profile.rpt
 
 clean:
 	rm -rf $(RUNROOT)
