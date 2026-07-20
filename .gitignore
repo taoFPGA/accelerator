@@ -15,6 +15,18 @@ workspace/
 
 *.pb
 
+# --- Xcelium Simulation Artifacts ---
+
+xcelium.d/
+
+.simvision/
+
+*.shm/
+
+*.trn
+
+sourcecode/sim/run/
+
 # --- Vivado Generated Directories ---
 
 *.cache/
