@@ -125,6 +125,24 @@ MM_ultra
     .out_data(out_data)
 );
 
+// ---------------------------------------------------------------------
+// Performance instrumentation: stall monitors on all 3 handshake pairs.
+// Each reports the % of the run where valid/ready couldn't complete a
+// transfer on that interface (see stall_monitor.sv for the breakdown).
+// ---------------------------------------------------------------------
+stall_monitor #(.NAME("in_F")) u_stall_in_F (
+    .clk(clk), .rst_n(rst_n), .enable(1'b1),
+    .valid(in_F_valid), .ready(in_F_ready)
+);
+stall_monitor #(.NAME("in_W")) u_stall_in_W (
+    .clk(clk), .rst_n(rst_n), .enable(1'b1),
+    .valid(in_W_valid), .ready(in_W_ready)
+);
+stall_monitor #(.NAME("out_data")) u_stall_out_data (
+    .clk(clk), .rst_n(rst_n), .enable(1'b1),
+    .valid(out_data_valid), .ready(out_data_ready)
+);
+
 integer x[`IN_ROWS_NUM-1:0][`IN_COLS_NUM-1:0];
 integer y[`IN_COLS_NUM-1:0][`OUT_COLS_NUM-1:0];
 
@@ -195,6 +213,29 @@ generate
         end
     end
 endgenerate
+
+// ---------------------------------------------------------------------
+// Hardware latency: exact cycle count from start_trans assertion until
+// out_data_last goes high (i.e. the full matmul, load-through-drain).
+// ---------------------------------------------------------------------
+integer hw_latency_cycles;
+reg     hw_latency_running;
+
+always @(posedge clk or negedge rst_n) begin
+    if (~rst_n) begin
+        hw_latency_cycles  <= 0;
+        hw_latency_running <= 0;
+    end
+    else if (start_trans) begin
+        hw_latency_cycles  <= 0;
+        hw_latency_running <= 1;
+    end
+    else if (hw_latency_running) begin
+        hw_latency_cycles <= hw_latency_cycles + 1;
+        if (out_data_last)
+            hw_latency_running <= 0;
+    end
+end
 
 reg start_trans;
 initial start_trans = 0;
@@ -371,6 +412,15 @@ always  begin
             $display("Error!, zero_error = %d.",zero_error);
         else
         $display("No zero_error.");
+
+        $display("---------------------------------------------------------");
+        $display("Hardware latency (start_trans -> out_data_last): %0d cycles (%0d ns)",
+                  hw_latency_cycles, hw_latency_cycles*10);
+        u_stall_in_F.report();
+        u_stall_in_W.report();
+        u_stall_out_data.report();
+        $display("---------------------------------------------------------");
+
         $finish();
     end
 end
