@@ -24,9 +24,24 @@
 `define A_size 16
 `define DATA_WIDTH 8
 `define SHIFT_WIDTH 10
-`define IN_Feature_Block_num 64
-`define Weight_Block_num 64
-`define OUT_Feature_Block_num 64
+// NOTE: these *_Block_num values must be given real headroom ABOVE the
+// actual number of beats used by IN_ROWS_NUM/IN_COLS_NUM/OUT_COLS_NUM
+// below, not just sized to exactly match. MM_in_buffer.v sizes its
+// internal threshold registers (e.g. W_block_size) as
+// clogb2(Weight_Block_num) bits, but that threshold needs to be able to
+// hold the value Weight_Block_num_actually_used_beats itself (a strict
+// `in_W_cnt < W_block_size` gate), not just address up to that count
+// minus one. Sizing a *_Block_num parameter to exactly the beat count
+// needed (e.g. 64 when 64 beats are used) makes that threshold overflow
+// and wrap to 0, permanently blocking that stream's `ready` -- see the
+// project notes for how this was root-caused (a $monitor trace on
+// MM_ultra.v's W_width_block_num capture chain showed the exact
+// wrap-to-zero). Keep several multiples of headroom, matching how
+// MM_Ultra_tb.sv itself uses e.g. Weight_Block_num=2400 against ~960
+// actual beats needed.
+`define IN_Feature_Block_num 256
+`define Weight_Block_num 256
+`define OUT_Feature_Block_num 256
 `define OUT_MEM_WIDTH 21
 `define F_length_width 10
 `define F_width_block_num_width 5
@@ -155,6 +170,7 @@ always @(posedge clk) begin
     if (rst_n && fifo_overflow)
         $display("%0t: TB ERROR: softmax->gelu FIFO overflow observed -- increase GELU_FIFO_DEPTH or check backpressure.", $time);
 end
+
 
 // ---------------------------------------------------------------------
 // End-to-end latency: mm_in_F_valid first asserted -> final out_last
