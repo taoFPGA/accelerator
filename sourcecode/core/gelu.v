@@ -2,7 +2,7 @@
 //latency=4+4
 module gelu(
 	input                           clk,
-    input [2:0]                     in_scale,
+    input [3:0]                     in_scale,
     input signed [7:0]              x, 
     output reg signed [7:0]         y_reg1
 );
@@ -14,13 +14,13 @@ reg signed [7:0] x_reg5;
 reg signed [7:0] x_reg6;
 reg signed [7:0] x_reg7;
 
-reg [2:0] in_scale_reg1;
-reg [2:0] in_scale_reg2;
-reg [2:0] in_scale_reg3;
-reg [2:0] in_scale_reg4;
-reg [2:0] in_scale_reg5;
-reg [2:0] in_scale_reg6;
-reg [2:0] in_scale_reg7;
+reg [3:0] in_scale_reg1;
+reg [3:0] in_scale_reg2;
+reg [3:0] in_scale_reg3;
+reg [3:0] in_scale_reg4;
+reg [3:0] in_scale_reg5;
+reg [3:0] in_scale_reg6;
+reg [3:0] in_scale_reg7;
 always@(posedge clk)begin
 	in_scale_reg1<=in_scale;
 	in_scale_reg2<=in_scale_reg1;
@@ -49,11 +49,14 @@ reg signed [15:0] x_in_8Q7_reg5;
 reg signed [15:0] x_in_8Q7_reg6;
 reg signed [15:0] x_in_8Q7_reg7;
 always @(*) begin
-    if (in_scale < 7  ) begin
-        x_in_8Q7 = $signed(x) <<< (3'd7- in_scale);//×óÒÆ
+    if (in_scale < 7) begin
+        x_in_8Q7 = $signed(x) <<< (4'd7 - in_scale);
     end
-    else begin // in_scale == 7
+    else if (in_scale == 7) begin
         x_in_8Q7 = x;
+    end
+    else begin // in_scale > 7
+        x_in_8Q7 = $signed(x) >>> (in_scale - 4'd7);
     end
 end
 always@(posedge clk)begin
@@ -100,9 +103,11 @@ always @(*) begin
     else if(x_reg7[7]==1'b0 && x_in_8Q7_reg7 >= c_2_5_2Q7)begin
         y = x_reg7;
     end
-    else begin
-//        y=y_3Q7;
-        y = (y_3Q7>>>(3'd7-in_scale_reg7));
+    else if (in_scale_reg7 <= 7) begin
+        y = (y_3Q7 >>> (4'd7 - in_scale_reg7));
+    end
+    else begin // in_scale_reg7 > 7
+        y = (y_3Q7 <<< (in_scale_reg7 - 4'd7));
     end
 end
 always@(posedge clk)begin

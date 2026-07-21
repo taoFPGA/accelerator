@@ -25,7 +25,7 @@ module EightGelus
     output [num_gelu-1:0] out_keep,
 
     
-    input  [2:0]  scale
+    input  [3:0]  scale
     );
 
 assign in_ready = out_ready;
