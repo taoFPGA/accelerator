@@ -2,7 +2,7 @@
 
 
 module gelu_tb();
-reg [2:0] in_scale;
+reg [3:0] in_scale;
 reg [7:0] x;
 reg clk;
 reg [127:0] cnt;
@@ -71,7 +71,7 @@ generate
     end
 endgenerate
 
-reg[2:0] in_scale_reg_array [7:0];
+reg[3:0] in_scale_reg_array [7:0];
 always @(posedge clk ) begin
     in_scale_reg_array[0] <= in_scale;
 end
@@ -88,7 +88,7 @@ real differ;
 always begin
     #50;
 //    x=1;in_scale=2;
-    x = $random % 128;in_scale = {$random}%7;
+    x = $random % 128;in_scale = {$random}%12;
     cnt = cnt +1;
     x_soft = $itor($signed(x)) / $pow(2, $itor(in_scale)) ;
     gelu_task(x_soft_reg8,y_soft_reg8);

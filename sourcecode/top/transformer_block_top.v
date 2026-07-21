@@ -45,17 +45,10 @@
 //   - GELU's 'scale' and Softmax's 'scale_in'/'scale_out' are tied to
 //     static top-level config inputs, matching how the existing unit
 //     testbenches drive them (must be held constant through the run).
-//   - REAL GAP, not worked around here: gelu_in must be told the same
-//     fractional-bit scale Softmax used for its output (GELU's 'scale'
-//     port and Softmax's 'scale_out_input' must carry the same value for
-//     the pipeline to be numerically meaningful). But Softmax_control's
-//     scale_out_input is 4 bits wide (its own header comment documents a
-//     valid range of 7-12), while gelu.v/EightGelus's 'scale' port is
-//     only 3 bits wide (max representable value 7). The two IPs as they
-//     exist today therefore only agree at scale=7; Softmax's higher-
-//     precision range (8-12) cannot be fed to GELU without widening
-//     gelu.v's 'in_scale' port (a small RTL change outside this
-//     blueprint's scope, flagged here rather than papered over).
+//     GELU's 'scale' port and Softmax's 'scale_out_input' must carry the
+//     same value for the pipeline to be numerically meaningful; gelu.v's
+//     'in_scale' is 4 bits wide, covering Softmax_control's full
+//     documented scale_out_input range (7-12).
 //   - REAL FINDING in EightGelus.v: its internal valid/last shift
 //     registers ('valid_reg', 'last_reg') advance unconditionally every
 //     clock, regardless of 'out_ready' -- there is no internal skid
@@ -110,7 +103,7 @@ module transformer_block_top #(
     input  [3:0]                                 softmax_scale_out,
 
     // ---- GELU stage config ----
-    input  [2:0]                                 gelu_scale,
+    input  [3:0]                                 gelu_scale,
 
     // ---- Final pipeline output: num_gelu-wide AXI-stream ----
     output                                        out_valid,
