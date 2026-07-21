@@ -20,7 +20,7 @@
 #PBS -q normal
 #PBS -l walltime=02:00:00
 #PBS -j oe
-#PBS -o /project/tsmc65/users/turgeme/ws/taoFPGA/sourcecode/sim/run_xrun.log
+#PBS -o /project/tsmc65/users/rasksha/ws/taoFPGA/sourcecode/sim/run_xrun.log
 
 set -e
 
@@ -29,5 +29,5 @@ if [ -z "$TARGET" ]; then
     exit 1
 fi
 
-cd /project/tsmc65/users/turgeme/ws/taoFPGA/sourcecode/sim
+cd "$PBS_O_WORKDIR"
 make "$TARGET"
