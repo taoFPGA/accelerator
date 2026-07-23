@@ -115,3 +115,7 @@ Thumbs.db
 
 *~
 
+# --- Claude Code local settings (personal, machine-specific; .claude/settings.json is shared and committed) ---
+
+.claude/settings.local.json
+

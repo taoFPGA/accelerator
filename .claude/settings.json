@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python make_gelu_chart.py)",
+      "Bash(python build_deck.py)",
+      "Bash(python make_gelu_chart_v2.py)"
+    ]
+  }
+}
