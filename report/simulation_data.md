@@ -157,14 +157,16 @@ sustain back-to-back beats under real backpressure. **This is the single most im
 number for the upcoming synthesis/timing-vs-throughput discussion** — cycle count alone
 (18,083 cycles) understates how far this pipeline is from its achievable throughput ceiling.
 
-**Coverage/profiling artifacts:** `make profile_transformer` was run once, at the *original*
-small 4×32×32 config (before this testbench was scaled up) — produced `xmprof.out`
-(function/instance-level profiling data) and `cov_work/scope/...` (toggle coverage
-database) under `sourcecode/sim/run/transformer_profile/`. **Open item:** `profile_transformer`
-has not yet been re-run at full 200×96×160 scale — the plain `run_transformer` numbers above
-are the current best full-scale data. Worth re-running with `-profile`/`-coverage` at full
-scale before finalizing the performance chapter, using the same monitored-launch protocol
-(see below).
+**Coverage/profiling artifacts:** `make profile_transformer` was first run at the *original*
+small 4×32×32 config (before this testbench was scaled up), producing a 3.7KB `xmprof.out`.
+Re-run afterward at full 200×96×160 scale using the same monitored-launch protocol: peak RSS
+**74.9MB**, wall clock **8s**, functional results identical to the plain `run_transformer`
+run (0/32,000 outside tolerance, 18,083-cycle latency, same stall breakdown) — confirming
+profiling/coverage instrumentation doesn't perturb simulated behavior. Produced a 24KB
+`xmprof.out` (function/instance-level profiling data) and a full `cov_work/scope/...` toggle
+coverage database under `sourcecode/sim/run/transformer_profile/`, both now representative
+of real workload scale. `xmelab` noted one expected limitation: toggle coverage isn't
+supported for `stall_monitor.sv`'s integer-typed ports (informational only, not an error).
 
 **Conclusion:** Full pipeline is functionally correct at real workload scale (0/32,000
 elements outside tolerance, tolerance = ±6 LSBs at the shared Softmax/GELU scale, accounting
