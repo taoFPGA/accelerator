@@ -306,15 +306,17 @@ catch immediately and expensive to leave for someone else to puzzle over later.
 
 ## 14. Performance baseline established
 
-With both testbenches finally correct and running at real scale, `profile_transformer` (at
-the original small config) and the full-scale `run_transformer` together gave the first
-real performance picture of the pipeline: an 18,083-cycle end-to-end latency at full scale,
-dominated by a ~93% stall rate on the final output stage — a structural characteristic
-(single-buffered downsizer, no skid buffer in `EightGelus`) that's already documented in
-code as a known blueprint simplification, not a new defect. This is now the baseline going
-into synthesis and timing/area closure. See `simulation_data.md` §4 for full figures, and
-note the flagged open item: `profile_transformer` itself (with coverage) should be re-run
-at full scale before the performance chapter is considered final.
+With both testbenches finally correct and running at real scale, `run_transformer` and
+`profile_transformer` (both re-run at full 200×96×160 scale, the latter via the same
+monitored-launch protocol) together gave the first real performance picture of the
+pipeline: an 18,083-cycle end-to-end latency, dominated by a ~93% stall rate on the final
+output stage — a structural characteristic (single-buffered downsizer, no skid buffer in
+`EightGelus`) that's already documented in code as a known blueprint simplification, not a
+new defect. `profile_transformer`'s full-scale re-run (peak RSS 74.9MB, 8s) produced a real
+toggle-coverage database and function-level profile data at representative scale, matching
+the plain run's functional results exactly. This closes out the performance-analysis phase
+and is now the baseline going into synthesis and timing/area closure. See
+`simulation_data.md` §4 for full figures.
 
 ---
 
