@@ -196,23 +196,29 @@ integer z_soft[`IN_ROWS_NUM-1:0][`OUT_COLS_NUM-1:0];
 
 
 
-wire [`A_size * `DATA_WIDTH - 1:0] x_in_array [`IN_ROWS_NUM * P_F_width_block_num - 1:0];
-wire [`A_size * `DATA_WIDTH - 1:0] y_in_array [`IN_COLS_NUM * P_W_width_block_num - 1:0];
-
-
-generate
-    for(i=0;i<`IN_ROWS_NUM * P_F_width_block_num;i++)begin
-        for(j=0;j<`A_size;j++)begin
-            assign x_in_array[i][j*`DATA_WIDTH +: `DATA_WIDTH] = x_flatten[i*`A_size + j];
-        end
+// x_in_array/y_in_array used to be materialized as one wire per word, driven
+// by a generate loop that unrolled one assign per scalar element (rows*cols
+// of them). Only one word is ever read per cycle (indexed by in_F_addr/
+// in_W_addr), so pack it on demand instead -- avoids Xcelium elaboration
+// blowing up memory/time at full scale.
+function automatic [`A_size*`DATA_WIDTH-1:0] pack_x_word(input integer word_idx);
+    integer k;
+    begin
+        for (k = 0; k < `A_size; k = k + 1)
+            pack_x_word[k*`DATA_WIDTH +: `DATA_WIDTH] = x_flatten[word_idx*`A_size + k];
     end
+endfunction
 
-    for(i=0;i<`IN_COLS_NUM * P_W_width_block_num;i++)begin
-        for(j=0;j<`A_size;j++)begin
-            assign y_in_array[i][j*`DATA_WIDTH +: `DATA_WIDTH] = y_flatten[i*`A_size + j];
-        end
+function automatic [`A_size*`DATA_WIDTH-1:0] pack_y_word(input integer word_idx);
+    integer k;
+    begin
+        for (k = 0; k < `A_size; k = k + 1)
+            pack_y_word[k*`DATA_WIDTH +: `DATA_WIDTH] = y_flatten[word_idx*`A_size + k];
     end
-endgenerate
+endfunction
+
+reg start_trans;
+initial start_trans = 0;
 
 // ---------------------------------------------------------------------
 // Hardware latency: exact cycle count from start_trans assertion until
@@ -237,9 +243,6 @@ always @(posedge clk or negedge rst_n) begin
     end
 end
 
-reg start_trans;
-initial start_trans = 0;
-
 reg [31:0] in_F_addr;
 initial in_F_addr = 0;
 
@@ -250,7 +253,7 @@ always @(posedge clk ) begin
         in_F_addr <= in_F_addr + 1;
 end
 
-assign in_F_data = x_in_array[in_F_addr];
+assign in_F_data = pack_x_word(in_F_addr);
 wire [`DATA_WIDTH - 1:0] F_in_data_display  [`A_size - 1:0];
 generate
     for(i=0;i<`A_size;i++)begin
@@ -278,7 +281,7 @@ always @(posedge clk ) begin
         in_W_addr <= in_W_addr + 1;
 end
 
-assign in_W_data = y_in_array[in_W_addr];
+assign in_W_data = pack_y_word(in_W_addr);
 wire [`DATA_WIDTH - 1:0] W_in_data_display [`A_size - 1:0];
 generate
     for(i=0;i<`A_size;i++)begin
@@ -305,8 +308,6 @@ endgenerate
 
 reg [`A_size * `DATA_WIDTH - 1:0] z_hard [`IN_ROWS_NUM * P_W_width_block_num-1:0];
 reg [31:0] z_hard_addr;
-integer z_hard_array [`IN_ROWS_NUM-1:0][`OUT_COLS_NUM-1:0];
-wire [`DATA_WIDTH - 1:0] z_hard_flatten [`IN_ROWS_NUM * `OUT_COLS_NUM-1:0];
 initial z_hard_addr = 0;
 
 always @(posedge clk ) begin
@@ -321,21 +322,19 @@ always @(posedge clk) begin
         z_hard[z_hard_addr] <= out_data;
 end
 
-generate
-    for(i = 0;i<`IN_ROWS_NUM * P_W_width_block_num;i++)begin
-        for(j=0;j<`A_size;j++)begin
-            assign z_hard_flatten[i*`A_size+j] = z_hard[i][j*`DATA_WIDTH +: `DATA_WIDTH]; 
-        end
+// z_hard_array used to be materialized via a generate loop that unrolled
+// one always @(*) block per output scalar (rows*cols of them) -- the
+// dominant cause of Xcelium's elaboration blowing up memory at full scale.
+// It's only ever read from the checker loop below, so unpack on demand.
+function automatic integer unpack_z_word(input integer row, input integer col);
+    integer word_idx;
+    integer byte_idx;
+    begin
+        word_idx = row * P_W_width_block_num + (col / `A_size);
+        byte_idx = col % `A_size;
+        unpack_z_word = $signed(z_hard[word_idx][byte_idx*`DATA_WIDTH +: `DATA_WIDTH]);
     end
-
-    for(i=0;i<`IN_ROWS_NUM;i++)begin
-        for(j=0;j<`OUT_COLS_NUM;j++)begin
-            always @(*) begin
-                z_hard_array[i][j] = $signed(z_hard_flatten[i*`OUT_COLS_NUM + j]);
-            end
-        end
-    end
-endgenerate
+endfunction
 
 
 
@@ -389,12 +388,12 @@ always  begin
         $display("z_hard:");
         for(m=0;m<`IN_ROWS_NUM;m++)begin
             for(n=0;n<`OUT_COLS_NUM;n++)begin
-                if($signed(z_hard_array[m][n])!= z_soft[m][n])begin
-                    $write("error:hard = %0d, soft = %0d.      ",$signed(z_hard_array[m][n]),z_soft[m][n]);
+                if(unpack_z_word(m,n) != z_soft[m][n])begin
+                    $write("error:hard = %0d, soft = %0d.      ",unpack_z_word(m,n),z_soft[m][n]);
                     error++;
                 end
                 else
-                    $write("%7d,",$signed(z_hard_array[m][n]));
+                    $write("%7d,",unpack_z_word(m,n));
             end
             $display();
         end
