@@ -39,17 +39,17 @@
 // wrap-to-zero). Keep several multiples of headroom, matching how
 // MM_Ultra_tb.sv itself uses e.g. Weight_Block_num=2400 against ~960
 // actual beats needed.
-`define IN_Feature_Block_num 256
-`define Weight_Block_num 256
-`define OUT_Feature_Block_num 256
+`define IN_Feature_Block_num 2400
+`define Weight_Block_num 2400
+`define OUT_Feature_Block_num 2400
 `define OUT_MEM_WIDTH 21
 `define F_length_width 10
 `define F_width_block_num_width 5
 `define W_width_block_num_width 5
 
-`define IN_ROWS_NUM 4    // matmul rows (F_length) == number of independent softmax groups
-`define IN_COLS_NUM 32   // matmul contraction dim; must be a multiple of `A_size
-`define OUT_COLS_NUM 32  // matmul output row width; becomes the softmax 'length' automatically
+`define IN_ROWS_NUM 200   // matmul rows (F_length) == number of independent softmax groups
+`define IN_COLS_NUM 96    // matmul contraction dim; must be a multiple of `A_size
+`define OUT_COLS_NUM 160  // matmul output row width; becomes the softmax 'length' automatically
 `define NUM_GELU 4       // GELU lanes; `OUT_COLS_NUM must be a multiple of this in this simple tb
                           // (the adapters support a partial final beat via 'keep', just not exercised here)
 
@@ -60,12 +60,10 @@ parameter integer P_F_length          = `IN_ROWS_NUM;
 parameter integer P_F_width_block_num = `IN_COLS_NUM / `A_size;
 parameter integer P_W_width_block_num = `OUT_COLS_NUM / `A_size;
 
-// Softmax's scale_out (4-bit, valid range 7-12 per its own header) and
-// GELU's scale (3-bit, max value 7) only agree at 7 -- see the
-// transformer_block_top.v header note. P_softmax_scale_out and
-// P_gelu_scale MUST be equal for the pipeline to be numerically
-// meaningful; 7 is the only value valid for both ports simultaneously
-// with the IPs as they exist today.
+// P_softmax_scale_out and P_gelu_scale MUST be equal for the pipeline to
+// be numerically meaningful. Both ports are 4 bits wide (valid range
+// 7-12 per Softmax_control's header), so any value in that range works
+// here -- pinned to 7 for now since that's what's been validated.
 parameter integer P_softmax_scale_in  = 6;  // interpretation of MM's int8 output; a system-level calibration choice
 parameter integer P_softmax_scale_out = 7;
 parameter integer P_gelu_scale        = 7;
@@ -90,7 +88,7 @@ wire [`A_size*`DATA_WIDTH-1:0]       mm_in_W_data;
 
 reg  signed [4:0]                    softmax_scale_in;
 reg  [3:0]                           softmax_scale_out;
-reg  [2:0]                           gelu_scale;
+reg  [3:0]                           gelu_scale;
 
 wire                                 out_valid;
 // EightGelus.v has no real internal backpressure support (see
@@ -231,21 +229,27 @@ initial begin
     end
 end
 
-wire [`A_size*`DATA_WIDTH-1:0] x_in_array [`IN_ROWS_NUM * P_F_width_block_num - 1:0];
-wire [`A_size*`DATA_WIDTH-1:0] y_in_array [`IN_COLS_NUM * P_W_width_block_num - 1:0];
+// x_in_array/y_in_array used to be materialized as one wire per word, driven
+// by a generate loop that unrolled one assign per scalar element (rows*cols
+// of them). Only one word is ever read per cycle (indexed by in_F_addr/
+// in_W_addr), so pack it on demand instead -- same fix as MM_Ultra_tb.sv,
+// which is what let that testbench run at full scale without blowing up
+// Xcelium's elaboration memory.
+function automatic [`A_size*`DATA_WIDTH-1:0] pack_x_word(input integer word_idx);
+    integer k;
+    begin
+        for (k = 0; k < `A_size; k = k + 1)
+            pack_x_word[k*`DATA_WIDTH +: `DATA_WIDTH] = x_flatten[word_idx*`A_size + k];
+    end
+endfunction
 
-generate
-    for (gi=0; gi<`IN_ROWS_NUM * P_F_width_block_num; gi=gi+1) begin : gen_x
-        for (gj=0; gj<`A_size; gj=gj+1) begin : gen_x_lane
-            assign x_in_array[gi][gj*`DATA_WIDTH +: `DATA_WIDTH] = x_flatten[gi*`A_size+gj];
-        end
+function automatic [`A_size*`DATA_WIDTH-1:0] pack_y_word(input integer word_idx);
+    integer k;
+    begin
+        for (k = 0; k < `A_size; k = k + 1)
+            pack_y_word[k*`DATA_WIDTH +: `DATA_WIDTH] = y_flatten[word_idx*`A_size + k];
     end
-    for (gi=0; gi<`IN_COLS_NUM * P_W_width_block_num; gi=gi+1) begin : gen_y
-        for (gj=0; gj<`A_size; gj=gj+1) begin : gen_y_lane
-            assign y_in_array[gi][gj*`DATA_WIDTH +: `DATA_WIDTH] = y_flatten[gi*`A_size+gj];
-        end
-    end
-endgenerate
+endfunction
 
 reg start_trans;
 initial start_trans = 0;
@@ -256,7 +260,7 @@ always @(posedge clk) begin
     if (mm_in_F_last) in_F_addr <= 0;
     else if (mm_in_F_valid) in_F_addr <= in_F_addr + 1;
 end
-assign mm_in_F_data = x_in_array[in_F_addr];
+assign mm_in_F_data = pack_x_word(in_F_addr);
 assign mm_in_F_last = (in_F_addr == `IN_ROWS_NUM * P_F_width_block_num - 1) ? 1'b1 : 1'b0;
 
 always @(posedge clk) begin
@@ -271,7 +275,7 @@ always @(posedge clk) begin
     if (mm_in_W_last) in_W_addr <= 0;
     else if (mm_in_W_valid) in_W_addr <= in_W_addr + 1;
 end
-assign mm_in_W_data = y_in_array[in_W_addr];
+assign mm_in_W_data = pack_y_word(in_W_addr);
 assign mm_in_W_last = (in_W_addr == `IN_COLS_NUM * P_W_width_block_num - 1) ? 1'b1 : 1'b0;
 
 always @(posedge clk) begin
