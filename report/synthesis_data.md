@@ -121,12 +121,90 @@ none functionally blocking:
 - `WARNING: [Timing 38-242]` — `HD.CLK_SRC` not set on the `clk` port, so clock delay/skew can't be estimated in this OOC run. Will be resolved once this block is part of the full `prj.tcl` SoC-level synthesis, where the actual PS7 clock source location is known.
 - `WARNING: [DRC 23-814]` — not all connectivity-based DRC checks can run without full top-level context, for the same reason.
 
-### Open items for next run
-1. Root-cause and fix the REQP-1839/1840 async-reset-on-BRAM-control gap (highest priority —
-   real correctness risk, not just a style nit).
-2. Investigate why `fifo_mem_reg` in `axis_upsizer_fifo.v` couldn't map to Block RAM.
+### Open items carried from Run 1 (status after Run 2, below)
+1. ~~Root-cause and fix the REQP-1839/1840 async-reset-on-BRAM-control gap~~ — **done, see Run 2.**
+2. ~~Investigate why `fifo_mem_reg` in `axis_upsizer_fifo.v` couldn't map to Block RAM~~ —
+   **resolved as a side effect of Run 2's fix** (see below).
 3. Consider whether the DPIP-1/DPOP-1/DPOP-2 DSP pipelining suggestions are worth taking once
    the design is otherwise stable — timing has positive margin today, so not urgent, but cheap
-   wins for a later pass.
+   wins for a later pass. **Still open.**
 4. Re-run timing/DRC once this block is integrated into the full `prj.tcl` SoC design, to get
-   real clock-source-aware numbers instead of the OOC estimate.
+   real clock-source-aware numbers instead of the OOC estimate. **Still open.**
+
+---
+
+## Run 2 — Async-reset-on-BRAM-control fix (2026-08-04)
+
+**Objective:** Root-cause and clear Run 1's one real gap: `REQP-1839`/`REQP-1840` (RAMB36/RAMB18
+async control check), 40+ instances warning that block RAM control pins in `MM_in_buffer` and
+`MM_buffer` were driven by asynchronously-reset registers.
+
+**Root cause:** In every module holding one of this design's five block RAM arrays
+(`in_F_array`/`in_W_array` in `MM_in_buffer.v`, `weight_buffer`/`feature_buffer` in
+`MM_buffer.v`, `F_array` in `MM_out_buffer.v`, plus `Softmax_control.v`'s own `in_data_buffer`),
+the actual memory read/write `always` blocks were already clean (no reset at all — correct).
+The problem was every address counter, valid-pipeline register, and FSM state register that
+*feeds* those ports' address/enable inputs, directly or through simple combinational logic —
+all used `always @(posedge clk or negedge rst_n)`, Verilog's asynchronous-reset idiom. An
+asynchronous reset can transition independent of any clock edge, so when Vivado maps these
+registers' fanout onto a RAMB18/RAMB36 control pin, that's a control-pin transition standard
+clocked timing analysis doesn't cover.
+
+**Fix:** Converted every `always @(posedge clk or negedge rst_n)` block to synchronous-reset-only
+(`always @(posedge clk)`, `if (~rst_n) ... else ...` body unchanged) — Xilinx's own recommended
+remedy. Scope grew significantly beyond the three buffer files first suspected, discovered across
+three iterative rounds (fix → re-synthesize → trace the next violation's driving register →
+repeat), because valid/ready backpressure signals ripple through the entire pipeline and any one
+of them can reach a BRAM control pin combinationally:
+
+| Round | Files | Blocks converted | Why found |
+|---|---|---|---|
+| 1 | `MM_in_buffer.v`, `MM_buffer.v`, `MM_out_buffer.v` | 12 + 14 + 11 = 37 | Directly named in Run 1's DRC violations |
+| 2 | `MM.v` | 10 | Violation now traced to `MM_out_data_valid_reg_array` (the systolic array's own output-valid pipeline, instantiated inside `MM_buffer.v`) |
+| 2 | `PE_array.v`, `PE.v`, `axis_downsizer.v` | 4 + 1 + 1 = 6 | Violation traced to `draining_reg` in `axis_downsizer.v` (the MM→Softmax width adapter) — backpressure (`out_data_ready`) from outside `MM_ultra` entirely was reaching `F_array`'s enable |
+| 3 | `Softmax_control.v`, `Softmax.v`, `EightGelus.v`, `axis_upsizer_fifo.v`, `transformer_block_top.v` | 4 + 3 + 7 + 2 + 1 = 17 | Violation traced to `Softmax_control.v`'s own internal `in_data_buffer` BRAM — a fifth block RAM not previously visible because Run 1's report was capped at 20 violations per rule and fully saturated by `MM_in_buffer`/`MM_buffer` instances |
+
+**Total: 12 files, 60 always blocks converted.** Full file list: `MM_in_buffer.v`, `MM_buffer.v`,
+`MM_out_buffer.v`, `MM.v`, `PE_array.v`, `PE.v`, `axis_downsizer.v`, `Softmax_control.v`,
+`Softmax.v`, `EightGelus.v`, `axis_upsizer_fifo.v`, `transformer_block_top.v` — i.e. essentially
+every reset-bearing register in the full `transformer_block_top` hierarchy that isn't already
+reset-free. Every diff was verified as sensitivity-list-only (no logic changes) before moving on.
+
+**Regression (re-run after every round, all four full-scale runs identical to pre-fix baseline):**
+- `MM_Ultra_tb` (200×96×160): `No Error.` / `No zero_error.`, hardware latency **21,544 cycles**
+  — bit-for-bit identical to Run 1's pre-fix baseline.
+- `transformer_block_tb` (200×96×160): **0 / 32,000** elements outside tolerance, end-to-end
+  latency **18,083 cycles** — identical to pre-fix baseline.
+
+This confirms the fix is exactly what it was designed to be: a change in *when* reset takes
+effect (next clock edge vs. immediately), invisible to every testbench (all of which hold
+`rst_n` low far longer than one clock period before deasserting), with zero functional change.
+
+**Post-fix synthesis result:**
+- `REQP-1839`: 20 → **0**. `REQP-1840`: 20 → **0**. Fully cleared.
+- **Bonus, unplanned:** two of Run 1's six `synth_design` warnings also disappeared —
+  `axis_upsizer_fifo.v`'s `fifo_mem_reg` "Set and reset with same priority" warning, and its
+  companion "trying to implement RAM in registers, Block RAM implementation is not possible"
+  warning (Run 1 open item #2, above). Both were consequences of the same async
+  set/reset-on-a-memory-register pattern; removing the async reset let Vivado infer Block RAM
+  for it correctly instead of falling back to discrete registers.
+- **Bonus, unplanned: utilization improved.** LUTs 27,327→**25,506** (51.37%→**47.94%**),
+  Registers 17,821→**13,624** (16.75%→**12.80%**), F7 Muxes 560→**40**, F8 Muxes 263→**0**.
+  Removing async set/reset from ~60 registers let Vivado pack flip-flops more efficiently
+  (async reset requires dedicated FF control-pin resources and, in a design this control-set-
+  diverse, apparently drove a lot of F7/F8 mux usage for merged control logic that's no longer
+  needed).
+- **Timing unaffected** (as expected — this fix doesn't touch any datapath): WNS still
+  **+0.682ns**, WHS **+0.208ns** (negligible change from +0.219ns), all constraints still met
+  at 100MHz.
+
+### Remaining DRC after Run 2
+Only performance-suggestion and expected-for-OOC items: `DPIP-1`×10, `DPOP-1`×5, `DPOP-2`×12
+(DSP pipelining, open item #3 above), `ZPS7-1`×1 (PS7 required, expected/not-a-real-issue for a
+standalone OOC sub-block). No correctness-risk DRC warnings remain.
+
+### Open items after Run 2
+1. DSP pipelining suggestions (`DPIP-1`/`DPOP-1`/`DPOP-2`) — optimization opportunity, not
+   urgent given positive timing margin.
+2. Re-run timing/DRC once integrated into the full `prj.tcl` SoC design for real
+   clock-source-aware numbers (still blocked on `HD.CLK_SRC` in pure OOC mode).

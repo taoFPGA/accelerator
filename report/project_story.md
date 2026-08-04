@@ -503,6 +503,71 @@ where synthesis found something simulation structurally could not have.
 
 ---
 
+## 18. Closing the async-reset gap — a three-round whack-a-mole that kept revealing the same
+    bug in new places
+
+**Context:** §17 left one real gap open: `REQP-1839`/`REQP-1840`, 40+ DRC warnings about block
+RAM control pins driven by asynchronously-reset registers in `MM_in_buffer`/`MM_buffer`. Asked
+to root-cause and fix it, extending to `MM_out_buffer.v` too on the theory it likely had the
+same latent issue (confirmed correct on inspection — it did).
+
+**What looked like a three-file fix turned into a twelve-file one.** The actual memory
+read/write `always` blocks in every buffer module were already reset-free and correct; the
+problem was every address counter, valid-pipeline register, and FSM state register *feeding*
+those ports, which universally used `always @(posedge clk or negedge rst_n)`. The fix itself
+is simple and mechanical — drop `or negedge rst_n` from the sensitivity list, exactly Xilinx's
+own recommended remedy — but finding the true extent of it took three rounds:
+1. **Round 1** (`MM_in_buffer.v`, `MM_buffer.v`, `MM_out_buffer.v`, 37 blocks): the files
+   directly named in Run 1's DRC violations. Re-synthesizing afterward, the warnings didn't go
+   away — they just started pointing at a *different* driving register:
+   `MM_out_data_valid_reg_array` inside `MM.v`, a module one level deeper in the hierarchy
+   (instantiated inside `MM_buffer.v` as `u_MM`) that nothing in the original request had named.
+2. **Round 2** (`MM.v`, 10 blocks): fixed, re-synthesized again. The violation moved *again* —
+   this time to `draining_reg` inside `axis_downsizer.v`, a module with no relation to "buffers"
+   at all (it's the width-adapter bridging `MM_ultra`'s output to Softmax's input). The
+   connection: `out_data_ready` backpressure from outside `MM_ultra` entirely was reaching
+   `F_array`'s enable logic combinationally. Also converted `PE_array.v`/`PE.v` (same round,
+   proactively, since they sit inside the same subtree and a full audit showed they had the
+   identical pattern) — 6 more blocks.
+3. **Round 3** (`Softmax_control.v`, `Softmax.v`, `EightGelus.v`, `axis_upsizer_fifo.v`,
+   `transformer_block_top.v`, 17 blocks): re-synthesized once more; `REQP-1839` finally cleared
+   completely, but `REQP-1840` revealed yet another BRAM — `Softmax_control.v` has its own
+   internal `in_data_buffer` memory, invisible in every prior run because Run 1's DRC report
+   caps each rule at 20 reported violations and that cap was fully saturated by
+   `MM_in_buffer`/`MM_buffer` instances until those got fixed.
+
+Given a full project-wide audit (a simple `grep` count per file) had already enumerated every
+remaining async-reset block with no more unknowns left to discover, round 3 converted the
+entire remaining list in one pass rather than continuing to trace one violation at a time —
+confirmed with the user first, since by that point the fix had grown well past the three files
+originally scoped and into a module (`axis_downsizer.v`) with no "buffer" in its name at all.
+
+**Total: 12 files, 60 `always` blocks converted**, re-verified against full-scale regression
+(`MM_Ultra_tb`, `transformer_block_tb`) after every single round — all four re-runs produced
+results bit-for-bit identical to the pre-fix baseline (21,544 cycles / 18,083 cycles, same
+error counts), confirming the change really is invisible to simulation, exactly as predicted.
+
+**Result:** `REQP-1839`/`REQP-1840` fully cleared — 0 instances, down from 40+. Two unplanned
+bonuses came with it: two of Run 1's six `synth_design` warnings disappeared as a side effect
+(the `fifo_mem_reg` set/reset-priority warning and its companion BRAM-inference failure — same
+root cause, already flagged as Run 1 open item #2, resolved without being separately chased),
+and utilization measurably *improved* (LUTs 51.37%→47.94%, Registers 16.75%→12.80%, F7/F8
+Muxes down from 560/263 to 40/0) — removing async reset from ~60 registers let Vivado pack
+flip-flops more efficiently. Full numbers in `synthesis_data.md`'s Run 2 section.
+
+**Lesson:** A DRC violation naming one specific register is telling you about the *nearest*
+offender on a signal path, not the full extent of the pattern — the same root cause can recur
+at every hop upstream through a design's valid/ready handshake network, in modules that share
+no obvious naming or folder relationship with where the symptom first appeared. A `grep`-based
+project-wide audit for the anti-pattern itself (here: `negedge rst_n` across every file in the
+relevant hierarchy) is more reliable than iteratively chasing wherever the next DRC violation
+happens to point — it converts an open-ended "keep re-synthesizing until it's clean" loop into
+a bounded, enumerable list, and in this case revealed the true scope (12 files) was known
+before round 3 even started, making it safe to fix comprehensively in one pass instead of
+continuing to whack-a-mole one file at a time.
+
+---
+
 ## Summary of lessons learned (rollup)
 
 1. **Verify infrastructure assumptions before deep technical investigation** — the PBS saga
@@ -539,3 +604,9 @@ where synthesis found something simulation structurally could not have.
     are a textbook example of something a behavioral simulator won't expose but DRC exists
     specifically to catch — don't treat a clean simulation pass as reducing the value of a
     synthesis/DRC pass, they're complementary, not sequential rubber-stamps.
+11. **A DRC violation names the nearest offender, not the full extent of the pattern** — the
+    same root cause can recur at every upstream hop in a signal path, in modules with no
+    obvious naming relationship to the symptom. When a fix doesn't fully clear a warning class
+    after one round, don't keep iteratively chasing wherever the next violation points — do a
+    project-wide audit for the anti-pattern itself first, to convert an open-ended loop into a
+    bounded, known list before fixing comprehensively in one pass.
