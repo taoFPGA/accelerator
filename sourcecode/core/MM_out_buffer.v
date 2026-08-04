@@ -95,7 +95,7 @@ generate
     end
 endgenerate
 
-always @(posedge clk or negedge rst_n) begin
+always @(posedge clk) begin
     if(~rst_n)
         start_trans <= 0;
     else if (F_array_out_valid)
@@ -104,7 +104,7 @@ always @(posedge clk or negedge rst_n) begin
         start_trans <= 1;
 end
 
-always @(posedge clk or negedge rst_n) begin
+always @(posedge clk) begin
     if(~rst_n)
         F_array_out_valid <= 0;
     else if(start_trans & out_data_ready)
@@ -115,7 +115,7 @@ always @(posedge clk or negedge rst_n) begin
         F_array_out_valid <= F_array_out_valid;
 end
 
-always @(posedge clk or negedge rst_n) begin
+always @(posedge clk) begin
     if(~rst_n)
         F_array_out_valid_delay1 <= 0;
     else if (F_array_out_cnt_delay1 ==out_F_block_size-1 &(F_array_out_valid_delay1&out_data_ready))
@@ -132,7 +132,7 @@ always @(posedge clk ) begin
         F_array_out_valid_delay2<=F_array_out_valid_delay1;
 end
 
-always @(posedge clk or negedge rst_n) begin
+always @(posedge clk) begin
     if(~rst_n)
         F_array_out_cnt <= 0;
     else if (F_array_out_cnt == out_F_block_size)
@@ -143,7 +143,7 @@ always @(posedge clk or negedge rst_n) begin
         F_array_out_cnt <= F_array_out_cnt;
 end
 
-always @(posedge clk or negedge rst_n) begin
+always @(posedge clk) begin
     if(~rst_n)
         out_data_cnt <= 0;
     else if (out_data_cnt == out_F_block_size)
@@ -154,7 +154,7 @@ always @(posedge clk or negedge rst_n) begin
         out_data_cnt <= out_data_cnt;
 end
 
-always @(posedge clk or negedge rst_n) begin
+always @(posedge clk) begin
     if(~rst_n)
         F_array_out_cnt_delay1 <= 0;
     else if (F_array_out_cnt_delay1 == out_F_block_size)
@@ -186,7 +186,7 @@ always @(posedge clk ) begin
         out_data_valid <= F_array_out_valid_delay2;
 end
 
-always @(posedge clk or negedge rst_n) begin
+always @(posedge clk) begin
     if(~rst_n)
         out_data_col_addr <= 0;
     else if (F_array_out_last_delay2)
@@ -199,7 +199,7 @@ always @(posedge clk or negedge rst_n) begin
         out_data_col_addr <= out_data_col_addr+1;
 end
 
-always @(posedge clk or negedge rst_n) begin
+always @(posedge clk) begin
     if(~rst_n)
         out_data_row_addr <= 0;
     else if (F_array_out_last_delay2)
@@ -221,7 +221,7 @@ always @(*) begin
         B_addr = C_addr;
 end
 
-always @(posedge clk or negedge rst_n) begin
+always @(posedge clk) begin
     if(~rst_n)
         clear_addr <= 0;
     // else if (out_data_last)
@@ -274,7 +274,7 @@ always @(posedge clk ) begin
     out_F_block_size <= F_length * W_width_block_num;
 end
 
-always @(posedge clk or negedge rst_n) begin
+always @(posedge clk) begin
     if(~rst_n)
         C_addr <= 0;
     else if (in_data_last)
@@ -285,7 +285,7 @@ always @(posedge clk or negedge rst_n) begin
         C_addr <= C_addr;
 end
 
-always @(posedge clk or negedge rst_n) begin
+always @(posedge clk) begin
     if(~rst_n)
         last_cnt <= 0;
     else if (last_cnt == F_width_block_num)

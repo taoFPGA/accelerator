@@ -19,7 +19,7 @@ module PE
 );
 reg signed [data_width-1:0] reg_w;
 
-always @(posedge clk or negedge rst_n) begin
+always @(posedge clk) begin
     if(~rst_n)begin
         psum_out <= 0;
         reg_w <= 0;

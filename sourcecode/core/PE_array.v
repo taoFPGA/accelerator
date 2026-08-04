@@ -38,7 +38,7 @@ generate
         end
         else begin
             reg [(log2_array_m+data_width*2)-1:0] out_buf [array_n-2-i:0];
-            always @(posedge clk or negedge rst_n) begin
+            always @(posedge clk) begin
                 if(~rst_n)
                     out_buf[0]<=0;
                 else
@@ -47,7 +47,7 @@ generate
             
             genvar k;
             for (k=1;k<=array_n-2-i;k=k+1)begin:out_buf_for
-                always@(posedge clk or negedge rst_n)begin
+                always@(posedge clk)begin
                     if(~rst_n)
                         out_buf[k]<=0;
                     else
@@ -90,7 +90,7 @@ generate
         end
         else begin
             reg [data_width-1:0] x_buf [i-1:0];
-            always @(posedge clk or negedge rst_n) begin
+            always @(posedge clk) begin
                 if(~rst_n)
                     x_buf[0]<=0;
                 else
@@ -99,7 +99,7 @@ generate
 
             genvar k;
             for (k=1;k<=i-1;k=k+1)begin:x_buf_for
-                always@(posedge clk or negedge rst_n)begin
+                always@(posedge clk)begin
                     if(~rst_n)
                         x_buf[k]<=0;
                     else

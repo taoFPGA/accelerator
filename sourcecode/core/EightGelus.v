@@ -31,7 +31,7 @@ module EightGelus
 assign in_ready = out_ready;
 reg [8:0] valid_reg;
 
-always@(posedge clk or negedge rst_n)begin
+always@(posedge clk)begin
     if(~rst_n)
         valid_reg[0]<=0;
     else
@@ -41,7 +41,7 @@ end
 genvar i;
 generate
 for(i=1;i<9;i=i+1)begin
-    always@(posedge clk or negedge rst_n)begin
+    always@(posedge clk)begin
         if(~rst_n)
             valid_reg[i]<=0;
         else           
@@ -54,7 +54,7 @@ assign out_valid = valid_reg[8];
 
 reg [8:0] last_reg;
 
-always@(posedge clk or negedge rst_n)begin
+always@(posedge clk)begin
     if(~rst_n)
         last_reg[0]<=0;
     else
@@ -63,7 +63,7 @@ end
 
 generate
 for(i=1;i<9;i=i+1)begin
-    always@(posedge clk or negedge rst_n)begin
+    always@(posedge clk)begin
         if(~rst_n)
             last_reg[i]<=0;
         else           
@@ -77,7 +77,7 @@ assign out_last = last_reg[8];
 
 reg [num_gelu*8-1:0]  in_data_delay1;
 
-always@(posedge clk or negedge rst_n)begin
+always@(posedge clk)begin
     if(~rst_n)
         in_data_delay1<=0;
     else
@@ -86,7 +86,7 @@ end
  
 reg [num_gelu-1:0] keep_reg [8:0];
 assign out_keep = keep_reg[8];
-always@(posedge clk or negedge rst_n)begin
+always@(posedge clk)begin
     if(~rst_n)
         keep_reg[0] <=0;
     else
@@ -95,7 +95,7 @@ end
 
 generate 
     for(i=1;i<9;i=i+1)begin
-        always@(posedge clk or negedge rst_n)begin
+        always@(posedge clk)begin
             if(~rst_n)
                 keep_reg[i] <=0;
             else
