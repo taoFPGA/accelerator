@@ -396,6 +396,70 @@ already suspected was wrong.
 
 ---
 
+## 16. Validating the six-parameter fix in Vivado — a stale version guard, a licensing side-quest,
+    and a minor property-drift finding
+
+**Context:** Before committing §15's six parameter fixes, the goal was to actually prove
+`prj.tcl` builds and validates cleanly in the Vivado 2026.1 we'd installed — not just trust
+that the corrected values were self-evidently right.
+
+**Blocker #1 — the script's own version guard:** `prj.tcl` hard-blocks (ERROR + early
+`return`) unless run in exactly Vivado 2019.1, the version it was originally generated with.
+Sourcing it under 2026.1 aborted immediately, before `create_root_design` ever ran.
+Investigated by neutralizing *only the version check* in a throwaway scratch copy (never
+touching the committed file) and re-running, to see whether the actual IP Integrator commands
+underneath were compatible with the new version or not. Result: **complete success** — the
+design built, all IP/module checks passed, `validate_bd_design` reported zero errors, and
+`design_1.bd` saved cleanly. Reopening the saved design and querying it directly confirmed
+every one of §15's six fixes actually took (`array_size=16`, the three `*_Block_num`
+values=2400, `shift_width=10`, `feature_width_block_num_width=5`), all three
+`MM_ultra_top_0` AXI-Stream ports resolved to the correct 16-byte width, and —
+the one thing flagged as uncertain in §15 — `axis_dwidth_converter_2`'s input side
+auto-propagated to 16 bytes correctly with no explicit override needed. Based on this proof,
+updated the real `scripts/prj.tcl`'s guard from a hard block to a non-fatal warning (commit
+`fa4c006`), then re-ran the validation against the actual committed file (not just the
+scratch copy) to confirm the real change works end-to-end before committing.
+
+**Blocker #2 — Vivado's free tier needs an explicit license, not just a device selection:**
+launching Vivado at all failed with "a valid license was not found," despite having installed
+the free "Vivado Design Suite" edition. Turned out selecting free device families at install
+time isn't sufficient on its own — AMD's current licensing model (the modern successor to the
+old always-free WebPACK model) requires generating a no-cost, node-locked license certificate
+through their account portal (Host ID = this machine's MAC address), separate from and after
+the installer step. This is an account-tied action, so it was done by the user directly, not
+automated; once downloaded, installed at `~/.Xilinx/Xilinx.lic` and wired into `setup.sh` via
+`XILINXD_LICENSE_FILE` (commit `f881cc5`) so it's automatic for future sessions rather than a
+step that gets forgotten.
+
+**Non-blocker — missing PYNQ-Z1 board file:** `set_property board_part
+www.digilentinc.com:pynq-z1:part0:1.0` also failed, because that board definition isn't in
+Digilent's current public `vivado-boards` GitHub repo (checked directly — 26 boards listed,
+PYNQ-Z1 not among them). Made non-fatal in the validation wrapper rather than chased further,
+since `board_part` is only I/O pin-constraint metadata for physical hardware bring-up and has
+no bearing on block-design elaboration — the actual chip part (`xc7z020clg400-1`) was accepted
+fine on its own. Left as an open item for whenever physical PYNQ-Z1 bring-up starts.
+
+**Minor finding worth tracking — `axi_dma_2` property drift:** during IP instantiation,
+Vivado emitted `WARNING: [IP_Flow 19-3374] An attempt to modify the value of disabled
+parameter 'c_m_axi_mm2s_data_width' from '32' to '64' has been ignored for IP 'axi_dma_2'`.
+Non-fatal, and didn't block validation, but it means this specific property in `prj.tcl` is no
+longer settable the way the script tries to set it in Vivado 2026.1 (an IP property-model
+change between versions) — silently ignored rather than erroring. Not yet investigated
+whether this affects `axi_dma_2`'s actual configured behavior; worth checking before finalizing
+the DMA read-path (S2MM) configuration in the synthesis pass.
+
+**Lesson:** A vendor-generated compatibility guard errs conservative by design — it can't know
+in advance whether a 7-version-old script will still work, so it blocks first and asks
+questions never. Testing that assumption empirically (in a disposable scratch copy, never the
+committed file) turned "we can't even source this script" into "the script is fine, only six
+specific values were wrong," which is a much smaller and more precise problem. Separately,
+getting third-party/adopted tooling actually running end-to-end tends to surface a cluster of
+unrelated environmental gaps (version guards, licensing, missing board files) that have nothing
+to do with RTL correctness — worth triaging each one by whether it's actually blocking versus
+just noisy, rather than treating all of them as equally urgent.
+
+---
+
 ## Summary of lessons learned (rollup)
 
 1. **Verify infrastructure assumptions before deep technical investigation** — the PBS saga
@@ -420,3 +484,9 @@ already suspected was wrong.
    declarations, not just the one value you already suspect. The values nobody explicitly
    overrode (silently inheriting a stale wrapper default) were more dangerous than the ones
    visibly set wrong.
+9. **A vendor version-compatibility guard is a conservative default, not proof of actual
+   incompatibility** — test it empirically in a disposable copy before assuming a script needs
+   a rewrite. Also: getting adopted tooling running end-to-end tends to surface a cluster of
+   unrelated environmental gaps (version guards, licensing, missing board files) — triage each
+   by whether it actually blocks the task at hand, not by treating all of them as equally
+   urgent.
