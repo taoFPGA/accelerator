@@ -460,6 +460,49 @@ just noisy, rather than treating all of them as equally urgent.
 
 ---
 
+## 17. Synthesis phase kicked off — first baseline established, real gap found
+
+**Context:** With `prj.tcl` validated (§16) and the toolchain fully working, moved into the
+synthesis phase proper: establish an actual area/timing baseline for the transformer
+accelerator, not just prove the integration script builds.
+
+**Built:** `scripts/synth.tcl` — an in-memory, non-project batch synthesis script targeting
+`xc7z020clg400-1` (PYNQ-Z1's part), synthesizing `transformer_block_top` (the full verified
+pipeline, deliberately chosen over the AXI-wrapped `MM_ultra_top` sub-block that `prj.tcl`
+integrates — "our transformer accelerator" reads as the complete pipeline, not just the
+matmul core) with `-mode out_of_context` (this block has no board-level I/O of its own and is
+meant to be instantiated inside the larger SoC, so OOC mode avoids Vivado inserting artificial
+top-level IBUF/OBUF pairs that would skew utilization numbers). Applied the same
+lesson from §15/§16 proactively this time: checked `transformer_block_top.v`'s own declared
+parameter defaults against verified simulation values *before* writing the script, rather than
+after finding a mismatch — they already matched exactly, so no `-generic` overrides were
+needed.
+
+**First run, tested with the same resource-monitored protocol used throughout the
+verification phase:** clean synthesis, 0 errors, 0 critical warnings, 6 warnings, ~3.3GB peak
+memory, ~3.5 minutes wall time. Full results logged in `synthesis_data.md` — summary:
+utilization comfortable (LUTs tightest at 51.37%, everything else under 20%), timing passes
+with positive margin at the 100MHz target (WNS +0.682ns, WHS +0.219ns, matching the Zynq PS7's
+actual FCLK0 frequency from `prj.tcl`), and DRC surfaced one **real** finding worth tracking:
+40+ instances (`REQP-1839`/`REQP-1840`) of block RAM control pins in `MM_in_buffer` and
+`MM_buffer` driven by asynchronous set/reset — Xilinx's own DRC description warns this "may
+cause corruption of the memory contents... not analyzed by the default static timing
+analysis." This is exactly the class of issue that doesn't reliably surface in simulation
+(a timing/silicon-corner race, not a functional-correctness bug a testbench would catch) — the
+first concrete example this project has hit of synthesis catching something verification
+structurally couldn't. Not yet root-caused or fixed; logged as the top open item for the next
+synthesis pass.
+
+**Lesson:** Passing simulation at full scale (as this design has, extensively — see the whole
+verification phase above) proves functional correctness under the testbench's stimulus and
+timing model, not synthesis-level or silicon-level correctness. Async-reset-driving-BRAM-control
+is a textbook example of a class of bug that a behavioral simulator generally won't expose
+(no real clock-domain/reset-assertion race modeled) but that DRC exists specifically to catch.
+The two techniques are complementary, not redundant — this is the first time in this project
+where synthesis found something simulation structurally could not have.
+
+---
+
 ## Summary of lessons learned (rollup)
 
 1. **Verify infrastructure assumptions before deep technical investigation** — the PBS saga
@@ -490,3 +533,9 @@ just noisy, rather than treating all of them as equally urgent.
    unrelated environmental gaps (version guards, licensing, missing board files) — triage each
    by whether it actually blocks the task at hand, not by treating all of them as equally
    urgent.
+10. **Full-scale simulation and synthesis DRC catch different classes of bug** — passing
+    verification proves functional correctness under the testbench's stimulus and timing
+    model, not silicon-level correctness. Asynchronous resets driving block RAM control pins
+    are a textbook example of something a behavioral simulator won't expose but DRC exists
+    specifically to catch — don't treat a clean simulation pass as reducing the value of a
+    synthesis/DRC pass, they're complementary, not sequential rubber-stamps.
