@@ -13,4 +13,14 @@ fi
 
 source "$VIVADO_SETTINGS"
 
+# Free (Vivado ML Standard / WebPACK-tier) node-locked license, generated per-user
+# from the AMD licensing portal against this machine's Host ID. $HOME already
+# resolves per-user, so no extra templating needed here unlike VIVADO_SETTINGS above.
+XILINX_LICENSE_FILE_PATH="$HOME/.Xilinx/Xilinx.lic"
+if [ -f "$XILINX_LICENSE_FILE_PATH" ]; then
+    export XILINXD_LICENSE_FILE="$XILINX_LICENSE_FILE_PATH"
+else
+    echo "Warning: no Xilinx license found at $XILINX_LICENSE_FILE_PATH -- Vivado will fail to launch until one is generated (AMD licensing portal, Host ID from this machine's MAC address) and placed there." >&2
+fi
+
 echo "Vivado 2026.1 environment loaded for ${USER}. Type 'vivado' to launch."
