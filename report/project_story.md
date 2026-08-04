@@ -568,6 +568,75 @@ continuing to whack-a-mole one file at a time.
 
 ---
 
+## 19. Full SoC integration phase begins — discovering the accelerator had never actually been
+    wrapped for it
+
+**Context:** With the standalone accelerator fully optimized (§18) and validated, asked to move
+into full SoC integration: run `prj.tcl` to generate the complete block design (Zynq PS + DMA +
+accelerator), then full system synthesis, checking 100MHz timing and new warnings.
+
+**First finding, before running anything:** `prj.tcl` as it existed only integrated
+`MM_ultra_top` — the matmul engine alone, wrapped in AXI years ago via `MM_ultra_axi.v`/
+`MM_ultra_top.v`. The complete pipeline this whole project has been calling "the transformer
+accelerator" (`transformer_block_top`, MM→Softmax→GELU) had never been given AXI wrapping at
+all — it only had raw signal ports, the way the testbenches drive it directly. Running `prj.tcl`
+as-is would have integrated a different, narrower thing than what §14-18 actually verified and
+optimized. Flagged this explicitly rather than silently proceeding with the mismatch; asked to
+build the missing wrapper first.
+
+**Built `transformer_block_axi.v` and `transformer_block_axi_top.v`**, mirroring
+`MM_ultra_axi.v`/`MM_ultra_top.v`'s structure (AXI4-Lite register file + AXI4-Stream
+slave/master wrapping) but sized for the full pipeline's larger config surface (7 config
+registers instead of 4, plus a read-only status register for
+`softmax_to_gelu_fifo_overflow`) and its output stream's `tkeep` signal (needed for GELU's
+partial-final-beat case, which the matmul-only wrapper never had to handle). One deliberate,
+explicit deviation from the existing wrapper's own convention: kept `transformer_block_top.v`'s
+own parameter names instead of inventing lowercase aliases the way `MM_ultra_axi.v` did — that
+renaming is exactly what caused the `array_size`/`A_size` drift bug chased across Sections
+15-16. Set every default to already match the verified simulation values, so — unlike
+`MM_ultra_top`, which needed 6 parameter corrections in `prj.tcl` — the new wrapper needed
+**zero** `CONFIG` overrides. Applying a documented lesson before it could bite twice.
+
+**Validated in isolation before touching `prj.tcl`:** synthesized the new wrapper standalone
+first — 0 errors, 23 warnings, every one audited and traced to either pre-existing items or
+benign patterns already understood from the original wrapper (implicit truncation connecting
+32-bit AXI registers to narrower config ports; unused `AWPROT`/`ARPROT`, inherent to this
+AXI4-Lite template and present in the original too, just never previously surfaced).
+
+**Updated `prj.tcl`:** renamed every `MM_ultra_top_0` reference, removed the now-unnecessary
+`CONFIG` block, left all downstream DMA/SmartConnect connectivity untouched since the new
+wrapper deliberately kept identical pin names to the old one. Ran it — clean, `validate_bd_design`
+reported zero errors, and reopening the saved design confirmed every parameter resolved
+correctly with zero drift, `m0_axis` correctly narrowed to 4 bytes (matching GELU's output width
+vs. the matmul's 16), `HAS_TKEEP=1` present, and — the one thing flagged as worth checking —
+`axis_dwidth_converter_2`'s input side auto-propagated to the new width with no explicit
+reconfiguration, exactly like the equivalent check in Section 16.
+
+**Full SoC synthesis** (new `scripts/synth_soc.tcl`, on-disk project this time since the
+block-design/wrapper flow needs real project files unlike `synth.tcl`'s in-memory OOC
+approach): succeeded, 0 errors. **100MHz still met** (WNS +0.507ns, WHS +0.033ns — both margins
+shrank somewhat from the standalone numbers, as expected with real interconnect/DMA fan-out
+added, but stayed comfortably positive). Utilization grew proportionally to the added PS7-side
+infrastructure (LUTs 47.94%→58.29%, Registers 12.80%→19.09%) — still well within the
+`xc7z020`'s capacity. 207 warnings this time (up from 4), all individually categorized and
+audited: every one traces to Xilinx's own pre-built `axi_dma`/`smartconnect` IP's unused
+optional features, none of it attributable to our RTL or the new wrapper. **DRC stayed clean of
+correctness-risk items** — zero `REQP-1839`/`REQP-1840`, confirming Section 18's async-reset fix
+holds even with the newly-exercised `Softmax_control.v` BRAM path now driven by real
+DMA/interconnect traffic patterns instead of the isolated OOC block. `ZPS7-1` ("PS7 block
+required") disappeared on its own, since the real PS7 is now actually present.
+
+**Lesson:** "Run the integration script" is not always as simple as running the existing
+script — the very first step surfaced that the script's scope (`MM_ultra_top` alone) had
+silently diverged from what "the accelerator" had come to mean everywhere else in this project
+(the full pipeline). Catching a scope mismatch before spending a synthesis run on the wrong
+target is worth the pause; and having already-documented lessons (parameter-naming drift,
+audit-before-assume, resource-monitored validation) meant the new wrapper needed none of the
+same fixes the original one did — proof that writing the lesson down in Sections 15-18 actually
+changed how Section 19 got built, not just how it got debugged afterward.
+
+---
+
 ## Summary of lessons learned (rollup)
 
 1. **Verify infrastructure assumptions before deep technical investigation** — the PBS saga
@@ -610,3 +679,10 @@ continuing to whack-a-mole one file at a time.
     after one round, don't keep iteratively chasing wherever the next violation points — do a
     project-wide audit for the anti-pattern itself first, to convert an open-ended loop into a
     bounded, known list before fixing comprehensively in one pass.
+12. **"Run the existing integration script" deserves a scope check before running it** — a
+    script that builds cleanly can still target a narrower or different thing than what a
+    project's own vocabulary ("the accelerator") has since come to mean. Cheaper to catch a
+    scope mismatch before a run than after. Separately: documented lessons only pay off if
+    they're actually applied on the next build, not just consulted when debugging — the new AXI
+    wrapper needed zero of the fixes the original one did, specifically because Sections 15-16's
+    lessons were applied while writing it, not after.
