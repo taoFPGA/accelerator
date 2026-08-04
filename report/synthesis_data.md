@@ -203,8 +203,116 @@ Only performance-suggestion and expected-for-OOC items: `DPIP-1`×10, `DPOP-1`×
 (DSP pipelining, open item #3 above), `ZPS7-1`×1 (PS7 required, expected/not-a-real-issue for a
 standalone OOC sub-block). No correctness-risk DRC warnings remain.
 
-### Open items after Run 2
+### Open items after Run 2 (status after Run 3, below)
 1. DSP pipelining suggestions (`DPIP-1`/`DPOP-1`/`DPOP-2`) — optimization opportunity, not
-   urgent given positive timing margin.
-2. Re-run timing/DRC once integrated into the full `prj.tcl` SoC design for real
-   clock-source-aware numbers (still blocked on `HD.CLK_SRC` in pure OOC mode).
+   urgent given positive timing margin. **Still open** (unchanged in Run 3).
+2. ~~Re-run timing/DRC once integrated into the full `prj.tcl` SoC design for real
+   clock-source-aware numbers~~ — **done, see Run 3.**
+
+---
+
+## Run 3 — Full SoC integration (2026-08-04)
+
+**Objective:** Move from standalone accelerator synthesis (Runs 1-2, out-of-context, no
+board-level I/O) to the real target: the transformer accelerator integrated into the full
+Zynq-7000 SoC (PS7 + DMA + interconnect), synthesized as the actual chip top-level with real
+DDR/FIXED_IO package I/O.
+
+**Prerequisite — the full pipeline had no AXI wrapper.** `scripts/prj.tcl` as it existed only
+integrated `MM_ultra_top` (the matmul engine alone, via `MM_ultra_axi.v`/`MM_ultra_top.v`) —
+never wrapped for AXI at all was `transformer_block_top`, the complete verified
+MM→Softmax→GELU pipeline. Built two new files mirroring the existing wrapper's structure:
+- **`sourcecode/top/transformer_block_axi.v`** — AXI4-Lite register file (8 word registers,
+  `C_S_AXI_ADDR_WIDTH=5`: 7 read-write config registers for `mm_shift_in`, `mm_F_length_in`,
+  `mm_F_width_block_num_in`, `mm_W_width_block_num_in`, `softmax_scale_in`,
+  `softmax_scale_out`, `gelu_scale`, plus a read-only status register exposing
+  `softmax_to_gelu_fifo_overflow` live) + dual AXI4-Stream slave (feature/weight in) + AXI4-Stream
+  master with `tkeep` (GELU output, needed for its partial-final-beat case that `MM_ultra_top`
+  never had to handle) wrapping `transformer_block_top`.
+- **`sourcecode/top/transformer_block_axi_top.v`** — outer port-list wrapper, mirrors
+  `MM_ultra_top.v`'s structure exactly.
+
+**Deliberate deviation from `MM_ultra_axi.v`'s convention:** kept `transformer_block_top.v`'s
+own parameter names (`A_size`, `Weight_Block_num`, ...) instead of inventing lowercase aliases
+(`array_size`, ...) the way the existing wrapper does. That renaming is exactly what caused the
+`array_size`/`A_size` default-drift bug documented in Sections 15-16 of `project_story.md` —
+avoided a second instance of the same class of bug by keeping one name per concept. Set every
+default to match `transformer_block_top.v`'s own (already-verified) defaults, so — unlike
+`MM_ultra_top`, which needed 6 parameter corrections in `prj.tcl` — **no `-generic`/`CONFIG`
+overrides were needed for the new wrapper at all.**
+
+**Validated in isolation first** (same discipline as everything else this project): synthesized
+`transformer_block_axi_top` standalone (OOC) before touching `prj.tcl` — 0 errors, 0 critical
+warnings, 23 warnings, all traced to either (a) already-known/pre-existing items, (b) benign
+implicit-truncation notes from connecting full 32-bit AXI registers to narrower config ports
+(identical pattern to the working `MM_ultra_axi.v`), or (c) the standard unused `AWPROT`/`ARPROT`
+ports inherent to this AXI4-Lite peripheral template (present in the original wrapper too, just
+never previously surfaced since `MM_ultra_top` was never OOC-synthesized standalone).
+
+**Updated `scripts/prj.tcl`:** renamed every `MM_ultra_top_0` reference to
+`transformer_block_axi_top_0`, changed the module-reference name and check list, and removed
+the old 6-line `CONFIG` override block entirely (no longer needed — see above). Left all
+downstream connectivity (DMA, SmartConnect, AXI-Lite address segments) untouched: the new
+wrapper kept identical pin names (`s0_axis`/`s1_axis`/`m0_axis`/`s00_axi`/`aclk`/`aresetn`) to
+`MM_ultra_top`, so only the cell-instance rename was structurally required.
+
+**Block design generation and validation:** ran the updated `prj.tcl` — clean, `validate_bd_design`
+reported zero errors, `design_1.bd` saved. Reopened the saved design and queried it directly to
+confirm:
+- All 12 `transformer_block_axi_top_0` parameters resolved to verified values, zero drift.
+- `s0_axis`/`s1_axis`: 16 bytes each (matches `A_size×data_width` = 16×8).
+- `m0_axis`: **4 bytes** (matches `num_gelu×data_width` = 4×8 — down from `MM_ultra_top`'s 16
+  bytes, since GELU's output is narrower than the raw matmul output), with **`HAS_TKEEP=1`**
+  confirmed present.
+- `axis_dwidth_converter_2`'s input side auto-propagated to the new 4-byte width with **zero
+  explicit reconfiguration** — Vivado's connectivity-based inference handled the change
+  correctly on its own, exactly as it did for the analogous check in Section 16's validation.
+- AXI-Lite: `ADDR_WIDTH=5`, `DATA_WIDTH=32`, matching the 8-register map by design.
+
+**Full SoC synthesis** (new `scripts/synth_soc.tcl` — on-disk project this time, since
+`prj.tcl`'s block-design + `generate_target` + `make_wrapper` flow needs real project files,
+unlike `synth.tcl`'s `-in_memory` OOC approach): `synth_design -top design_1_wrapper` (the real
+chip top, not out-of-context) completed successfully. ~6 minutes, peak memory ~4.6GB (safely
+under the monitored threshold), run directly on the login node with the same resource-monitored
+protocol used throughout.
+
+### Results
+
+| Metric | Standalone (Run 2) | Full SoC (Run 3) |
+|---|---|---|
+| WNS | +0.682ns | **+0.507ns** |
+| WHS | +0.208ns | **+0.033ns** |
+| Timing constraints | met | **met** — "All user specified timing constraints are met." |
+| Slice LUTs | 25,506 (47.94%) | **31,012 (58.29%)** |
+| Slice Registers | 13,624 (12.80%) | **20,307 (19.09%)** |
+| Errors | 0 | **0** |
+| Warnings | 4 | **207** |
+| DRC correctness-risk items | 0 | **0** |
+
+Both timing margins shrank somewhat (expected — more logic, more routing complexity, and this
+time real interconnect/DMA fan-out instead of an isolated OOC block) but stayed comfortably
+positive; **100MHz is still met with margin at the full-SoC level.** Utilization grew
+proportionally to the added PS7-side infrastructure (3× DMA, 3× SmartConnect, crossbar,
+protocol converter) — still well within the `xc7z020`'s capacity.
+
+**All 207 warnings audited and categorized** — every one traces to either Xilinx's own
+pre-built `axi_dma`/`smartconnect` IP (unused optional ports/scatter-gather features never
+enabled — none of it our RTL), the same benign width-truncation/`AWPROT`/`ARPROT` notes already
+seen in isolation, or the already-documented `lin.v`/`Exp_module.v` items. **Zero new warnings
+attributable to our own RTL or the new AXI wrapper.**
+
+**DRC:** only `DPIP-1`×10, `DPOP-1`×5, `DPOP-2`×12 (the same DSP pipelining suggestions, open
+item #1 above) — `ZPS7-1` ("PS7 block required") is gone this time, since the real PS7 is now
+actually present (that warning was purely an OOC-mode artifact, as expected). **Zero
+`REQP-1839`/`REQP-1840` async-reset-on-BRAM warnings** — confirms the Section 18 fix holds at
+full SoC scale too, including through the newly-added `Softmax_control.v` `in_data_buffer` BRAM
+path now exercised by the real DMA/interconnect traffic pattern.
+
+### Open items after Run 3
+1. DSP pipelining suggestions (`DPIP-1`/`DPOP-1`/`DPOP-2`) — still open, optimization only.
+2. Physical implementation (place/route, bitstream) not yet attempted — still blocked on the
+   missing PYNQ-Z1 board file for real pin constraints (non-fatal for synthesis-level analysis,
+   would matter for actual hardware bring-up).
+3. `axi_dma_2`'s S2MM stream-width tuning (4-byte GELU output → 8-byte DMA width, handled today
+   by `axis_dwidth_converter_2`'s automatic widening) not yet evaluated for burst efficiency —
+   functionally correct, not yet optimized.
