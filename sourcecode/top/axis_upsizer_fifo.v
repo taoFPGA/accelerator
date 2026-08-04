@@ -58,7 +58,7 @@ wire fifo_rd_en;   // driven by the packer FSM below
 wire                  fifo_rd_last = fifo_mem[rd_ptr][DATA_WIDTH];
 wire [DATA_WIDTH-1:0] fifo_rd_data = fifo_mem[rd_ptr][DATA_WIDTH-1:0];
 
-always @(posedge clk or negedge rst_n) begin
+always @(posedge clk) begin
     if (~rst_n) begin
         wr_ptr      <= {FIFO_AW{1'b0}};
         rd_ptr      <= {FIFO_AW{1'b0}};
@@ -97,7 +97,7 @@ reg [CNT_W-1:0]            fill_idx;
 
 assign fifo_rd_en = !fifo_empty && !fsm_hold;
 
-always @(posedge clk or negedge rst_n) begin
+always @(posedge clk) begin
     if (~rst_n) begin
         cur_data <= {(LANES*DATA_WIDTH){1'b0}};
         cur_keep <= {LANES{1'b0}};

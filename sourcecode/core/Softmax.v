@@ -151,7 +151,7 @@ always@(posedge clk)begin
 end
 
 initial begin  cnt=0;  end
-always@(posedge clk or negedge rst_n)begin
+always@(posedge clk)begin
     if (~rst_n)
         cnt<=0;
     else begin
@@ -169,7 +169,7 @@ always@(posedge clk or negedge rst_n)begin
 end
 
 // initial begin data_in_max=8'b11111111;end
-always@(posedge clk or negedge rst_n)begin
+always@(posedge clk)begin
     if(~rst_n)
         data_in_max<=8'b11111111;
     else if(cnt==lengthX3-1)
@@ -199,7 +199,7 @@ always@(posedge clk)begin
 end
 
 
-always@(posedge clk or negedge rst_n)begin
+always@(posedge clk)begin
     if(~rst_n)
         e_sum_U8Q12<=0;
     else if(stage_delay4==2 & valid_in_delay4)

@@ -127,7 +127,7 @@ always @(posedge clk) begin
     in_MM_buffer_W_data <= in_W_array[out_W_addr];
 end
 
-always @(posedge clk  or negedge rst_n) begin
+always @(posedge clk) begin
     if(~rst_n)
         state <= `IDLE;
     else if (state == `IDLE & (in_F_valid | in_W_valid))
@@ -141,7 +141,7 @@ always @(posedge clk  or negedge rst_n) begin
         state <= state;
 end
 
-always @(posedge clk  or negedge rst_n) begin
+always @(posedge clk) begin
     if(~rst_n)
         in_F_cnt<=0;
     else if (start)
@@ -152,7 +152,7 @@ always @(posedge clk  or negedge rst_n) begin
         in_F_cnt <= in_F_cnt;
 end
 
-always @(posedge clk  or negedge rst_n) begin
+always @(posedge clk) begin
     if(~rst_n)
         in_F_addr<=0;
     else if (in_F_last)
@@ -163,7 +163,7 @@ always @(posedge clk  or negedge rst_n) begin
         in_F_addr <= in_F_addr;
 end
 
-always @(posedge clk  or negedge rst_n) begin
+always @(posedge clk) begin
     if(~rst_n)
         in_W_cnt<=0;
     else if (start)
@@ -174,7 +174,7 @@ always @(posedge clk  or negedge rst_n) begin
         in_W_cnt <= in_W_cnt;
 end
 
-always @(posedge clk  or negedge rst_n) begin
+always @(posedge clk) begin
     if(~rst_n)
         in_W_addr<=0;
     else if (in_W_last)
@@ -185,7 +185,7 @@ always @(posedge clk  or negedge rst_n) begin
         in_W_addr <= in_W_addr;
 end
 
-always @(posedge clk  or negedge rst_n) begin
+always @(posedge clk) begin
     if(~rst_n)
         in_MM_buffer_F_valid <= 0;
     else if(start)
@@ -196,7 +196,7 @@ always @(posedge clk  or negedge rst_n) begin
         in_MM_buffer_F_valid<=in_MM_buffer_F_valid;
 end
 
-always @(posedge clk  or negedge rst_n) begin
+always @(posedge clk) begin
     if(~rst_n)
         in_MM_buffer_F_cnt<=0;
     else if (in_MM_buffer_F_cnt == F_length)
@@ -207,7 +207,7 @@ always @(posedge clk  or negedge rst_n) begin
         in_MM_buffer_F_cnt <= in_MM_buffer_F_cnt;
 end
 
-always @(posedge clk  or negedge rst_n) begin
+always @(posedge clk) begin
     if(~rst_n)
         out_F_row_addr <= 0;
     else if (start)
@@ -220,7 +220,7 @@ always @(posedge clk  or negedge rst_n) begin
         out_F_row_addr <= out_F_row_addr;
 end
 
-always @(posedge clk  or negedge rst_n) begin
+always @(posedge clk) begin
     if(~rst_n)
        out_F_col_addr <= 0;
     else if (MM_buffer_out_last & out_F_col_addr == F_width_block_num)
@@ -231,7 +231,7 @@ always @(posedge clk  or negedge rst_n) begin
         out_F_col_addr <= out_F_col_addr;
 end
 
-always @(posedge clk  or negedge rst_n) begin
+always @(posedge clk) begin
     if(~rst_n)
         in_MM_buffer_W_valid <= 0;
     else if(start)
@@ -242,7 +242,7 @@ always @(posedge clk  or negedge rst_n) begin
         in_MM_buffer_W_valid<=in_MM_buffer_W_valid;
 end
 
-always @(posedge clk or negedge rst_n) begin
+always @(posedge clk) begin
     if(~rst_n)
         in_MM_buffer_W_cnt <= 0;
     else if (in_MM_buffer_W_cnt == W_width_block_num * A_size)
@@ -253,7 +253,7 @@ always @(posedge clk or negedge rst_n) begin
         in_MM_buffer_W_cnt<=in_MM_buffer_W_cnt;
 end
 
-always @(posedge clk or negedge rst_n ) begin
+always @(posedge clk) begin
     if(~rst_n)
         out_W_addr <= 0;
     else if (out_W_addr== W_block_size -1)

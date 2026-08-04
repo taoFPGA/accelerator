@@ -69,7 +69,7 @@ always @(posedge clk ) begin
     Softmax_valid_in_delay1<=Softmax_valid_in;
 end
 
-always@(posedge clk or negedge rst_n)begin
+always@(posedge clk)begin
     if(~rst_n)
         top_last_in_reg<=0;
     else if (top_last_in)
@@ -84,7 +84,7 @@ always@(posedge clk)begin
     top_ready_in_delay1<=top_ready_in;
 end
 
-always@(posedge clk or negedge rst_n)begin
+always@(posedge clk)begin
     if(~rst_n)
         cnt_in <= 0;
     else if(cnt_stage == lengthX3)//(cnt_stage == length * 3)
@@ -95,7 +95,7 @@ always@(posedge clk or negedge rst_n)begin
         cnt_in <= cnt_in;
 end
 
-always@(posedge clk or negedge rst_n)begin
+always@(posedge clk)begin
     if(~rst_n)
         cnt_stage<=0;
     else if (cnt_stage == lengthX3)//(cnt_stage == length * 3)
@@ -122,7 +122,7 @@ always @(posedge clk ) begin
     lengthX2<=length * 2;
 end
 
-always @(posedge clk or negedge rst_n) begin
+always @(posedge clk) begin
     if(~rst_n)
         top_valid_in_delay1<=0;
     else

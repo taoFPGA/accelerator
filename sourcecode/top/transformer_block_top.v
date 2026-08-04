@@ -166,7 +166,7 @@ MM_ultra #(
 reg [W_width_block_num_width-1:0] row_beat_cnt;
 wire                              mm_row_last = (row_beat_cnt == mm_W_width_block_num_in - 1'b1);
 
-always @(posedge clk or negedge rst_n) begin
+always @(posedge clk) begin
     if (~rst_n)
         row_beat_cnt <= {W_width_block_num_width{1'b0}};
     else if (mm_out_valid && mm_out_ready) begin

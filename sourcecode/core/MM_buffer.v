@@ -151,7 +151,7 @@ always @(posedge clk ) begin
     FL_reg <= FL;
 end
 
-always @(posedge clk or negedge rst_n) begin
+always @(posedge clk) begin
     if(~rst_n)
         weight_buffer_cnt <= 0;
     else if ( MM_buffer_inWeight_valid & MM_buffer_inWeight_ready)
@@ -162,7 +162,7 @@ always @(posedge clk or negedge rst_n) begin
         weight_buffer_cnt <= weight_buffer_cnt;
 end
 
-always @(posedge clk or negedge rst_n) begin
+always @(posedge clk) begin
     if(~rst_n)
         feature_buffer_cnt <= 0;
     else if ( MM_buffer_inFeature_valid & MM_buffer_inFeature_ready)
@@ -173,7 +173,7 @@ always @(posedge clk or negedge rst_n) begin
         feature_buffer_cnt <= feature_buffer_cnt;
 end
 
-always @(posedge clk or negedge rst_n) begin
+always @(posedge clk) begin
     if(~rst_n)
         w_end <= 1;
     else if(start)
@@ -184,7 +184,7 @@ always @(posedge clk or negedge rst_n) begin
         w_end <= w_end;
 end
 
-always @(posedge clk or negedge rst_n) begin
+always @(posedge clk) begin
     if(~rst_n)
         weight_buffer_in_addr <= 0;
     else if ( MM_buffer_inWeight_last)
@@ -200,7 +200,7 @@ always @(posedge clk ) begin
         weight_buffer[weight_buffer_in_addr] <= MM_buffer_inWeight_data;
 end
 
-always @(posedge clk or negedge rst_n) begin
+always @(posedge clk) begin
     if(~rst_n)
         feature_buffer_in_addr <= 0;
     else if ( MM_buffer_inFeature_last)
@@ -216,7 +216,7 @@ always @(posedge clk ) begin
         feature_buffer[feature_buffer_in_addr] <= MM_buffer_inFeature_data;
 end
 
-always @(posedge clk or negedge rst_n) begin
+always @(posedge clk) begin
     if(~rst_n)
         state <= `IDLE;
     else if (state == `IDLE) begin //only start can wake up state
@@ -235,7 +235,7 @@ always @(posedge clk or negedge rst_n) begin
     end
 end
 
-always @(posedge clk or negedge rst_n) begin
+always @(posedge clk) begin
     if (~rst_n)
         weight_flag_up <= 0;
     else if(weight_flag_up)
@@ -244,7 +244,7 @@ always @(posedge clk or negedge rst_n) begin
         weight_flag_up <= 1;
 end
 
-always @(posedge clk or negedge rst_n) begin
+always @(posedge clk) begin
     if(~rst_n)
         input_weight_valid <= 0;
     else if(wdata_flag_up)
@@ -260,7 +260,7 @@ always @(posedge clk ) begin
 end
 
 
-always @(posedge clk or negedge rst_n) begin
+always @(posedge clk) begin
     if(~rst_n)
         weight_cnt <= 0;
     else if (weight_cnt == array_m)
@@ -271,7 +271,7 @@ always @(posedge clk or negedge rst_n) begin
         weight_cnt <= weight_cnt;
 end
 
-always @(posedge clk or negedge rst_n) begin
+always @(posedge clk) begin
     if(~rst_n)
         input_feature_valid <= 0;
     else if (set_w_delay1)
@@ -286,7 +286,7 @@ always @(posedge clk ) begin
     input_feature_data <= feature_buffer[input_feature_addr];
 end
 
-always @(posedge clk or negedge rst_n) begin
+always @(posedge clk) begin
     if(~rst_n)
         input_feature_addr <= 0;
     else if (input_feature_addr == FL_reg - 1)
@@ -299,7 +299,7 @@ always @(posedge clk or negedge rst_n) begin
         input_feature_addr <= input_feature_addr;
 end
 
-always @(posedge clk or negedge rst_n) begin
+always @(posedge clk) begin
     if(~rst_n)
         feature_cnt <= 0;
     else if(feature_cnt == FL_reg)
@@ -310,7 +310,7 @@ always @(posedge clk or negedge rst_n) begin
         feature_cnt <= feature_cnt;
 end
 
-always @(posedge clk or negedge rst_n) begin
+always @(posedge clk) begin
     if(~rst_n)
         input_weight_col <= 0;
     else if(input_weight_col == num_blobk_W)
@@ -321,7 +321,7 @@ always @(posedge clk or negedge rst_n) begin
         input_weight_col <= input_weight_col;
 end
 
-always @(posedge clk or negedge rst_n) begin
+always @(posedge clk) begin
     if(~rst_n)
         input_weight_row <= 0;
     else if (input_weight_row == array_m - 1)

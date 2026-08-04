@@ -43,7 +43,7 @@ assign out_valid = draining;
 assign out_data  = data_shift[DATA_WIDTH-1:0];
 assign out_last  = draining & beat_last & (lane_idx == LANES-1);
 
-always @(posedge clk or negedge rst_n) begin
+always @(posedge clk) begin
     if (~rst_n) begin
         draining   <= 1'b0;
         lane_idx   <= {CNT_WIDTH{1'b0}};

@@ -81,7 +81,7 @@ assign MM_out_last = MM_out_last_reg_array[2*array_m];
 
 
 
-always @(posedge clk or negedge rst_n) begin
+always @(posedge clk) begin
     if(~rst_n)
         weight_buffer_cnt <= 0;
     else if(weight_buffer_cnt == array_m)
@@ -92,7 +92,7 @@ always @(posedge clk or negedge rst_n) begin
         weight_buffer_cnt<=weight_buffer_cnt;
 end
 
-always @(posedge clk or negedge rst_n) begin
+always @(posedge clk) begin
     if(~rst_n)
         wdata_flag<=0;
     else 
@@ -107,14 +107,14 @@ always @(posedge clk)begin
     data_out_reg1 <= data_out;
 end
 
-always @(posedge clk or negedge rst_n) begin
+always @(posedge clk) begin
     if(~rst_n)
         feature_in_reg1 <= 0;
     else
         feature_in_reg1 <= feature_in;
 end
 
-//always @(posedge clk or negedge rst_n) begin
+//always @(posedge clk) begin
 //    if(~rst_n)
 //        weight_ready <= 0;
 //    else if (wdata_flag & MM_in_data_valid)
@@ -125,7 +125,7 @@ end
 //        weight_ready <= weight_ready;
 //end
 
-always @(posedge clk or negedge rst_n) begin
+always @(posedge clk) begin
     if(~rst_n)
         weight_buffer[0]<=0;
     else if(wdata_flag & MM_in_data_valid)
@@ -135,7 +135,7 @@ always @(posedge clk or negedge rst_n) begin
 end
 
 integer j;
-always @(posedge clk or negedge rst_n) begin
+always @(posedge clk) begin
     for(j=1;j<array_m;j=j+1)begin
         if(~rst_n)
             weight_buffer[j]<=0;
@@ -146,7 +146,7 @@ always @(posedge clk or negedge rst_n) begin
     end
 end
 
-always @(posedge clk or negedge rst_n) begin
+always @(posedge clk) begin
     if(~rst_n)
         MM_out_data_valid_reg_array[0]<=0;
     else
@@ -154,7 +154,7 @@ always @(posedge clk or negedge rst_n) begin
 end
 generate
     for(i=1;i<=array_m*2;i=i+1)begin
-        always @(posedge clk or negedge rst_n) begin
+        always @(posedge clk) begin
             if(~rst_n)
                 MM_out_data_valid_reg_array[i]<=0;
             else
@@ -163,7 +163,7 @@ generate
     end
 endgenerate
 
-always @(posedge clk or negedge rst_n) begin
+always @(posedge clk) begin
     if(~rst_n)
         MM_out_last_reg_array[0]<=0;
     else
@@ -172,7 +172,7 @@ end
 
 generate
     for(i=1;i<=array_m*2;i=i+1) begin
-        always @(posedge clk or negedge rst_n) begin
+        always @(posedge clk) begin
             if(~rst_n)
                 MM_out_last_reg_array[i]<=0;
             else
