@@ -13,6 +13,14 @@ parameter integer data_width = 8;
 parameter integer array_m = 16;
 parameter integer array_n = 16;
 parameter integer log2_array_m = 4;
+// DSP-inference-gap fix: force this many of the array_m rows' PEs onto
+// DSP48E1 hard macros; the remaining rows stay LUT/CARRY4-mapped. Default
+// (12 of 16 rows -> 192 PEs) sized so total DSP usage (192 + the ~13
+// already consumed by the Softmax/GELU scalar pipeline) stays safely
+// under the xc7z020's 220 DSP48E1 budget (192+13=205, 15 spare) -- a full
+// 1:1 mapping of all 256 PEs would need 256+13=269, which overflows the
+// device. See project_story.md for the DSP-inference-gap investigation.
+parameter integer NUM_DSP_ROWS = 12;
 
 
 input wire clk;
@@ -70,12 +78,14 @@ endgenerate
 
 generate
     for (i=0; i<array_m; i=i+1) begin:array
+        localparam integer USE_DSP_THIS_ROW = (i < NUM_DSP_ROWS) ? 1 : 0;
         if (i==0) begin
             PE_line #(
                 .data_width (data_width),
                 .array_m(array_m),
                 .array_n(array_n),
-                .log2_array_m(log2_array_m)
+                .log2_array_m(log2_array_m),
+                .USE_DSP(USE_DSP_THIS_ROW)
             )
             PE_line_u
             (
@@ -111,7 +121,8 @@ generate
                 .data_width (data_width),
                 .array_m(array_m),
                 .array_n(array_n),
-                .log2_array_m(log2_array_m)
+                .log2_array_m(log2_array_m),
+                .USE_DSP(USE_DSP_THIS_ROW)
             )
             PE_line_u
             (

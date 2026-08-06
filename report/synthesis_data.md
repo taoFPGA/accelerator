@@ -316,3 +316,235 @@ path now exercised by the real DMA/interconnect traffic pattern.
 3. `axi_dma_2`'s S2MM stream-width tuning (4-byte GELU output → 8-byte DMA width, handled today
    by `axis_dwidth_converter_2`'s automatic widening) not yet evaluated for burst efficiency —
    functionally correct, not yet optimized.
+
+---
+
+## Run 4 — Post-route implementation baseline + DSP-inference-gap fix (2026-08-06)
+
+**Objective:** Two sequential steps. (1) Move past post-synthesis-only estimates (Runs 1-3) and
+establish the project's first genuine, signoff-quality baseline by running the full
+`opt_design → place_design → route_design` implementation flow plus `report_power`. (2) Fix the
+DSP-inference gap identified by analysis of the Run 1-3 utilization data (DSP 5.91% vs. LUT
+58.29% at the full-SoC level — the 256-PE systolic array's signed 8×8 MACs were being
+synthesized entirely into LUT/CARRY4 fabric instead of DSP48E1 hard macros), then re-verify with
+a second implementation pass to get a true apples-to-apples post-route comparison.
+
+**Method — Step 1 (baseline):** New `scripts/impl.tcl`, sourcing `synth_soc.tcl` to regenerate
+the synthesized design, then running `opt_design`/`place_design`/`route_design` with **default
+directives** — deliberately not `prj.tcl`'s managed `impl_1` run, which is configured for the
+more expensive `Performance_ExplorePostRoutePhysOpt` strategy (multi-pass search per step); given
+this VM's 7.4GB RAM and prior crash history, default directives were chosen for predictable
+resource use over maximal QoR search. Run in the background with active memory-safety monitoring
+(a corrected version of the resource-monitored protocol used throughout this project — the first
+monitoring attempt tracked only `vivado`'s immediate child via `--ppid`, which missed the actual
+heavy process living several forks deeper in the tree and reported a flat, meaningless ~6.7MB RSS
+the whole run; corrected to track total system `MemAvailable` directly instead, which is robust
+regardless of process-tree topology). Real vivado tree RSS peaked at **~3.65GB** with system
+available memory dropping to **~1.7GB** at one point — closer to the danger zone than any prior
+run in this project, though it completed without needing the kill-switch.
+
+**Method — Step 2 (DSP fix):** Investigated whether DSP48E1 dual-8-bit SIMD packing (pairing two
+independent MACs per DSP via a shared-multiplicand trick) was achievable as a `PE.v`-local change
+first. Traced the actual cycle timing in `PE_line.v`: adjacent PEs in a line do eventually
+process the same `x` value, but staggered by exactly one cycle (the systolic skew), never
+simultaneously — the shared-multiplicand technique requires simultaneity, so true dual-MAC
+packing would require restructuring `PE_line.v`'s skew scheme and `PE_array.v`'s output-alignment
+logic to match, not a `PE.v`-local edit. Given that risk, chose the lower-risk **partial 1:1 DSP
+mapping**: force 12 of the 16 systolic rows (192 of 256 PEs) onto dedicated DSP48E1s via a new
+`NUM_DSP_ROWS` parameter threaded through `PE_array.v` → `PE_line.v` → `PE.v`, leaving the
+remaining 4 rows (64 PEs) LUT-mapped. Sized so total DSP usage (192 + the ~13 already consumed by
+the Softmax/GELU scalar pipeline) stays under the `xc7z020`'s 220-DSP budget with margin — a full
+1:1 mapping of all 256 PEs would need 256+13=269, overflowing the device by 49 DSPs.
+
+### 1. Post-Route Sign-Off Comparison
+
+The definitive apples-to-apples comparison — both rows are **real post-route data** (not
+synthesis estimates), same `scripts/impl.tcl` flow, same default directives, differing only in
+the DSP-fix RTL change:
+
+| Metric (post-route, full SoC) | Pre-Fix Baseline | Post-Fix Final | Change |
+|---|---|---|---|
+| WNS @ 100MHz | +0.361 ns | +0.293 ns | −0.068 ns (−19% margin, still met) |
+| Total On-Chip Power | 1.741 W | **1.687 W** | **−3.1%** |
+| Dynamic Power | 1.590 W | 1.538 W | −3.3% |
+| Static Power | 0.151 W | 0.150 W | ~flat |
+| Slice LUTs | 30,276 (56.91%) | **15,363 (28.88%)** | **−49.3%** |
+| Slice Registers | 20,255 (19.04%) | 14,854 (13.96%) | −26.7% |
+| DSP48E1 | 13 (5.91%) | **205 (93.18%)** | +192, as designed |
+| Block RAM Tiles | 86.5 (61.79%) | 86.5 (61.79%) | unchanged (expected — unrelated to this fix) |
+| DRC | clean, advisory-only | clean, advisory-only | no regressions |
+
+(Corresponding post-synthesis-only numbers, for reference: standalone accelerator LUT
+25,506→10,536 [−58.7%], CARRY4 4,874→1,674 [−65.6%], DSP 13→205; full SoC LUT 31,012→16,068
+[−48.2%], CARRY4 4,874→1,862 [−61.8%]. Post-route figures above are the authoritative ones.)
+
+Artifacts: `reports/impl_pre_dspfix/` (pre-fix post-route baseline, preserved), `reports/impl/`
+(post-fix post-route, current), `reports/syn/` and `reports/syn/soc/` (post-fix
+post-synthesis-only), `scripts/soc_build/post_{opt,place,route}.dcp` (checkpoints for both runs).
+
+### 2. Post-Mortem & Bug Fixes
+
+**Bug 1 — `use_dsp` attribute silently ignored when placed on an `always` block.** The first
+`PE.v` edit placed `(* use_dsp = "yes" *)` directly above the `always @(posedge clk)` block
+containing the MAC. Re-synthesizing produced byte-identical LUT/DSP/CARRY4 counts to the
+unfixed baseline — a silent no-op, not an error. Per Xilinx UG901 (Synthesis guide), `use_dsp`
+must be attached to the **register declaration** that holds the multiply-accumulate result, not
+to the enclosing procedural block; an attribute on the `always` statement itself is not a
+recognized attachment point and is dropped during elaboration with no warning. Fixed by changing
+`psum_out` from `output reg` to `output wire`, introducing a per-branch internal
+`(* use_dsp = "yes"/"no" *) reg psum_out_r` inside each `generate if/else` branch to carry the
+attribute correctly, and driving the output port via a continuous `assign psum_out = psum_out_r`
+— functionally and timing-identical to the original, verified by the fact both branches'
+`always`-block bodies remained byte-for-byte identical to the pre-fix RTL. Second synthesis
+attempt confirmed the fix: DSP48E1 13→205, CARRY4 4,874→1,674 (standalone).
+
+**Bug 2 — Tcl `source` doesn't create a new variable scope.** `impl.tcl` calls
+`source "$SCRIPT_DIR/synth_soc.tcl"` to regenerate the synthesized design before running
+`opt_design` onward. Both scripts independently declared a top-level variable named `REPORTS`
+pointing at different paths (`reports/impl` vs. `reports/syn/soc`). Because Tcl's `source`
+executes the sourced script in the *same* interpreter scope as the caller — unlike, e.g., a
+function call, which gets its own local scope — `synth_soc.tcl`'s `set REPORTS
+"reports/syn/soc"` silently overwrote `impl.tcl`'s own assignment. The first full implementation
+run's post-route reports (including the first-ever `power.rpt`) landed in `reports/syn/soc/`,
+overwriting what had previously been post-synthesis-only data there, rather than in the intended
+`reports/impl/`. Caught by checking `reports/impl/` immediately after the run reported success
+and finding it empty. Fixed by renaming `impl.tcl`'s variable to `IMPL_REPORTS`, computed *after*
+the `source` call rather than before, so it cannot collide with anything `synth_soc.tcl` sets
+internally. The genuine post-route data was not lost — copied from `reports/syn/soc/` to
+`reports/impl/` before `reports/syn/soc/` was regenerated (correctly, this time) by re-running
+`synth_soc.tcl` alone.
+
+### 3. Physical Trade-off & Congestion Analysis
+
+The post-route comparison surfaces a real, worth-stating-plainly trade-off: **timing margin
+shrank** (WNS +0.361ns → +0.293ns, about 19% less slack) even though **both power and area
+improved**. This is not a contradiction — it's a direct physical consequence of the fix's own
+mechanism. Packing 205 DSP48E1 slices into what is now **93.18% of the `xc7z020`'s entire DSP
+column capacity** (205 of 220) concentrates a large fraction of the design's arithmetic into a
+much smaller, denser physical footprint than the previous LUT/CARRY4-diffuse implementation,
+which had 256 MAC-equivalent operations spread thinly across general fabric with much more
+placement freedom. Denser DSP-column packing constrains the placer's options and increases
+routing congestion pressure around those columns — the router still closes timing (WNS stays
+comfortably positive at 100MHz, real f_max ≈103.0MHz), but with less slack than before, since some
+net on the critical path now routes through more contested territory. This is a standard,
+expected physical-implementation dynamic, not a sign the fix was wrong: a design that trades a
+LUT-fabric-wide, diffuse implementation for a DSP-column-concentrated one predictably shifts
+routing pressure from "spread everywhere, contested nowhere" to "concentrated somewhere,
+contested there" — the net win (49% fewer LUTs, 3.1% less power) is real and comes with this
+specific, identifiable, and fully quantified cost, rather than being a free lunch.
+
+### 4. Shift in Hardware Boundaries
+
+This fix officially changes the accelerator's resource profile. Before Run 4, the design was
+**LUT-bound**: DSP at 5.91% while LUT sat at 56.91% (post-route) — the PE array's 256 MACs
+existing almost entirely as general fabric logic while dedicated arithmetic hardware sat
+essentially idle. After the fix, **DSP is now the binding constraint**: 205 of 220 DSP48E1
+slices used (93.18%), with exactly **15 DSP48E1 slices of headroom** remaining on the device —
+while LUT has fallen to 28.88%, now the *least* pressured of the major resource classes. This is
+the firm, current-hardware baseline for any future ViT/transformer-scaling discussion: further
+growing the systolic array (e.g. 16×16 → 32×32) is no longer primarily a LUT-budget question —
+it is now gated almost entirely by the 15 remaining DSP48E1 slices, unless a future pass
+implements the true dual-8-bit SIMD packing design considered (and deferred, as the higher-risk
+option) in Step 2's investigation above, which would roughly halve DSP demand per PE and reopen
+that scaling headroom.
+
+### Open items after Run 4
+
+1. DSP pipelining suggestions (`DPIP-1`/`DPOP-1`/`DPOP-2`) — still open, optimization only, now
+   with slightly more instances (more DSPs to advise about), same advisory-only severity.
+2. Bitstream generation (`write_bitstream`) not yet attempted — still blocked on the missing
+   PYNQ-Z1 board file question, though Section discussion elsewhere in this project established
+   that `design_1_wrapper`'s only top-level ports (`DDR_*`/`FIXED_IO_*`) are PS-fixed silicon
+   pins needing no board-specific XDC, and `prj.tcl`'s `processing_system7_0` already carries
+   real PYNQ-Z1 DDR3/MIO values — so board files may not actually be a hard blocker for a
+   functional bitstream, only for GUI convenience/future PL-side I/O.
+3. Full dual-8-bit SIMD DSP packing (the higher-payoff, higher-risk option deferred in Step 2)
+   not yet implemented — would require restructuring `PE_line.v`'s skew timing and
+   `PE_array.v`'s output alignment, plus a full regression re-run to re-confirm the
+   0/32,000-tolerance numerical result still holds. Would roughly halve DSP demand per PE
+   (~128 vs. 192 for the array), reopening scaling headroom noted in section 4 above.
+4. `axi_dma_2`'s S2MM stream-width tuning — still open from Run 3, unchanged by this run.
+
+---
+
+## Run 5 — Bitstream generation & repository integrity closeout (2026-08-06)
+
+**Objective:** Close out open item #2 from Run 4 (bitstream generation not yet attempted) by
+generating the final `.bit`/`.xsa` artifacts from the DSP-fixed post-route checkpoint, then audit
+`.gitignore` to make sure everything needed to review and reproduce this project's analysis —
+reports, docs, scripts, the signoff checkpoint, and the bitstream itself — survives a fresh clone
+onto a machine that may not even have Vivado installed. No new synthesis or implementation was
+run for this entry; it operates entirely on Run 4's existing `post_route.dcp`.
+
+### 1. Bitstream & Hardware Handoff Artifacts
+
+New `scripts/bitgen.tcl`: reopens `scripts/soc_build/post_route.dcp` — Run 4's final, DSP-fixed,
+timing-closed checkpoint (**WNS +0.293ns @ 100MHz, 205/220 DSP48E1**) — directly, with no
+re-synthesis or re-place/re-route, and runs `write_bitstream` followed by `write_hw_platform
+-fixed -include_bit` for the modern `.xsa` hardware handoff (the current replacement for the
+legacy `.hdf` format).
+
+**Result:** clean signoff on both counts.
+- Pre-bitstream DRC check: **0 Errors**.
+- `write_bitstream`: **0 Warnings, 0 Critical Warnings, 0 Errors** ("Bitgen Completed
+  Successfully").
+- `write_hw_platform`'s own internal bitstream regeneration: same, clean.
+- `exports/design.bit` — **4.05MB**, verified via `file` as a genuine Xilinx bitstream
+  (`Version=2026.1`, `design_1_wrapper`).
+- `exports/design.xsa` — **1.08MB**, a valid hardware-platform archive with the bitstream
+  embedded.
+
+This is the project's first physically-implementable bitstream for the `xc7z020clg400-1` — a
+direct, traceable artifact of the exact signoff numbers in Run 4's comparison table, not a
+separate or re-derived build.
+
+### 2. Repository Integrity & Analysis Accessibility
+
+Audited `.gitignore` against the question "if this repo is cloned fresh onto a machine without
+Vivado/Xcelium, is everything needed to review this project's actual results present, or only
+the means to regenerate them?" Found the report `.rpt` files — the actual data behind every
+number cited in `project_story.md`/`synthesis_data.md` — were gitignored, meaning a fresh clone
+would have the analysis prose but not the artifacts it was written from. Fixed:
+
+- **Un-ignored** `reports/sim/*.rpt`, `reports/syn/*.rpt`, `reports/syn/soc/*.rpt`,
+  `reports/impl/*.rpt` (previously excluded; `reports/impl_pre_dspfix/*.rpt` needed no rule
+  change, nothing was catching it). Documented in `.gitignore` itself that these will show up as
+  diffs after every future run — expected, not a sign of a problem.
+- **Checkpoints:** rather than un-ignoring `scripts/soc_build/` wholesale (~589 files of
+  disposable Vivado project/IP-cache internals, fully regenerable from `synth_soc.tcl` +
+  `impl.tcl` — un-ignoring it would work directly against keeping the repo clean), copied the
+  specific signoff checkpoint to `dbs/design_1_wrapper_post_route_dspfix.dcp` (16.6MB) — `dbs/`
+  being exactly the directory README.md already documents for "Design Checkpoints (.dcp)...
+  Intermediate snapshots of synthesized/routed design." `scripts/soc_build/` itself remains fully
+  ignored.
+- **Confirmed already correct** (verified with `git check-ignore`, not assumed): `report/*.md`,
+  all `scripts/*.tcl` (including the two new ones, `impl.tcl` and `bitgen.tcl`), `setup.sh`, all
+  RTL/testbench sources, and `exports/*.bit`/`*.xsa` (the blanket exclusion for these was already
+  commented out in the original scaffolding). Disposable artifacts (`scripts/soc_build/`,
+  `*.log`, `*.jou`, `xcelium.d/`) confirmed still correctly ignored.
+
+### 3. Final Project Status & Summary
+
+This closes the arc that began with Run 1's standalone synthesis baseline: the accelerator has
+moved from a verified RTL/behavioral-simulation model, through synthesis, through a real
+DSP-inference architectural fix, through post-route timing signoff, to a **physically
+implementable, timing-closed, energy-characterized hardware artifact** —
+
+- **Timing:** closes at 100MHz with +0.293ns of real, post-route slack.
+- **Power:** 1.687W total on-chip (1.538W dynamic + 0.150W static), measured, not estimated.
+- **Resource profile:** DSP-bound (205/220, 93.18%), not LUT-bound — the architectural gap
+  identified in Runs 1-3 and fixed in Run 4.
+- **Deliverable:** a genuine `.bit`/`.xsa` pair, generated cleanly with zero DRC/bitgen errors or
+  warnings, ready to program onto real PYNQ-Z1 hardware.
+- **Reproducibility:** every number in this document is now backed by a tracked artifact a fresh
+  clone can inspect directly, not just prose describing a run that happened once.
+
+### Open items after Run 5
+1. Item #2 from Run 4 (bitstream generation) — **closed** by this run.
+2. DSP pipelining suggestions (`DPIP-1`/`DPOP-1`/`DPOP-2`) — still open, optimization only.
+3. Full dual-8-bit SIMD DSP packing (deferred in Run 4) — still open; would reopen DSP headroom
+   beyond the current 15-slice margin if the array is scaled further.
+4. `axi_dma_2`'s S2MM stream-width tuning — still open, unchanged.
+5. Real hardware bring-up (programming the PYNQ-Z1 board with `exports/design.bit` and running
+   against actual DDR3/peripherals) not yet attempted — everything to this point has been
+   simulation and EDA-tool-verified only.

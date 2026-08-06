@@ -1,0 +1,224 @@
+TOOL:	xrun(64)	23.09-s013: Started on Aug 04, 2026 at 12:12:48 UTC
+SOFTINCLUDE $XPEDION/aa/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,25): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,27): cds.lib Invalid environment variable ''.
+xrun(64): 23.09-s013: (c) Copyright 1995-2024 Cadence Design Systems, Inc.
+SOFTINCLUDE $XPEDION/aa/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,25): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,27): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $XPEDION/aa/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,25): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,27): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $XPEDION/aa/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,25): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,27): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $XPEDION/aa/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,25): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,27): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $XPEDION/aa/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,25): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,27): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $XPEDION/aa/cds.lib
+|
+xmvlog: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,25): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
+|
+xmvlog: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,27): cds.lib Invalid environment variable ''.
+file: /project/tsmc65/users/rasksha/ws/taoFPGA/sourcecode/sim/../core/MM_ultra.v
+	module worklib.MM_ultra:v
+		errors: 0, warnings: 0
+file: /project/tsmc65/users/rasksha/ws/taoFPGA/sourcecode/sim/../core/MM_in_buffer.v
+	module worklib.MM_in_buffer:v
+		errors: 0, warnings: 0
+file: /project/tsmc65/users/rasksha/ws/taoFPGA/sourcecode/sim/../core/MM_buffer.v
+	module worklib.MM_buffer:v
+		errors: 0, warnings: 0
+file: /project/tsmc65/users/rasksha/ws/taoFPGA/sourcecode/sim/../core/MM_out_buffer.v
+	module worklib.MM_out_buffer:v
+		errors: 0, warnings: 0
+file: /project/tsmc65/users/rasksha/ws/taoFPGA/sourcecode/sim/../core/MM.v
+	module worklib.MM:v
+		errors: 0, warnings: 0
+file: /project/tsmc65/users/rasksha/ws/taoFPGA/sourcecode/sim/../core/PE_array.v
+	module worklib.PE_array:v
+		errors: 0, warnings: 0
+file: /project/tsmc65/users/rasksha/ws/taoFPGA/sourcecode/sim/../core/PE_line.v
+	module worklib.PE_line:v
+		errors: 0, warnings: 0
+file: /project/tsmc65/users/rasksha/ws/taoFPGA/sourcecode/sim/../core/PE.v
+	module worklib.PE:v
+		errors: 0, warnings: 0
+file: /project/tsmc65/users/rasksha/ws/taoFPGA/sourcecode/sim/../core/AdderS.v
+	module worklib.AdderS:v
+		errors: 0, warnings: 0
+file: /project/tsmc65/users/rasksha/ws/taoFPGA/sourcecode/sim/../core/right_shifter.v
+	module worklib.right_shifter:v
+		errors: 0, warnings: 0
+file: /project/tsmc65/users/rasksha/ws/taoFPGA/sourcecode/sim/../core/Softmax_control.v
+	module worklib.Softmax_control:v
+		errors: 0, warnings: 0
+file: /project/tsmc65/users/rasksha/ws/taoFPGA/sourcecode/sim/../core/Softmax.v
+	module worklib.Softmax:v
+		errors: 0, warnings: 0
+file: /project/tsmc65/users/rasksha/ws/taoFPGA/sourcecode/sim/../core/Exp_module.v
+	module worklib.Exp_module:v
+		errors: 0, warnings: 0
+file: /project/tsmc65/users/rasksha/ws/taoFPGA/sourcecode/sim/../core/Ln_module.v
+	module worklib.Ln_module:v
+		errors: 0, warnings: 0
+file: /project/tsmc65/users/rasksha/ws/taoFPGA/sourcecode/sim/../core/EightGelus.v
+	module worklib.EightGelus:v
+		errors: 0, warnings: 0
+file: /project/tsmc65/users/rasksha/ws/taoFPGA/sourcecode/sim/../core/gelu.v
+	module worklib.gelu:v
+		errors: 0, warnings: 0
+file: /project/tsmc65/users/rasksha/ws/taoFPGA/sourcecode/sim/../core/lin.v
+	module worklib.lin:v
+		errors: 0, warnings: 0
+file: /project/tsmc65/users/rasksha/ws/taoFPGA/sourcecode/sim/../tb/stall_monitor.sv
+	module worklib.stall_monitor:sv
+		errors: 0, warnings: 0
+file: /project/tsmc65/users/rasksha/ws/taoFPGA/sourcecode/sim/../top/axis_downsizer.v
+	module worklib.axis_downsizer:v
+		errors: 0, warnings: 0
+file: /project/tsmc65/users/rasksha/ws/taoFPGA/sourcecode/sim/../top/axis_upsizer_fifo.v
+	module worklib.axis_upsizer_fifo:v
+		errors: 0, warnings: 0
+file: /project/tsmc65/users/rasksha/ws/taoFPGA/sourcecode/sim/../top/transformer_block_top.v
+	module worklib.transformer_block_top:v
+		errors: 0, warnings: 0
+file: /project/tsmc65/users/rasksha/ws/taoFPGA/sourcecode/sim/../tb/transformer_block_tb.sv
+	module worklib.transformer_block_tb:sv
+		errors: 0, warnings: 0
+	Total errors/warnings found outside modules and primitives:
+		errors: 0, warnings: 2
+SOFTINCLUDE $XPEDION/aa/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,25): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,27): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $XPEDION/aa/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,25): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,27): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $XPEDION/aa/cds.lib
+|
+xmelab: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,25): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
+|
+xmelab: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,27): cds.lib Invalid environment variable ''.
+	Elaborating the design hierarchy:
+		Caching library 'worklib' ....... Done
+	Top level design units:
+		transformer_block_tb
+	Building instance overlay tables: .................... Done
+	Generating native compiled code:
+SOFTINCLUDE $XPEDION/aa/cds.lib
+|
+xmvlog_cg: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,25): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
+|
+xmvlog_cg: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,27): cds.lib Invalid environment variable ''.
+		worklib.lin:v <0x690e6850>
+			streams:  17, words:  3515
+		worklib.gelu:v <0x13122413>
+			streams:  21, words:  7624
+		worklib.axis_upsizer_fifo:v <0x0399d13f>
+			streams:  17, words:  9069
+		worklib.Ln_module:v <0x3ea63d63>
+			streams:   8, words:  3743
+		worklib.Exp_module:v <0x7481f620>
+			streams:  14, words:  3020
+		worklib.Softmax:v <0x52d7841c>
+			streams:  35, words: 15717
+		worklib.Softmax_control:v <0x31b3de79>
+			streams:  35, words: 10434
+		worklib.axis_downsizer:v <0x0ae8bde1>
+			streams:   8, words:  2955
+		worklib.right_shifter:v <0x24f1f2df>
+			streams:   5, words:  2219
+		worklib.PE:v <0x79a60da1>
+			streams:   5, words:  1564
+		worklib.MM_buffer:v <0x339729b1>
+			streams:  61, words: 23842
+		worklib.MM_in_buffer:v <0x22761fc8>
+			streams:  42, words: 18289
+		worklib.MM_ultra:v <0x562882be>
+			streams:  20, words:  5965
+		worklib.transformer_block_top:v <0x3e241c56>
+			streams:   5, words:  1064
+		worklib.transformer_block_tb:sv <0x1af55384>
+			streams:  50, words: 38577
+		worklib.PE_array:v <0x6a96eb00>
+			streams: 209, words: 111952
+		worklib.MM:v <0x1f4acfb0>
+			streams:  31, words: 25007
+		worklib.AdderS:v <0x0df08741>
+			streams:   3, words:  2232
+		worklib.MM_out_buffer:v <0x4f12eb7d>
+			streams:  49, words: 23388
+		worklib.EightGelus:v <0x38f4c187>
+			streams:  25, words: 11353
+		worklib.PE_line:v <0x1a99cd40>
+			streams:   4, words:  1112
+		worklib.stall_monitor:sv <0x539f2d34>
+			streams:  10, words:  7988
+		worklib.stall_monitor:sv <0x4bda4842>
+			streams:  10, words:  7988
+	Building instance specific data structures.
+	Loading native compiled code:     .................... Done
+	Design hierarchy summary:
+		                  Instances  Unique
+		Modules:                316      22
+		Registers:             1226     291
+		Scalar wires:           138       -
+		Expanded wires:        8304     325
+		Vectored wires:        1319       -
+		Always blocks:          802     151
+		Initial blocks:        2422      21
+		Cont. assignments:     1091     127
+		Pseudo assignments:      65       -
+		Process Clocks:         715       4
+		Simulation timescale:   1ps
+	Writing initial simulation snapshot: worklib.transformer_block_tb:sv
+SOFTINCLUDE $XPEDION/aa/cds.lib
+|
+xmsim: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,25): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
+|
+xmsim: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,27): cds.lib Invalid environment variable ''.
+Loading snapshot worklib.transformer_block_tb:sv .................... Done
+xcelium> source /tools/cadence/XCELIUM/23.09.013/tools/xcelium/files/xmsimrc
+xcelium> run
+---------------------------------------------------------
+transformer_block_tb: 0 / 32000 elements outside tolerance (+/-0.0469)
+End-to-end pipeline latency (mm_in_F_valid -> final out_last): 18083 cycles (180830 ns)
+[stall_monitor:mm_in_F] total=116119 transfer=1200 valid_stall=0 ready_stall=98592 idle=16327 | stall=84.91% util=1.03%
+[stall_monitor:mm_in_W] total=116119 transfer=960 valid_stall=0 ready_stall=98592 idle=16567 | stall=84.91% util=0.83%
+[stall_monitor:pipe_out] total=116119 transfer=8000 valid_stall=0 ready_stall=108119 idle=0 | stall=93.11% util=6.89%
+---------------------------------------------------------
+Simulation complete via $finish(1) at time 1161245 NS + 0
+/project/tsmc65/users/rasksha/ws/taoFPGA/sourcecode/tb/transformer_block_tb.sv:455         $finish();
+xcelium> exit
+TOOL:	xrun(64)	23.09-s013: Exiting on Aug 04, 2026 at 12:12:51 UTC  (total: 00:00:03)
