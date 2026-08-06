@@ -637,6 +637,137 @@ changed how Section 19 got built, not just how it got debugged afterward.
 
 ---
 
+## 20. First post-route sign-off baseline, and a DSP-inference architectural gap fixed
+
+**Context:** With full-SoC synthesis established (§19), asked to take two sequential steps:
+establish the project's first genuine post-route (place-and-route + power) baseline, then fix an
+architectural anomaly flagged by the utilization data across §17-19 — DSP48E1 usage sitting at
+just 5.91% while LUT usage climbed toward 58.29% at the full-SoC level, an inversion of what a
+matmul-dominated systolic-array accelerator should look like.
+
+**Step 1 — establishing the baseline.** Wrote `scripts/impl.tcl`: regenerate the synthesized
+design via `synth_soc.tcl`, then run `opt_design → place_design → route_design` with default
+directives (deliberately not `prj.tcl`'s pre-configured `impl_1` managed run, which uses a more
+expensive multi-pass "Explore" strategy not worth the resource risk on this 7.4GB VM). Launched
+under the same resource-monitored, kill-switch-protected protocol established back in §6-9 —
+except the first monitoring attempt itself had a bug: it tracked only `vivado`'s immediate child
+process via `--ppid`, completely missing the actual heavy process living several forks deeper in
+the tree, and reported a flat, meaningless ~6.7MB RSS for the whole run while real memory use
+climbed to 5.1GB used / 1.7GB available system-wide. Caught this by cross-checking `ps` directly
+rather than trusting the monitor's own output, and immediately launched a corrected guard tracking
+total system `MemAvailable` instead — robust regardless of process-tree shape. The run completed
+successfully without needing the kill-switch, peaking at 1.7GB available (the closest this
+project has come to its crash threshold since the original PE-array elaboration blowup in §7-9),
+producing the first real signoff numbers this project has ever had: **WNS +0.361ns** at 100MHz
+(vs. the post-synthesis-only estimate of +0.507ns — the expected direction, since real routing
+delay is always worse than the synthesis estimate) and **Total On-Chip Power 1.741W** (1.590W
+dynamic + 0.151W static).
+
+**A path-collision bug surfaced immediately after.** `impl.tcl` sources `synth_soc.tcl` to
+regenerate the design before implementation; both scripts independently declare a top-level `set
+REPORTS ...` pointing at different paths. Tcl's `source` runs in the *same* variable scope as the
+caller (not a fresh scope the way a function call gets), so `synth_soc.tcl`'s own assignment
+silently overwrote `impl.tcl`'s — the genuine post-route reports, including the project's
+first-ever `power.rpt`, landed in `reports/syn/soc/` instead of `reports/impl/`, overwriting what
+had been post-synthesis-only data there. Caught by checking the target directory immediately
+after the run reported success rather than assuming a clean exit meant a clean result — found it
+empty, traced the cause, recovered the real data by copying it out before it could be lost, and
+fixed the script by giving the variable a collision-proof name computed after the `source` call.
+
+**Step 2 — the DSP-inference fix.** Before touching `PE.v`, checked whether the highest-payoff
+fix (DSP48E1 dual-8-bit SIMD packing — two independent MACs sharing one DSP48E1 via a
+shared-multiplicand trick) was actually achievable as a local edit. It isn't, for this array:
+tracing `PE_line.v`'s actual cycle timing shows adjacent PEs do eventually process the same `x`
+value, but staggered by exactly one cycle — the deliberate systolic skew — never simultaneously,
+which is what the shared-multiplicand technique requires. True dual-MAC packing would mean
+restructuring `PE_line.v`'s skew scheme and `PE_array.v`'s output-alignment logic to match, a
+real microarchitecture change carrying real re-verification cost, not a `PE.v`-local edit.
+Flagged this explicitly and let the lower-risk **partial 1:1 DSP mapping** be the chosen path:
+force 12 of the array's 16 systolic rows (192 of 256 PEs) onto dedicated DSP48E1s via a new
+`NUM_DSP_ROWS` parameter threaded `PE_array.v` → `PE_line.v` → `PE.v`, leaving 4 rows (64 PEs)
+LUT-mapped, sized to fit the `xc7z020`'s 220-DSP budget alongside the ~13 already used by the
+Softmax/GELU scalar pipeline.
+
+**The fix's first attempt was a silent no-op.** Placing `(* use_dsp = "yes" *)` directly above
+the `always @(posedge clk)` block containing the MAC produced byte-identical LUT/DSP/CARRY4
+counts on re-synthesis — no error, just no effect. Per Xilinx UG901, `use_dsp` has to attach to
+the register **declaration** holding the multiply result, not the enclosing procedural block; an
+attribute on the `always` statement itself isn't a recognized attachment point and is silently
+dropped during elaboration. Fixed by changing `psum_out` from `output reg` to `output wire`,
+introducing a per-branch internal register (`(* use_dsp = "yes"/"no" *) reg psum_out_r`) inside
+each `generate if/else` branch to carry the attribute correctly, and driving the port via a
+continuous `assign` — functionally and cycle-timing identical to the original RTL, confirmed by
+both branches' `always`-block bodies remaining byte-for-byte unchanged. Re-synthesized: DSP48E1
+jumped 13→205, CARRY4 dropped 4,874→1,674 (standalone accelerator).
+
+**Result:** Ran the same `impl.tcl` flow a second time against the DSP-fixed RTL for a genuine,
+apples-to-apples post-route comparison (with the pre-fix reports preserved first, so the
+comparison wouldn't be lost to the same overwrite risk just fixed). Post-route: **LUTs
+30,276→15,363 (−49.3%), CARRY4-driven fabric usage collapsed accordingly, Total On-Chip Power
+1.741W→1.687W (−3.1%)** — but **WNS also shrank, +0.361ns→+0.293ns (−19% margin)**, still
+comfortably meeting 100MHz. This is a real, physically-grounded trade-off, not a partial failure:
+packing 205 of the device's 220 DSP48E1 slices (93.18%) into a much denser physical footprint
+than the previous LUT-diffuse implementation increases local placement/routing congestion around
+those columns, which is exactly where the lost timing slack goes. The design's resource profile
+has now visibly inverted — from **LUT-bound** (58.29% LUT vs. 5.91% DSP before this section) to
+**DSP-bound** (93.18% DSP vs. 28.88% LUT after), with exactly 15 DSP48E1 slices of headroom left
+on the device.
+
+**Lesson:** A metric moving in the "wrong" direction after a fix isn't automatically a bug —
+WNS shrinking while power and area both improved is a predictable physical consequence of
+concentrating arithmetic into a denser footprint, and reporting it plainly (rather than only
+reporting the metrics that improved) is what makes the result trustworthy. Separately: two
+distinct tool/language gotchas surfaced in the same afternoon — an unrecognized Verilog attribute
+placement that fails silently instead of erroring, and a Tcl scripting-language scoping rule that
+silently overwrites state instead of erroring — and both were only caught by verifying the actual
+output against expectation rather than trusting a clean exit code, the same discipline this
+project has leaned on since §4's non-deterministic "should be fixed" claim.
+
+## 21. Bitstream generated, and the repository audited for reproducibility
+
+**Context:** With the DSP-fixed post-route baseline established (§20), asked to take the final
+two steps to close out this phase: generate the actual bitstream from that signed-off
+checkpoint, and audit `.gitignore` to make sure a fresh clone of this repository — potentially on
+a machine without Vivado or Xcelium installed at all — would have everything needed to review
+this project's real results, not just the scripts to regenerate them.
+
+**Bitstream generation.** New `scripts/bitgen.tcl` reopens `scripts/soc_build/post_route.dcp` —
+§20's final checkpoint, WNS +0.293ns at 100MHz, 205 of 220 DSP48E1 in use — directly, with no
+re-synthesis or re-place/re-route needed, and runs `write_bitstream` followed by
+`write_hw_platform -fixed -include_bit` for the `.xsa` hardware handoff. Both completed with the
+cleanest possible signoff: the pre-bitstream DRC check reported **0 Errors**, and
+`write_bitstream` itself reported **0 Warnings, 0 Critical Warnings, 0 Errors** — "Bitgen
+Completed Successfully." `exports/design.bit` (4.05MB, verified as a genuine Xilinx bitstream via
+`file`) and `exports/design.xsa` (1.08MB) are this project's first physically-implementable
+hardware artifacts — not a separate or re-derived build, but the direct output of the exact
+signoff numbers documented in §20.
+
+**Repository integrity audit.** Framed the question plainly before touching `.gitignore`: if
+someone clones this repo fresh onto a machine without any EDA tools at all, can they actually see
+this project's real results, or only the means to regenerate them? The answer was no — every
+report `.rpt` file this entire documentation has been citing specific numbers from (WNS, power,
+utilization, stall-monitor percentages, the 0/32,000-tolerance verification result) was
+gitignored. Un-ignored `reports/sim/`, `reports/syn/`, `reports/syn/soc/`, and `reports/impl/`'s
+`.rpt` files so the actual data survives a clone, not just the prose describing it. For the
+post-route checkpoint, chose not to un-ignore `scripts/soc_build/` wholesale — it's roughly 589
+files of disposable Vivado project internals, fully regenerable from the tracked Tcl scripts, and
+tracking all of it would work against the repo staying clean — and instead copied just the final
+signoff checkpoint into `dbs/`, the directory `README.md` already documented as the intended home
+for exactly this ("Design Checkpoints... intermediate snapshots of synthesized/routed design")
+back when that directory was still empty scaffolding (the housekeeping-pass discussion earlier in
+this project). Verified every category — documentation, scripts, RTL, the new checkpoint, the new
+bitstream/xsa — with `git check-ignore` directly rather than assuming the edits were correct.
+
+**Lesson:** Documentation that cites specific numbers is only as trustworthy as the artifacts
+behind those numbers being actually reachable — a report file gitignored "to keep the repo clean"
+quietly converts every number in `project_story.md`/`synthesis_data.md` from a verifiable fact
+into an unverifiable claim for anyone without the exact tool licenses used to produce it. The fix
+wasn't to track everything indiscriminately (that's exactly the mistake `scripts/soc_build/`
+would have been) — it was to distinguish analysis-relevant artifacts, which earn their place in
+version control precisely because they're the evidence, from disposable intermediate build
+state, which doesn't. That distinction, not a blanket policy in either direction, is what
+"the repository stays clean" and "the analysis is reproducible" turn out to have in common.
+
 ## Summary of lessons learned (rollup)
 
 1. **Verify infrastructure assumptions before deep technical investigation** — the PBS saga
@@ -686,3 +817,25 @@ changed how Section 19 got built, not just how it got debugged afterward.
     they're actually applied on the next build, not just consulted when debugging — the new AXI
     wrapper needed zero of the fixes the original one did, specifically because Sections 15-16's
     lessons were applied while writing it, not after.
+13. **Silent no-ops are more dangerous than errors, in both RTL attributes and scripting
+    languages** — a `use_dsp` attribute misplaced above an `always` block, and a Tcl `source`
+    call silently overwriting a same-named variable, both produced a clean exit code and zero
+    warnings while doing nothing (or the wrong thing). A monitoring script has the identical
+    failure mode: tracking the wrong process in a fork tree reports a plausible-looking but
+    meaningless number instead of erroring. The only defense that caught all three was checking
+    actual output against expectation (byte-identical utilization counts; an empty target
+    directory; a flat RSS reading) rather than trusting that "it ran without error" meant "it did
+    what I intended."
+14. **A metric getting worse after a fix isn't automatically a regression** — it can be the
+    direct, predictable physical cost of the fix's own mechanism, and is worth reporting exactly
+    as plainly as the metrics that improved. Concentrating 256 MAC units from diffuse LUT fabric
+    into 93% of the device's DSP columns was always going to trade some placement/routing
+    freedom for area and power — the honest result is the trade-off stated together, not just
+    the headline win.
+15. **Documentation citing specific numbers is only as trustworthy as the artifacts behind those
+    numbers being reachable** — gitignoring report files "to keep the repo clean" quietly turns
+    every cited figure into an unverifiable claim for anyone without the same tool licenses.
+    The fix isn't to track everything indiscriminately (that trades one failure mode for its
+    opposite); it's distinguishing analysis-relevant evidence from disposable intermediate build
+    state, and verifying the distinction actually holds (`git check-ignore`, checked directly)
+    rather than assuming an edit did what it was meant to.

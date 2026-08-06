@@ -1,0 +1,70 @@
+TOOL:	xrun(64)	23.09-s013: Started on Aug 02, 2026 at 07:10:59 UTC
+SOFTINCLUDE $XPEDION/aa/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,25): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,27): cds.lib Invalid environment variable ''.
+xrun(64): 23.09-s013: (c) Copyright 1995-2024 Cadence Design Systems, Inc.
+SOFTINCLUDE $XPEDION/aa/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,25): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,27): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $XPEDION/aa/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,25): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,27): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $XPEDION/aa/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,25): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,27): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $XPEDION/aa/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,25): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,27): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $XPEDION/aa/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,25): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,27): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $XPEDION/aa/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,25): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,27): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $XPEDION/aa/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,25): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,27): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $XPEDION/aa/cds.lib
+|
+xmsim: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,25): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
+|
+xmsim: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,27): cds.lib Invalid environment variable ''.
+Loading snapshot worklib.Softmax_top_tb:sv .................... Done
+xcelium> source /tools/cadence/XCELIUM/23.09.013/tools/xcelium/files/xmsimrc
+xcelium> run
+The ratio of error greater than the minimum precision: 0.0000%
+real_max = 0.0051, hard_max = 0.0000
+The ratio of error greater than the minimum precision: 0.00000%
+real_max = 0.01874, hard_max = 0.01562
+---------------------------------------------------------
+[stall_monitor:top_in] total=1970 transfer=394 valid_stall=0 ready_stall=786 idle=790 | stall=39.90% util=20.00%
+---------------------------------------------------------
+Simulation complete via $finish(1) at time 197450 NS + 0
+/project/tsmc65/users/rasksha/ws/taoFPGA/sourcecode/tb/Softmax_top_tb.sv:246     #100 $finish();
+xcelium> exit
+TOOL:	xrun(64)	23.09-s013: Exiting on Aug 02, 2026 at 07:11:00 UTC  (total: 00:00:01)

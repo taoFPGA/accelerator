@@ -1,0 +1,178 @@
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2026 Advanced Micro Devices, Inc. All Rights Reserved.
+---------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2026.1 (lin64) Build 6511674 Tue Jun 16 11:01:26 MDT 2026
+| Date         : Thu Aug  6 10:45:33 2026
+| Host         : ip-10-70-171-248.il-central-1.compute.internal running 64-bit Rocky Linux release 8.10 (Green Obsidian)
+| Command      : report_drc -file /project/tsmc65/users/rasksha/ws/taoFPGA/reports/syn/soc/drc.rpt
+| Design       : design_1_wrapper
+| Device       : xc7z020clg400-1
+| Speed File   : -1
+| Design State : Fully Routed
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+Report DRC
+
+Table of Contents
+-----------------
+1. REPORT SUMMARY
+2. REPORT DETAILS
+
+1. REPORT SUMMARY
+-----------------
+            Netlist: design_1_wrapper
+          Floorplan: design_1
+      Design limits: <entire design considered>
+           Ruledeck: default
+             Max checks: <unlimited>
+             Checks found: 28
++--------+----------+------------------------+--------+
+| Rule   | Severity | Description            | Checks |
++--------+----------+------------------------+--------+
+| DPIP-1 | Warning  | Input pipelining       | 11     |
+| DPOP-1 | Warning  | PREG Output pipelining | 5      |
+| DPOP-2 | Warning  | MREG Output pipelining | 12     |
++--------+----------+------------------------+--------+
+
+2. REPORT DETAILS
+-----------------
+DPIP-1#1 Warning
+Input pipelining  
+DSP design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[2].u_gelu/u_lin/l_4Q21_reg1_reg input design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[2].u_gelu/u_lin/l_4Q21_reg1_reg/A[29:0] is not pipelined. Pipelining DSP48 input will improve performance.
+Related violations: <none>
+
+DPIP-1#2 Warning
+Input pipelining  
+DSP design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/F_block_size_reg input design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/F_block_size_reg/A[29:0] is not pipelined. Pipelining DSP48 input will improve performance.
+Related violations: <none>
+
+DPIP-1#3 Warning
+Input pipelining  
+DSP design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/F_block_size_reg input design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/F_block_size_reg/B[17:0] is not pipelined. Pipelining DSP48 input will improve performance.
+Related violations: <none>
+
+DPIP-1#4 Warning
+Input pipelining  
+DSP design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/out_F_addr input design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/out_F_addr/A[29:0] is not pipelined. Pipelining DSP48 input will improve performance.
+Related violations: <none>
+
+DPIP-1#5 Warning
+Input pipelining  
+DSP design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/out_F_addr input design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/out_F_addr/B[17:0] is not pipelined. Pipelining DSP48 input will improve performance.
+Related violations: <none>
+
+DPIP-1#6 Warning
+Input pipelining  
+DSP design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/clear_addr0 input design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/clear_addr0/A[29:0] is not pipelined. Pipelining DSP48 input will improve performance.
+Related violations: <none>
+
+DPIP-1#7 Warning
+Input pipelining  
+DSP design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/clear_addr0 input design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/clear_addr0/B[17:0] is not pipelined. Pipelining DSP48 input will improve performance.
+Related violations: <none>
+
+DPIP-1#8 Warning
+Input pipelining  
+DSP design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/out_F_block_size_reg input design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/out_F_block_size_reg/A[29:0] is not pipelined. Pipelining DSP48 input will improve performance.
+Related violations: <none>
+
+DPIP-1#9 Warning
+Input pipelining  
+DSP design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/out_F_block_size_reg input design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/out_F_block_size_reg/B[17:0] is not pipelined. Pipelining DSP48 input will improve performance.
+Related violations: <none>
+
+DPIP-1#10 Warning
+Input pipelining  
+DSP design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/out_data_addr input design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/out_data_addr/A[29:0] is not pipelined. Pipelining DSP48 input will improve performance.
+Related violations: <none>
+
+DPIP-1#11 Warning
+Input pipelining  
+DSP design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_Softmax_control/u_Softmax/u_Exp_module_2/x_log2e_S10Q14_reg1_reg input design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_Softmax_control/u_Softmax/u_Exp_module_2/x_log2e_S10Q14_reg1_reg/A[29:0] is not pipelined. Pipelining DSP48 input will improve performance.
+Related violations: <none>
+
+DPOP-1#1 Warning
+PREG Output pipelining  
+DSP design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/out_F_addr output design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/out_F_addr/P[47:0] is not pipelined (PREG=0). Pipelining the DSP48 output will improve performance and often saves power so it is suggested whenever possible to fully pipeline this function.  If this DSP48 function was inferred, it is suggested to describe an additional register stage after this function.  If the DSP48 was instantiated in the design, it is suggested to set the PREG attribute to 1.
+Related violations: <none>
+
+DPOP-1#2 Warning
+PREG Output pipelining  
+DSP design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/clear_addr0 output design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/clear_addr0/P[47:0] is not pipelined (PREG=0). Pipelining the DSP48 output will improve performance and often saves power so it is suggested whenever possible to fully pipeline this function.  If this DSP48 function was inferred, it is suggested to describe an additional register stage after this function.  If the DSP48 was instantiated in the design, it is suggested to set the PREG attribute to 1.
+Related violations: <none>
+
+DPOP-1#3 Warning
+PREG Output pipelining  
+DSP design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/out_data_addr output design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/out_data_addr/P[47:0] is not pipelined (PREG=0). Pipelining the DSP48 output will improve performance and often saves power so it is suggested whenever possible to fully pipeline this function.  If this DSP48 function was inferred, it is suggested to describe an additional register stage after this function.  If the DSP48 was instantiated in the design, it is suggested to set the PREG attribute to 1.
+Related violations: <none>
+
+DPOP-1#4 Warning
+PREG Output pipelining  
+DSP design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_Softmax_control/u_Softmax/u_Exp_module_1/temp_y_2Q25 output design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_Softmax_control/u_Softmax/u_Exp_module_1/temp_y_2Q25/P[47:0] is not pipelined (PREG=0). Pipelining the DSP48 output will improve performance and often saves power so it is suggested whenever possible to fully pipeline this function.  If this DSP48 function was inferred, it is suggested to describe an additional register stage after this function.  If the DSP48 was instantiated in the design, it is suggested to set the PREG attribute to 1.
+Related violations: <none>
+
+DPOP-1#5 Warning
+PREG Output pipelining  
+DSP design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_Softmax_control/u_Softmax/u_Exp_module_2/temp_y_2Q25 output design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_Softmax_control/u_Softmax/u_Exp_module_2/temp_y_2Q25/P[47:0] is not pipelined (PREG=0). Pipelining the DSP48 output will improve performance and often saves power so it is suggested whenever possible to fully pipeline this function.  If this DSP48 function was inferred, it is suggested to describe an additional register stage after this function.  If the DSP48 was instantiated in the design, it is suggested to set the PREG attribute to 1.
+Related violations: <none>
+
+DPOP-2#1 Warning
+MREG Output pipelining  
+DSP design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg multiplier stage design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg/P[47:0] is not pipelined (MREG=0). Pipelining the multiplier function will improve performance and will save significant power so it is suggested whenever possible to fully pipeline this function.  If this multiplier was inferred, it is suggested to describe an additional register stage after this function.  If there is no registered adder/accumulator following the multiply function, two pipeline stages are suggested to allow both the MREG and PREG registers to be used.  If the DSP48 was instantiated in the design, it is suggested to set both the MREG and PREG attributes to 1 when performing multiply functions.
+Related violations: <none>
+
+DPOP-2#2 Warning
+MREG Output pipelining  
+DSP design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[1].u_gelu/u_lin/l_4Q21_reg1_reg multiplier stage design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[1].u_gelu/u_lin/l_4Q21_reg1_reg/P[47:0] is not pipelined (MREG=0). Pipelining the multiplier function will improve performance and will save significant power so it is suggested whenever possible to fully pipeline this function.  If this multiplier was inferred, it is suggested to describe an additional register stage after this function.  If there is no registered adder/accumulator following the multiply function, two pipeline stages are suggested to allow both the MREG and PREG registers to be used.  If the DSP48 was instantiated in the design, it is suggested to set both the MREG and PREG attributes to 1 when performing multiply functions.
+Related violations: <none>
+
+DPOP-2#3 Warning
+MREG Output pipelining  
+DSP design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[2].u_gelu/u_lin/l_4Q21_reg1_reg multiplier stage design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[2].u_gelu/u_lin/l_4Q21_reg1_reg/P[47:0] is not pipelined (MREG=0). Pipelining the multiplier function will improve performance and will save significant power so it is suggested whenever possible to fully pipeline this function.  If this multiplier was inferred, it is suggested to describe an additional register stage after this function.  If there is no registered adder/accumulator following the multiply function, two pipeline stages are suggested to allow both the MREG and PREG registers to be used.  If the DSP48 was instantiated in the design, it is suggested to set both the MREG and PREG attributes to 1 when performing multiply functions.
+Related violations: <none>
+
+DPOP-2#4 Warning
+MREG Output pipelining  
+DSP design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[3].u_gelu/u_lin/l_4Q21_reg1_reg multiplier stage design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[3].u_gelu/u_lin/l_4Q21_reg1_reg/P[47:0] is not pipelined (MREG=0). Pipelining the multiplier function will improve performance and will save significant power so it is suggested whenever possible to fully pipeline this function.  If this multiplier was inferred, it is suggested to describe an additional register stage after this function.  If there is no registered adder/accumulator following the multiply function, two pipeline stages are suggested to allow both the MREG and PREG registers to be used.  If the DSP48 was instantiated in the design, it is suggested to set both the MREG and PREG attributes to 1 when performing multiply functions.
+Related violations: <none>
+
+DPOP-2#5 Warning
+MREG Output pipelining  
+DSP design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/F_block_size_reg multiplier stage design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/F_block_size_reg/P[47:0] is not pipelined (MREG=0). Pipelining the multiplier function will improve performance and will save significant power so it is suggested whenever possible to fully pipeline this function.  If this multiplier was inferred, it is suggested to describe an additional register stage after this function.  If there is no registered adder/accumulator following the multiply function, two pipeline stages are suggested to allow both the MREG and PREG registers to be used.  If the DSP48 was instantiated in the design, it is suggested to set both the MREG and PREG attributes to 1 when performing multiply functions.
+Related violations: <none>
+
+DPOP-2#6 Warning
+MREG Output pipelining  
+DSP design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/out_F_addr multiplier stage design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/out_F_addr/P[47:0] is not pipelined (MREG=0). Pipelining the multiplier function will improve performance and will save significant power so it is suggested whenever possible to fully pipeline this function.  If this multiplier was inferred, it is suggested to describe an additional register stage after this function.  If there is no registered adder/accumulator following the multiply function, two pipeline stages are suggested to allow both the MREG and PREG registers to be used.  If the DSP48 was instantiated in the design, it is suggested to set both the MREG and PREG attributes to 1 when performing multiply functions.
+Related violations: <none>
+
+DPOP-2#7 Warning
+MREG Output pipelining  
+DSP design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/out_F_block_size_reg multiplier stage design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/out_F_block_size_reg/P[47:0] is not pipelined (MREG=0). Pipelining the multiplier function will improve performance and will save significant power so it is suggested whenever possible to fully pipeline this function.  If this multiplier was inferred, it is suggested to describe an additional register stage after this function.  If there is no registered adder/accumulator following the multiply function, two pipeline stages are suggested to allow both the MREG and PREG registers to be used.  If the DSP48 was instantiated in the design, it is suggested to set both the MREG and PREG attributes to 1 when performing multiply functions.
+Related violations: <none>
+
+DPOP-2#8 Warning
+MREG Output pipelining  
+DSP design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/out_data_addr multiplier stage design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/out_data_addr/P[47:0] is not pipelined (MREG=0). Pipelining the multiplier function will improve performance and will save significant power so it is suggested whenever possible to fully pipeline this function.  If this multiplier was inferred, it is suggested to describe an additional register stage after this function.  If there is no registered adder/accumulator following the multiply function, two pipeline stages are suggested to allow both the MREG and PREG registers to be used.  If the DSP48 was instantiated in the design, it is suggested to set both the MREG and PREG attributes to 1 when performing multiply functions.
+Related violations: <none>
+
+DPOP-2#9 Warning
+MREG Output pipelining  
+DSP design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_Softmax_control/u_Softmax/u_Exp_module_1/temp_y_2Q25 multiplier stage design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_Softmax_control/u_Softmax/u_Exp_module_1/temp_y_2Q25/P[47:0] is not pipelined (MREG=0). Pipelining the multiplier function will improve performance and will save significant power so it is suggested whenever possible to fully pipeline this function.  If this multiplier was inferred, it is suggested to describe an additional register stage after this function.  If there is no registered adder/accumulator following the multiply function, two pipeline stages are suggested to allow both the MREG and PREG registers to be used.  If the DSP48 was instantiated in the design, it is suggested to set both the MREG and PREG attributes to 1 when performing multiply functions.
+Related violations: <none>
+
+DPOP-2#10 Warning
+MREG Output pipelining  
+DSP design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_Softmax_control/u_Softmax/u_Exp_module_1/x_log2e_S10Q14_reg1_reg multiplier stage design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_Softmax_control/u_Softmax/u_Exp_module_1/x_log2e_S10Q14_reg1_reg/P[47:0] is not pipelined (MREG=0). Pipelining the multiplier function will improve performance and will save significant power so it is suggested whenever possible to fully pipeline this function.  If this multiplier was inferred, it is suggested to describe an additional register stage after this function.  If there is no registered adder/accumulator following the multiply function, two pipeline stages are suggested to allow both the MREG and PREG registers to be used.  If the DSP48 was instantiated in the design, it is suggested to set both the MREG and PREG attributes to 1 when performing multiply functions.
+Related violations: <none>
+
+DPOP-2#11 Warning
+MREG Output pipelining  
+DSP design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_Softmax_control/u_Softmax/u_Exp_module_2/temp_y_2Q25 multiplier stage design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_Softmax_control/u_Softmax/u_Exp_module_2/temp_y_2Q25/P[47:0] is not pipelined (MREG=0). Pipelining the multiplier function will improve performance and will save significant power so it is suggested whenever possible to fully pipeline this function.  If this multiplier was inferred, it is suggested to describe an additional register stage after this function.  If there is no registered adder/accumulator following the multiply function, two pipeline stages are suggested to allow both the MREG and PREG registers to be used.  If the DSP48 was instantiated in the design, it is suggested to set both the MREG and PREG attributes to 1 when performing multiply functions.
+Related violations: <none>
+
+DPOP-2#12 Warning
+MREG Output pipelining  
+DSP design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_Softmax_control/u_Softmax/u_Exp_module_2/x_log2e_S10Q14_reg1_reg multiplier stage design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_Softmax_control/u_Softmax/u_Exp_module_2/x_log2e_S10Q14_reg1_reg/P[47:0] is not pipelined (MREG=0). Pipelining the multiplier function will improve performance and will save significant power so it is suggested whenever possible to fully pipeline this function.  If this multiplier was inferred, it is suggested to describe an additional register stage after this function.  If there is no registered adder/accumulator following the multiply function, two pipeline stages are suggested to allow both the MREG and PREG registers to be used.  If the DSP48 was instantiated in the design, it is suggested to set both the MREG and PREG attributes to 1 when performing multiply functions.
+Related violations: <none>
+
+

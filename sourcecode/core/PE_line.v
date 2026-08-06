@@ -2,10 +2,12 @@
 
 module PE_line
 #(
-    parameter array_m = 4, 
-    parameter array_n = 4, 
+    parameter array_m = 4,
+    parameter array_n = 4,
     parameter data_width = 8,
-    parameter log2_array_m = 2
+    parameter log2_array_m = 2,
+    // Forwarded uniformly to every PE in this line -- see PE.v/PE_array.v.
+    parameter integer USE_DSP = 1
 )
 (
     input                                               clk,
@@ -38,8 +40,9 @@ generate
         PE#(
             .data_width(data_width),
             .array_m(array_m),
-            .array_n(array_n),   
-            .log2_array_m(log2_array_m)
+            .array_n(array_n),
+            .log2_array_m(log2_array_m),
+            .USE_DSP(USE_DSP)
         )
         PE_u(
             .clk(clk),

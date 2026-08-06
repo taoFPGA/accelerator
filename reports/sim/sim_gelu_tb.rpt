@@ -1,0 +1,176 @@
+TOOL:	xrun(64)	23.09-s013: Started on Aug 02, 2026 at 12:12:27 UTC
+SOFTINCLUDE $XPEDION/aa/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,25): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,27): cds.lib Invalid environment variable ''.
+xrun(64): 23.09-s013: (c) Copyright 1995-2024 Cadence Design Systems, Inc.
+SOFTINCLUDE $XPEDION/aa/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,25): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,27): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $XPEDION/aa/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,25): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,27): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $XPEDION/aa/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,25): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,27): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $XPEDION/aa/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,25): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,27): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $XPEDION/aa/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,25): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,27): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $XPEDION/aa/cds.lib
+|
+xmvlog: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,25): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
+|
+xmvlog: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,27): cds.lib Invalid environment variable ''.
+file: /project/tsmc65/users/rasksha/ws/taoFPGA/sourcecode/sim/../core/gelu.v
+	module worklib.gelu:v
+		errors: 0, warnings: 0
+file: /project/tsmc65/users/rasksha/ws/taoFPGA/sourcecode/sim/../core/lin.v
+	module worklib.lin:v
+		errors: 0, warnings: 0
+file: /project/tsmc65/users/rasksha/ws/taoFPGA/sourcecode/sim/../tb/gelu_tb.sv
+	module worklib.gelu_tb:sv
+		errors: 0, warnings: 0
+	Total errors/warnings found outside modules and primitives:
+		errors: 0, warnings: 2
+SOFTINCLUDE $XPEDION/aa/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,25): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,27): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $XPEDION/aa/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,25): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,27): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $XPEDION/aa/cds.lib
+|
+xmelab: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,25): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
+|
+xmelab: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,27): cds.lib Invalid environment variable ''.
+	Elaborating the design hierarchy:
+		Caching library 'worklib' ....... Done
+	Top level design units:
+		gelu_tb
+	Building instance overlay tables: .................... Done
+	Generating native compiled code:
+SOFTINCLUDE $XPEDION/aa/cds.lib
+|
+xmvlog_cg: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,25): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
+|
+xmvlog_cg: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,27): cds.lib Invalid environment variable ''.
+		worklib.lin:v <0x729a62f1>
+			streams:  17, words:  3515
+		worklib.gelu:v <0x70104f27>
+			streams:  21, words:  7531
+		worklib.gelu_tb:sv <0x522724e5>
+			streams:  18, words: 11718
+	Building instance specific data structures.
+	Loading native compiled code:     .................... Done
+	Design hierarchy summary:
+		                 Instances  Unique
+		Modules:                 3       3
+		Registers:              54      54
+		Scalar wires:            3       -
+		Vectored wires:         19       -
+		Always blocks:          32      20
+		Initial blocks:          2       2
+		Cont. assignments:      13      16
+		Pseudo assignments:      4       -
+		Process Clocks:         11       1
+		Simulation timescale:  1ps
+	Writing initial simulation snapshot: worklib.gelu_tb:sv
+SOFTINCLUDE $XPEDION/aa/cds.lib
+|
+xmsim: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,25): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
+|
+xmsim: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,27): cds.lib Invalid environment variable ''.
+Loading snapshot worklib.gelu_tb:sv .................... Done
+xcelium> source /tools/cadence/XCELIUM/23.09.013/tools/xcelium/files/xmsimrc
+xcelium> run
+diff = -0.004, y_hard=-0.031, y_soft=-0.028, x_soft=-0.058, cnt = 10
+diff = -0.003, y_hard=-0.016, y_soft=-0.013, x_soft=-0.026, cnt = 12
+diff = -0.002, y_hard=-0.016, y_soft=-0.014, x_soft=-0.028, cnt = 24
+diff = -0.005, y_hard= 0.039, y_soft= 0.044, x_soft= 0.082, cnt = 26
+diff =  0.033, y_hard=-0.016, y_soft=-0.048, x_soft=-1.969, cnt = 30
+diff = -0.007, y_hard= 0.000, y_soft= 0.007, x_soft= 0.014, cnt = 31
+diff =  0.010, y_hard= 0.148, y_soft= 0.139, x_soft= 0.234, cnt = 36
+diff = -0.002, y_hard= 0.055, y_soft= 0.057, x_soft= 0.104, cnt = 37
+diff = -0.005, y_hard= 0.031, y_soft= 0.036, x_soft= 0.068, cnt = 38
+diff = -0.006, y_hard=-0.008, y_soft=-0.002, x_soft=-0.004, cnt = 43
+diff = -0.008, y_hard= 0.000, y_soft= 0.008, x_soft= 0.015, cnt = 46
+diff =  0.016, y_hard=-0.117, y_soft=-0.134, x_soft=-0.379, cnt = 48
+diff = -0.007, y_hard=-0.016, y_soft=-0.009, x_soft=-0.018, cnt = 54
+diff = -0.001, y_hard= 0.008, y_soft= 0.009, x_soft= 0.018, cnt = 55
+diff = -0.001, y_hard=-0.031, y_soft=-0.030, x_soft=-0.063, cnt = 60
+diff =  0.023, y_hard= 1.875, y_soft= 1.852, x_soft= 1.906, cnt = 63
+diff =  0.010, y_hard= 0.742, y_soft= 0.733, x_soft= 0.898, cnt = 64
+diff = -0.004, y_hard=-0.023, y_soft=-0.019, x_soft=-0.040, cnt = 65
+diff =  0.001, y_hard= 0.031, y_soft= 0.030, x_soft= 0.058, cnt = 67
+diff = -0.003, y_hard=-0.016, y_soft=-0.012, x_soft=-0.025, cnt = 68
+diff = -0.006, y_hard=-0.023, y_soft=-0.018, x_soft=-0.037, cnt = 71
+diff = -0.004, y_hard=-0.016, y_soft=-0.012, x_soft=-0.024, cnt = 78
+diff = -0.002, y_hard= 0.055, y_soft= 0.057, x_soft= 0.105, cnt = 86
+diff = -0.005, y_hard=-0.031, y_soft=-0.027, x_soft=-0.056, cnt = 91
+diff =  0.017, y_hard=-0.133, y_soft=-0.150, x_soft=-0.469, cnt = 92
+diff = -0.004, y_hard=-0.039, y_soft=-0.035, x_soft=-0.074, cnt = 95
+diff = -0.007, y_hard=-0.023, y_soft=-0.017, x_soft=-0.035, cnt = 100
+diff =  0.008, y_hard= 0.344, y_soft= 0.336, x_soft= 0.488, cnt = 103
+diff = -0.001, y_hard= 0.031, y_soft= 0.032, x_soft= 0.062, cnt = 105
+diff = -0.002, y_hard=-0.008, y_soft=-0.006, x_soft=-0.012, cnt = 107
+diff = -0.004, y_hard= 0.008, y_soft= 0.012, x_soft= 0.023, cnt = 109
+diff = -0.003, y_hard= 0.016, y_soft= 0.019, x_soft= 0.037, cnt = 113
+diff = -0.004, y_hard= 0.039, y_soft= 0.043, x_soft= 0.080, cnt = 116
+diff =  0.020, y_hard=-0.078, y_soft=-0.098, x_soft=-1.516, cnt = 118
+diff =  0.023, y_hard= 1.875, y_soft= 1.852, x_soft= 1.906, cnt = 128
+diff =  0.002, y_hard= 0.055, y_soft= 0.053, x_soft= 0.098, cnt = 129
+diff = -0.002, y_hard= 0.055, y_soft= 0.057, x_soft= 0.105, cnt = 135
+diff =  0.018, y_hard=-0.148, y_soft=-0.167, x_soft=-0.883, cnt = 136
+diff = -0.003, y_hard= 0.039, y_soft= 0.042, x_soft= 0.079, cnt = 143
+diff = -0.007, y_hard= 0.016, y_soft= 0.022, x_soft= 0.043, cnt = 145
+diff = -0.006, y_hard=-0.016, y_soft=-0.010, x_soft=-0.021, cnt = 146
+diff = -0.003, y_hard= 0.008, y_soft= 0.011, x_soft= 0.022, cnt = 160
+diff = -0.006, y_hard= 0.000, y_soft= 0.006, x_soft= 0.012, cnt = 167
+diff = -0.004, y_hard= 0.008, y_soft= 0.012, x_soft= 0.023, cnt = 170
+diff =  0.004, y_hard= 0.133, y_soft= 0.128, x_soft= 0.219, cnt = 171
+diff =  0.008, y_hard=-0.086, y_soft=-0.094, x_soft=-0.230, cnt = 173
+diff =  0.007, y_hard= 0.141, y_soft= 0.134, x_soft= 0.227, cnt = 174
+diff = -0.006, y_hard= 0.016, y_soft= 0.021, x_soft= 0.041, cnt = 176
+diff = -0.006, y_hard= 0.016, y_soft= 0.021, x_soft= 0.041, cnt = 177
+diff = -0.006, y_hard= 0.000, y_soft= 0.006, x_soft= 0.011, cnt = 178
+diff =  0.004, y_hard=-0.047, y_soft=-0.051, x_soft=-0.112, cnt = 181
+diff =  0.013, y_hard= 0.312, y_soft= 0.299, x_soft= 0.445, cnt = 188
+diff = -0.004, y_hard= 0.078, y_soft= 0.082, x_soft= 0.146, cnt = 190
+diff =  0.012, y_hard=-0.148, y_soft=-0.161, x_soft=-0.977, cnt = 193
+diff =  0.015, y_hard=-0.133, y_soft=-0.147, x_soft=-0.453, cnt = 200
+cnt = 200
+END
+Simulation complete via $finish(1) at time 20 US + 0
+/project/tsmc65/users/rasksha/ws/taoFPGA/sourcecode/tb/gelu_tb.sv:37 #20000$display("cnt = %1d",cnt); $display("END");$finish;
+xcelium> exit
+TOOL:	xrun(64)	23.09-s013: Exiting on Aug 02, 2026 at 12:12:31 UTC  (total: 00:00:04)
