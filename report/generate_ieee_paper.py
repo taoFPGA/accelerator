@@ -116,6 +116,19 @@ def bullet(doc, text, bold_lead=None):
     return p
 
 
+def numbered_item(doc, n, text):
+    """IEEE-style enumerated contribution: '(n) text', hanging indent."""
+    p = doc.add_paragraph()
+    p.paragraph_format.space_after = Pt(4)
+    p.paragraph_format.left_indent = Inches(0.18)
+    p.paragraph_format.first_line_indent = Inches(-0.18)
+    r = p.add_run(f"({n}) ")
+    style_run(r, size=BODY_SIZE, bold=True)
+    r2 = p.add_run(text)
+    style_run(r2, size=BODY_SIZE)
+    return p
+
+
 def figure(doc, path, caption, width_in=3.4):
     p = doc.add_paragraph()
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -154,6 +167,23 @@ def add_table(doc, headers, rows, caption):
     spacer = doc.add_paragraph()
     spacer.paragraph_format.space_after = Pt(8)
     return table
+
+
+def equation(doc, lines, number):
+    """Centered, italicized equation block (one or more aligned lines),
+    with a single IEEE-style right-parenthesized number on the last line."""
+    if isinstance(lines, str):
+        lines = [lines]
+    for i, line in enumerate(lines):
+        p = doc.add_paragraph()
+        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p.paragraph_format.space_before = Pt(4 if i == 0 else 0)
+        p.paragraph_format.space_after = Pt(4 if i == len(lines) - 1 else 0)
+        r = p.add_run(line)
+        style_run(r, size=BODY_SIZE, italic=True)
+        if i == len(lines) - 1:
+            r2 = p.add_run(f"    ({number})")
+            style_run(r2, size=BODY_SIZE, italic=False)
 
 
 # --------------------------------------------------------------------------
@@ -220,8 +250,10 @@ r2 = abstract_p.add_run(
     "validation run matching simulation to zero error across 32,000 "
     "output elements. We further report a kernel-level benchmark against "
     "a real, numerically validated ViT-Tiny software baseline, achieving "
-    "up to 97.73× speedup over the board's ARM Cortex-A9 for a "
-    "representative fused kernel — while explicitly analyzing why the "
+    "up to 97.73× measured speedup (70.02× and 97.73× across the two "
+    "benchmarked kernel shapes) over the board's ARM Cortex-A9, "
+    "corresponding to a total energy efficiency of 2.25 GOPS/W (2.47 "
+    "GOPS/W on dynamic power alone) at peak throughput — while explicitly analyzing why the "
     "accelerator's fixed pipeline does not structurally correspond to any "
     "single Vision Transformer operation, a distinction we treat as a "
     "methodological contribution in its own right. We close with a "
@@ -278,25 +310,26 @@ body_para(doc,
     "against its own ground truth.")
 
 heading2(doc, "C", "Key Contributions & Paper Outline")
-bullet(doc, "A 16×16 INT8 weight-stationary systolic array fused "
+numbered_item(doc, 1, "A 16×16 INT8 weight-stationary systolic array fused "
             "with dedicated fixed-point Softmax and GELU engines into a "
             "single streaming pipeline.")
-bullet(doc, "A tolerance-bounded verification methodology carried "
+numbered_item(doc, 2, "A tolerance-bounded verification methodology carried "
             "consistently from SystemVerilog RTL simulation through a "
             "Python/NumPy golden model validated against physical silicon.")
-bullet(doc, "Identification and correction of a synthesis-level "
+numbered_item(doc, 3, "Identification and correction of a synthesis-level "
             "DSP-inference defect, reducing LUT utilization by 49.3% and "
             "total on-chip power by 3.1% at signoff.")
-bullet(doc, "First physical hardware validation of the design on a "
+numbered_item(doc, 4, "First physical hardware validation of the design on a "
             "PYNQ-Z2, matching simulation to zero error across 32,000 "
             "output elements at full scale.")
-bullet(doc, "A kernel-level hardware/software benchmark against a real, "
-            "numerically validated ViT-Tiny baseline, reporting up to "
-            "97.73× measured speedup together with an explicit "
+numbered_item(doc, 5, "A kernel-level hardware/software benchmark against a real, "
+            "numerically validated ViT-Tiny baseline, reporting 70.02×-97.73× "
+            "measured speedup and a total energy efficiency of 2.25 GOPS/W "
+            "at peak throughput, together with an explicit "
             "architectural analysis of why the accelerator's fixed "
             "pipeline does not map onto any single ViT operation.")
-bullet(doc, "A quantified account of the design's open hardware "
-            "constraints — principally a 64 KB DMA transfer ceiling "
+numbered_item(doc, 6, "A quantified account of the design's open hardware "
+            "constraints — principally a 64 KB DMA transfer ceiling "
             "— and the re-synthesis path identified to resolve them.")
 body_para(doc,
     "The remainder of this paper is organized as follows. Section II "
@@ -326,7 +359,17 @@ body_para(doc,
     "[−128, 127]. Both formulations were confirmed mathematically "
     "identical during hardware bring-up (Section VI) when the software "
     "golden model was cross-checked line-by-line against this shifter's "
-    "RTL.")
+    "RTL. Formally, for a pre-shift accumulator value z and a "
+    "runtime-configurable shift ∈ ℤ⁺, the quantization operator realized "
+    "in hardware is")
+equation(doc,
+    "Quant(z) = clip( ⌊(z + 2^(shift−1))·2^(−shift)⌋, −128, 127 )",
+    1)
+body_para(doc,
+    "where ⌊·⌋ denotes floor (equivalently, arithmetic right shift for "
+    "two's-complement operands) and clip(·, lo, hi) saturates its "
+    "argument to [lo, hi]. The degenerate case shift = 0 is handled as a "
+    "direct clip of z with no rounding term.")
 
 heading2(doc, "B", "Fixed-Point Non-Linear Arithmetic Engines")
 body_para(doc,
@@ -340,7 +383,18 @@ body_para(doc,
     "term); pass three streams the row a third time, computing the final "
     "normalized value exp(x−max−ln(Σ)) using a second instance of the "
     "same exponential unit combined with a piecewise logarithm "
-    "approximation (Ln_module) to avoid an explicit division. The GELU "
+    "approximation (Ln_module) to avoid an explicit division. Formally, "
+    "for a row x with elements xᵢ, the three passes compute")
+equation(doc,
+    ["m = maxᵢ(xᵢ)",
+     "S = Σᵢ 2^((xᵢ − m)·log₂e)",
+     "yᵢ = 2^(((xᵢ − m) − ln S)·log₂e)"],
+    2)
+body_para(doc,
+    "an exact base-2 reformulation of softmax(x)ᵢ = exp(xᵢ−m)/Σ that "
+    "matches the hardware's own log₂(e)-scaled exponential and Ln_module "
+    "log-domain division-avoidance strategy exactly, rather than the "
+    "textbook exp/ln formulation alone. The GELU "
     "activation (gelu.v) is a two-segment piecewise-linear approximation: "
     "inputs beyond a fixed saturation threshold pass through unmodified "
     "or clamp to zero according to sign, and inputs within that range are "
@@ -479,9 +533,9 @@ body_para(doc,
 
 fig_table = [
     ["Metric", "Before fix", "After fix", "Δ"],
-    ["Slice LUTs (post-route, full SoC)", "30,276 (56.91%)", "15,363 (28.88%)", "−49.3%"],
-    ["CARRY4 (post-route, full SoC)", "4,874", "1,862", "−61.8%"],
-    ["DSP48E1", "13 (5.91%)", "205 (93.18%)", "+192"],
+    ["Slice LUTs (post-route, full SoC)", "30,276 / 53,200 (56.91%)", "15,363 / 53,200 (28.88%)", "−49.3%"],
+    ["CARRY4 (post-route, full SoC)", "4,874 / 13,300", "1,862 / 13,300", "−61.8%"],
+    ["DSP48E1", "13 / 220 (5.91%)", "205 / 220 (93.18%)", "+192"],
     ["WNS @ 100 MHz", "+0.361 ns", "+0.293 ns", "−19% margin"],
     ["Total on-chip power", "1.741 W", "1.687 W", "−3.1%"],
 ]
@@ -505,8 +559,17 @@ heading2(doc, "B", "Performance Metrics & Acceleration")
 body_para(doc,
     "The hardware kernel achieved 2.487 GOP/s and 3.795 GOP/s on the two "
     "benchmarked shapes respectively, against 0.036 and 0.039 GOP/s on "
-    "the CPU — measured speedups of 70.0× and 97.73× for the "
-    "identical operation. Figs. 1–3 present latency, throughput, and "
+    "the CPU — measured speedups of 70.02× and 97.73× for the "
+    "identical operation. At the 3.795 GOP/s peak (192×320, MLP-shaped "
+    "kernel), against the post-route signoff power figures of Table I "
+    "(1.687 W total on-chip, 1.538 W dynamic), the design achieves a "
+    "total energy efficiency of 2.25 GOPS/W and a dynamic energy "
+    "efficiency of 2.47 GOPS/W. These efficiency figures combine a "
+    "live-measured kernel throughput with Vivado's post-route, "
+    "activity-based power estimate for the full SoC design — not a "
+    "physically instrumented power reading synchronized to the benchmark "
+    "run itself — and should be read as a signoff-grade estimate "
+    "accordingly. Figs. 1–3 present latency, throughput, and "
     "speedup for both shapes.")
 
 figure(doc, os.path.join(FIGURES, "latency_comparison.png"),
@@ -518,8 +581,8 @@ figure(doc, os.path.join(FIGURES, "speedup_factor.png"),
 
 bench_table = [
     ["Shape", "HW latency", "CPU latency", "Speedup"],
-    ["192×192 (projection)", "5.84 ms", "408.9 ms", "70.0×"],
-    ["192×320 (MLP-shaped)", "6.38 ms", "623.3 ms", "97.7×"],
+    ["192×192 (projection)", "5.84 ms", "408.9 ms", "70.02×"],
+    ["192×320 (MLP-shaped)", "6.38 ms", "623.3 ms", "97.73×"],
 ]
 add_table(doc, bench_table[0], bench_table[1:],
           "TABLE II. KERNEL BENCHMARK RESULTS, PYNQ-Z2 vs. ARM CORTEX-A9")
