@@ -1275,6 +1275,17 @@ exactly what drives `in_F_addr`'s reset before assuming DMA chunking was safe) c
 data-corrupting bug before it shipped, the same discipline as refusing to hand-wave `MM_in_buffer.v`'s
 addressing logic in §29 rather than accepting a fix that merely made the error message go away.
 
+**Follow-up run, both shapes clean:** re-ran after the `out_cols=320` cap. Both shapes completed
+without error: **70.0x kernel speedup** on the 192×192 projection shape (5.84ms HW vs. 408.9ms
+CPU) and **97.7x** on the 192×320 MLP-shaped, DMA-limited case (6.38ms HW vs. 623.3ms CPU). The
+`softmax_to_gelu_fifo_overflow` warning did *not* reappear on this run (it fired on the two
+previous runs at different shapes) — consistent with, though not proof of, the "live, not
+latched" read being transient/shape-independent rather than a real per-shape fault; still an open
+item to actually pin down, not something to assume resolved from one clean run. This closes out
+the benchmark itself with a real, defensible result set: a validated, correct end-to-end
+ViT-Tiny software baseline (10.68s / 0.094 img/sec) alongside a genuine, measured 70-98x
+kernel-level hardware speedup, honestly scoped as exactly that and nothing more.
+
 ## Summary of lessons learned (rollup)
 
 1. **Verify infrastructure assumptions before deep technical investigation** — the PBS saga
