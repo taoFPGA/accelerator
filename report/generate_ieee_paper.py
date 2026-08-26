@@ -46,8 +46,7 @@ def new_section(doc, columns):
     section.right_margin = Cm(1.5)
     section.top_margin = Cm(1.9)
     section.bottom_margin = Cm(2.5)
-    if columns == 2:
-        set_two_columns(section, 2)
+    set_two_columns(section, columns)
     return section
 
 
@@ -184,6 +183,51 @@ def equation(doc, lines, number):
         if i == len(lines) - 1:
             r2 = p.add_run(f"    ({number})")
             style_run(r2, size=BODY_SIZE, italic=False)
+
+
+def _shade_cell(cell, hex_color):
+    tcPr = cell._tc.get_or_add_tcPr()
+    shd = OxmlElement("w:shd")
+    shd.set(qn("w:val"), "clear")
+    shd.set(qn("w:color"), "auto")
+    shd.set(qn("w:fill"), hex_color)
+    tcPr.append(shd)
+
+
+def listing(doc, number, code_lines, caption, mono_size=Pt(8)):
+    """IEEE-style code listing: a shaded, monospace box (via a 1-cell
+    table, for a clean bordered background) followed by a centered
+    'Listing N. <caption>' line below it."""
+    table = doc.add_table(rows=1, cols=1)
+    table.autofit = True
+    cell = table.rows[0].cells[0]
+    _shade_cell(cell, "F2F2F0")
+    cell.paragraphs[0].paragraph_format.space_after = Pt(0)
+    first = True
+    for line in code_lines:
+        p = cell.paragraphs[0] if first else cell.add_paragraph()
+        first = False
+        p.paragraph_format.space_after = Pt(0)
+        p.paragraph_format.space_before = Pt(0)
+        r = p.add_run(line if line else " ")
+        r.font.name = "Consolas"
+        r.font.size = mono_size
+        rpr = r._element.get_or_add_rPr()
+        rFonts = rpr.find(qn("w:rFonts"))
+        if rFonts is None:
+            rFonts = OxmlElement("w:rFonts")
+            rpr.append(rFonts)
+        rFonts.set(qn("w:eastAsia"), "Consolas")
+
+    cap = doc.add_paragraph()
+    cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    cap.paragraph_format.space_before = Pt(3)
+    cap.paragraph_format.space_after = Pt(8)
+    r = cap.add_run(f"Listing {number}. ")
+    style_run(r, size=Pt(9), bold=True)
+    r2 = cap.add_run(caption)
+    style_run(r2, size=Pt(9))
+    return table
 
 
 # --------------------------------------------------------------------------
@@ -369,7 +413,23 @@ body_para(doc,
     "where ⌊·⌋ denotes floor (equivalently, arithmetic right shift for "
     "two's-complement operands) and clip(·, lo, hi) saturates its "
     "argument to [lo, hi]. The degenerate case shift = 0 is handled as a "
-    "direct clip of z with no rounding term.")
+    "direct clip of z with no rounding term. Listing 1 excerpts the "
+    "actual RTL realization of (1) in right_shifter.v, which computes the "
+    "round term by inspecting the discarded bit directly rather than via "
+    "an explicit add-then-shift, the two formulations having been "
+    "confirmed identical as noted above.")
+listing(doc, 1,
+    ["// right_shifter.v -- round-half-up + saturate to INT8",
+     "assign temp1_out = data_in >>> shift;",
+     "assign temp2_out =",
+     "    data_in[shift-1] ? temp1_out + 1 : temp1_out;",
+     "// under_min/over_max: range checks on temp2_out",
+     "case ({under_min, over_max})",
+     "    2'b10: data_out = {1'b1, {(W-1){1'b0}}}; // -128",
+     "    2'b01: data_out = {1'b0, {(W-1){1'b1}}}; // +127",
+     "    default: data_out = temp2_out[W-1:0];",
+     "endcase"],
+    "Round-half-up and saturate operator, right_shifter.v (Eq. 1).")
 
 heading2(doc, "B", "Fixed-Point Non-Linear Arithmetic Engines")
 body_para(doc,
@@ -394,7 +454,16 @@ body_para(doc,
     "an exact base-2 reformulation of softmax(x)ᵢ = exp(xᵢ−m)/Σ that "
     "matches the hardware's own log₂(e)-scaled exponential and Ln_module "
     "log-domain division-avoidance strategy exactly, rather than the "
-    "textbook exp/ln formulation alone. The GELU "
+    "textbook exp/ln formulation alone. Fig. X depicts the resulting "
+    "finite-state control flow: each of the three passes streams the "
+    "full N-element row exactly once, strictly sequentially, for a total "
+    "latency of 3N cycles per row — the structural origin of the serial "
+    "Softmax bottleneck quantified in Section VII.B.")
+figure(doc, os.path.join(FIGURES, "fig_softmax_fsm.png"),
+       "Fig. X. Softmax_control's 3-pass FSM and its per-pass equations (Eq. 2).",
+       width_in=3.0)
+body_para(doc,
+    "The GELU "
     "activation (gelu.v) is a two-segment piecewise-linear approximation: "
     "inputs beyond a fixed saturation threshold pass through unmodified "
     "or clamp to zero according to sign, and inputs within that range are "
@@ -457,7 +526,21 @@ body_para(doc,
     "(transformer_block_axi_top) and integrated alongside the Zynq-7020's "
     "dual-core ARM Cortex-A9 processing system, an AXI SmartConnect "
     "interconnect, and three independent AXI Direct Memory Access engines "
-    "(feature, weight, and result channels) via Xilinx IP Integrator.")
+    "(feature, weight, and result channels) via Xilinx IP Integrator. "
+    "Fig. Y shows the complete top-level datapath: the PS7 configures the "
+    "pipeline over AXI-Lite and streams feature and weight tensors in via "
+    "two MM2S DMA channels, while a third, independent S2MM channel "
+    "returns the GELU stage's output; internally, width-adapter glue logic "
+    "bridges each stage's differing datapath width, exactly as detailed "
+    "in Section IV.B.")
+
+# Fig. Y is wide (8 pipeline stages); span both columns for legibility.
+new_section(doc, columns=1)
+figure(doc, os.path.join(FIGURES, "fig_soc_architecture.png"),
+       "Fig. Y. Complete top-level SoC architecture: PS7, three AXI DMA "
+       "channels, and the transformer_block_axi_top internal pipeline.",
+       width_in=7.0)
+new_section(doc, columns=2)
 
 heading2(doc, "B", "Physical Adaptations for Board Deployment")
 body_para(doc,
@@ -505,12 +588,38 @@ body_para(doc,
     "synthesized into general LUT/CARRY4 fabric instead of dedicated DSP "
     "hard macros. Root-causing traced this to a synthesis attribute "
     "scoped at the wrong granularity relative to Vivado's register-level "
-    "DSP inference rules (cf. Xilinx UG901 [6]), silently ignored rather "
-    "than reported as an error. Correcting it moved the systolic array's "
-    "multiplications onto DSP48E1 hard macros, reducing full-SoC "
-    "post-route Slice LUTs by 49.3% (30,276 → 15,363) and CARRY4 "
-    "primitives by 61.8% (4,874 → 1,862), while total on-chip power fell "
-    "3.1% to 1.687 W.")
+    "DSP inference rules (cf. Xilinx UG901 [6]): as Listing 2 shows, "
+    "attaching use_dsp to the enclosing always block is a silent no-op — "
+    "synthesis produced byte-identical LUT/DSP/CARRY4 counts regardless of "
+    "its value — whereas attaching it to the register declaration that "
+    "actually holds the multiply-accumulate result is what Vivado's "
+    "inference pass recognizes.")
+listing(doc, 2,
+    ["// PE.v -- BEFORE: attribute on the always block (no-op)",
+     "(* use_dsp = \"yes\" *)",
+     "always @(posedge clk) begin",
+     "    psum_out <= psum_in + x_in*reg_w;",
+     "end",
+     "",
+     "// AFTER: attribute on the register declaration (per UG901)",
+     "(* use_dsp = \"yes\" *) reg signed",
+     "    [2*data_width+log2_array_m-1:0] psum_out_r;",
+     "always @(posedge clk)",
+     "    psum_out_r <= psum_in + x_in*reg_w;"],
+    "The UG901 DSP-inference attribute-placement fix, PE.v.")
+body_para(doc,
+    "Correcting the attribute placement alone would map all 256 PEs to "
+    "DSP48E1 hard macros — more than the xc7z020's 220-slice budget once "
+    "Softmax and GELU's own arithmetic (≈13 DSPs) is accounted for. "
+    "PE_array.v therefore parameterizes the split per PE row "
+    "(NUM_DSP_ROWS = 12 of 16), mapping exactly 192 of 256 PEs to "
+    "DSP48E1 and leaving the remaining 4 rows (64 PEs) LUT/CARRY4-mapped "
+    "— a deliberate, budget-sized partial mapping, not an all-or-nothing "
+    "switch. This reduced full-SoC post-route Slice LUTs by 49.3% "
+    "(30,276 → 15,363) and CARRY4 primitives by 61.8% (4,874 → 1,862), "
+    "brought DSP48E1 usage to 205 of 220 (192 from the array plus "
+    "Softmax/GELU's ≈13), and reduced total on-chip power by 3.1% to "
+    "1.687 W.")
 
 heading2(doc, "C", "Physical Congestion vs. Timing Trade-Off")
 body_para(doc,
