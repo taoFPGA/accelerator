@@ -1,155 +1,173 @@
+"""
+PYNQ Python driver for the transformer_block_axi_top accelerator
+(MM_ultra -> Softmax_control -> EightGelus), for use from a Jupyter
+notebook running on the board against an Overlay built from
+design.bit + design.hwh.
+
+This replaces the previous version of this file, which targeted a
+different, no-longer-current AXI wrapper: A_SIZE=25 (vs. the real
+A_size=16), hardcoded 0xA00x0000 addresses that don't match this
+project's actual address map, and no softmax/GELU configuration at all
+(it predates transformer_block_axi_top's integration). See
+report/project_story.md for the audit that found this. Register
+offsets/semantics below come directly from
+sourcecode/top/transformer_block_axi.v's documented register map, and
+the calibration constants (shift / softmax scale-in / softmax scale-out
+/ GELU scale) are the exact values already verified end-to-end in
+sourcecode/tb/transformer_block_tb.sv.
+
+Usage (in a notebook, same folder as design.bit/design.hwh):
+
+    from MM import TransformerAccelerator
+    import numpy as np
+
+    acc = TransformerAccelerator("design.bit")
+    IN_ROWS, IN_COLS, OUT_COLS = 8, 32, 32
+    acc.configure(IN_ROWS, IN_COLS, OUT_COLS)
+
+    rng = np.random.default_rng(0)
+    feature = rng.integers(-128, 128, size=(IN_ROWS, IN_COLS), dtype=np.int8)
+    weight  = rng.integers(-128, 128, size=(IN_COLS, OUT_COLS), dtype=np.int8)
+
+    result = acc.run(feature, weight)
+    print(result.shape, result.dtype)
+    print(result)
+
+NOTE on correctness scope: this driver verifies that data moves through
+the real hardware pipeline correctly (transfer completes without
+hanging, output shape/dtype are right, the softmax->GELU FIFO didn't
+overflow). It does NOT check the output against a bit-exact numerical
+golden model of softmax+GELU -- that would mean porting the real-valued
+reference model transformer_block_tb.sv already uses (chained from
+MM_Ultra_tb.sv/Softmax_top_tb.sv/gelu_tb.sv's individual golden models)
+into Python. Worth doing as a follow-up if bit-exact hardware
+validation is needed; out of scope for this first working driver.
+"""
+import time
+
 import numpy as np
-from pynq import allocate
-from pynq import MMIO
+from pynq import Overlay, allocate
 
-A_SIZE = 25
-in_F_max_size = 4000 * A_SIZE
-in_W_max_size = 4000 * A_SIZE
-out_F_max_size = 4000 * A_SIZE
-in_F_width_max = 64 * A_SIZE
-in_W_width_max  = 64 * A_SIZE
-shift_max = 32
+A_SIZE = 16       # systolic array width -- fixed by the synthesized RTL, do not change here
+DATA_WIDTH = 8    # int8 features/weights/output
+NUM_GELU = 4      # GELU output lanes -- out_cols must be a multiple of this
 
-def mat_create(shape, data_type = np.int8):
-    height = shape[0]
-    width = shape[1]
-    if height % A_SIZE != 0:
-        An_h = height + A_SIZE - height % A_SIZE
-    else:
-        An_h = height
-        
-    if width % A_SIZE != 0:
-        An_w = width+ A_SIZE - width % A_SIZE
-    else:
-        An_w = width
-    A = allocate(shape=(An_h,An_w), dtype=data_type)
-    return [A[0:height,0:width], A]
+# transformer_block_axi.v's register map (byte offsets)
+REG_MM_SHIFT             = 0x00
+REG_MM_F_LENGTH          = 0x04
+REG_MM_F_WIDTH_BLOCK_NUM = 0x08
+REG_MM_W_WIDTH_BLOCK_NUM = 0x0C
+REG_SOFTMAX_SCALE_IN     = 0x10
+REG_SOFTMAX_SCALE_OUT    = 0x14
+REG_GELU_SCALE           = 0x18
+REG_STATUS              = 0x1C  # bit0 = softmax_to_gelu_fifo_overflow (read-only)
 
-def mat_setValue(A,B:np.ndarray): #use numpy array to set value
-    A[0][:] = B 
-    
-def mat_getNdarray(A):
-    B = np.zeros((A[0].shape[0],A[0].shape[1])) 
-    B = A[0].copy()
-    return B
+# Calibration constants verified end-to-end in sourcecode/tb/transformer_block_tb.sv
+# (P_shift / P_softmax_scale_in / P_softmax_scale_out / P_gelu_scale).
+# softmax_scale_out and gelu_scale MUST be equal for the pipeline to be
+# numerically meaningful (transformer_block_top.v's own requirement).
+DEFAULT_SHIFT = 9
+DEFAULT_SOFTMAX_SCALE_IN = 6
+DEFAULT_SOFTMAX_SCALE_OUT = 7
+DEFAULT_GELU_SCALE = 7
 
-def mat_delete(A):
-    A[1].freebuffer()
-    
-def mat_print(A):
-    print(A[0])
+_DMA_WAIT_TIMEOUT_S = 10.0
 
-def mat_mul_soft(A,B,C,shift):
-    C0 = A[0].astype(np.int32) @ B[0].astype(np.int32)
-    C0 = np.right_shift(C0,shift)
-    C0 = np.clip(C0,-128,127)
-    C[0][:] = C0 
 
-def ini_MM():
-    global MM_ultra 
-    global in_f_dma 
-    global in_w_dma
-    global out_f_dma
+class TransformerAccelerator:
+    """Thin driver around one transformer_block_axi_top instance and its 3 AXI DMA channels."""
 
-    MM_ultra_addr= 0xA0030000
-    MM_ultra_addr_range = 0xFFF
-    MM_ultra = MMIO(MM_ultra_addr, MM_ultra_addr_range)
-    
-    global XAXIDMA_IDLE_MASK
-    XAXIDMA_IDLE_MASK = 0x00000002
-    
-    IN_FEATURE_DMA_ADDR = 0xA0000000
-    in_f_range = 0x10000
-    in_f_dma = MMIO(IN_FEATURE_DMA_ADDR, in_f_range)
+    def __init__(self, bitfile="design.bit"):
+        self.ol = Overlay(bitfile)
+        self.ctrl = self._resolve_ip("transformer_block_axi_top_0")
+        self.feature_dma = self.ol.axi_dma_0  # MM2S -> s0_axis (feature/activations)
+        self.weight_dma = self.ol.axi_dma_1   # MM2S -> s1_axis (weights)
+        self.result_dma = self.ol.axi_dma_2   # S2MM <- m0_axis (GELU output)
+        self.in_rows = self.in_cols = self.out_cols = None
 
-    IN_WEIGHT_DMA_ADDR = 0xA0010000
-    in_w_range = 0x10000
-    in_w_dma = MMIO(IN_WEIGHT_DMA_ADDR, in_w_range)
+    def _resolve_ip(self, prefix):
+        """Look up an IP by instance-name prefix in ol.ip_dict and return the
+        live driver object, regardless of whether PYNQ exposed it under the
+        plain instance name or '<instance>/<axi_interface_name>' (observed:
+        transformer_block_axi_top_0's control interface shows up as
+        'transformer_block_axi_top_0/s00_axi', named after its AXI-Lite
+        interface rather than the block instance, because that's what the
+        .hwh actually associates the address segment with)."""
+        matches = [k for k in self.ol.ip_dict if k == prefix or k.startswith(prefix + "/")]
+        if not matches:
+            raise RuntimeError(f"No IP matching '{prefix}' in this overlay -- "
+                                f"check ol.ip_dict.keys(): {list(self.ol.ip_dict.keys())}")
+        obj = self.ol
+        for part in matches[0].split("/"):
+            obj = getattr(obj, part)
+        return obj
 
-    OUT_FEATURE_DMA_ADDR = 0xA0020000
-    out_f_range = 0x10000
-    out_f_dma = MMIO(OUT_FEATURE_DMA_ADDR, out_f_range)
-    
+    def configure(self, in_rows, in_cols, out_cols,
+                  shift=DEFAULT_SHIFT,
+                  softmax_scale_in=DEFAULT_SOFTMAX_SCALE_IN,
+                  softmax_scale_out=DEFAULT_SOFTMAX_SCALE_OUT,
+                  gelu_scale=DEFAULT_GELU_SCALE):
+        if in_cols % A_SIZE != 0:
+            raise ValueError(f"in_cols ({in_cols}) must be a multiple of A_SIZE ({A_SIZE})")
+        if out_cols % A_SIZE != 0:
+            raise ValueError(f"out_cols ({out_cols}) must be a multiple of A_SIZE ({A_SIZE})")
+        if softmax_scale_out != gelu_scale:
+            raise ValueError("softmax_scale_out and gelu_scale must be equal "
+                              "(transformer_block_top.v requirement)")
 
-def in_feature_transfer(array, start_offset = 0, len = 0):
-    start_addr = array.physical_address + start_offset
-    if len == 0:
-        len = array.nbytes
-    array.flush()
-    in_f_dma.write(0x0,0x4) #reset
-    in_f_dma.write(0x18,start_addr)
-    in_f_dma.write(0x0,0x1) #open channel 
-    in_f_dma.write(0x28,len)
-    
-def in_weight_transfer(array, start_offset = 0, len = 0):
-    start_addr = array.physical_address + start_offset
-    if len == 0:
-        len = array.nbytes
-    array.flush()
-    in_w_dma.write(0x0,0x4) #reset
-    in_w_dma.write(0x18,start_addr)
-    in_w_dma.write(0x0,0x1) #open channel 
-    in_w_dma.write(0x28,len)
+        self.in_rows, self.in_cols, self.out_cols = in_rows, in_cols, out_cols
+        self.ctrl.write(REG_MM_SHIFT, shift & 0x3FF)
+        self.ctrl.write(REG_MM_F_LENGTH, in_rows)
+        self.ctrl.write(REG_MM_F_WIDTH_BLOCK_NUM, in_cols // A_SIZE)
+        self.ctrl.write(REG_MM_W_WIDTH_BLOCK_NUM, out_cols // A_SIZE)
+        self.ctrl.write(REG_SOFTMAX_SCALE_IN, softmax_scale_in & 0x1F)
+        self.ctrl.write(REG_SOFTMAX_SCALE_OUT, softmax_scale_out & 0xF)
+        self.ctrl.write(REG_GELU_SCALE, gelu_scale & 0xF)
 
-def out_feature_transfer(array, start_offset = 0, len = 0):
-    start_addr = array.physical_address + start_offset
-    if len == 0:
-        len = array.nbytes
-    out_f_dma.write(0x30,0x4) #reset
-    out_f_dma.write(0x48,start_addr)
-    out_f_dma.write(0x30,0x1) #open channel 
-    out_f_dma.write(0x58,len)
-    array.invalidate()
-    
-def out_feature_wait():
-    while False if out_f_dma.read(0x34) & XAXIDMA_IDLE_MASK else True:
-        pass
-def in_feature_wait():
-    while False if in_f_dma.read(0x4) & XAXIDMA_IDLE_MASK else True:
-        pass
-def in_weight_wait():
-    while False if in_w_dma.read(0x4) & XAXIDMA_IDLE_MASK else True:
-        pass
-    
-def mat_mul(A, B, C,shift=0):
-    A = A[1]
-    B = B[1]
-    C = C[1]
-    A_h = A.shape[0]
-    A_w = A.shape[1]
-    B_h = B.shape[0]
-    B_w = B.shape[1]
-    if A_h == 1:
-        print("\033[31mThe height of matrix A can not be 1\033[0m")
-        return 
-    if A_w > in_F_width_max:
-        print("\033[31mThe width of matrix A is too large\033[0m")
-        return 
-    if A_w != B_h:
-        print("\033[31mThe width of matrix A is not equal to the height of matrix B\033[0m")
-        return
-    if A_w % A_SIZE != 0 :
-        print("\033[31mThe width of matrix A is not the integer multiple of A_SIZE\033[0m")
-        return
-    if B_w % A_SIZE != 0 :
-        print("\033[31mThe width of matrix B is not the integer multiple of A_SIZE\033[0m")
-        return
-    if A.nbytes > in_F_max_size:
-        print("\033[31mThe size of matrix A is too large\033[0m")
-        return
-    if B.nbytes > in_W_max_size:
-        print("\033[31mThe size of matrix B is too large\033[0m")
-        return
-    if C.nbytes > in_W_max_size:
-        print("\033[31mThe size of matrix C is too large\033[0m")
-        return
-    F_width_block_num = int(A_w / A_SIZE)
-    W_width_block_num = int(B_w /A_SIZE)
-    MM_ultra.write(0x0,shift)
-    MM_ultra.write(0x4,A_h)
-    MM_ultra.write(0x8,F_width_block_num)
-    MM_ultra.write(0xc,W_width_block_num)
-    out_feature_transfer(C)
-    in_feature_transfer(A)
-    in_weight_transfer(B)
-    out_feature_wait()
+    def fifo_overflowed(self):
+        return bool(self.ctrl.read(REG_STATUS) & 0x1)
+
+    def run(self, feature, weight):
+        """feature: (in_rows, in_cols) int8 ndarray. weight: (in_cols, out_cols) int8 ndarray.
+        Returns the (in_rows, out_cols) int8 result of gelu(softmax(feature @ weight >> shift))."""
+        in_rows, in_cols = feature.shape
+        w_in_cols, out_cols = weight.shape
+        if in_cols != w_in_cols:
+            raise ValueError(f"feature cols ({in_cols}) != weight rows ({w_in_cols})")
+        if (in_rows, in_cols, out_cols) != (self.in_rows, self.in_cols, self.out_cols):
+            raise ValueError("shape doesn't match the last configure() call -- call configure() first")
+
+        feature_buf = allocate(shape=(in_rows, in_cols), dtype=np.int8)
+        weight_buf = allocate(shape=(in_cols, out_cols), dtype=np.int8)
+        result_buf = allocate(shape=(in_rows, out_cols), dtype=np.int8)
+        try:
+            feature_buf[:] = feature
+            weight_buf[:] = weight
+
+            # Arm the receive channel before the two send channels start
+            # streaming, matching apps/Matrix.cpp's ordering.
+            self.result_dma.recvchannel.transfer(result_buf)
+            self.weight_dma.sendchannel.transfer(weight_buf)
+            self.feature_dma.sendchannel.transfer(feature_buf)
+
+            self._wait(self.feature_dma.sendchannel, "feature send")
+            self._wait(self.weight_dma.sendchannel, "weight send")
+            self._wait(self.result_dma.recvchannel, "result receive")
+
+            if self.fifo_overflowed():
+                print("WARNING: softmax_to_gelu_fifo_overflow was set -- "
+                      "increase GELU_FIFO_DEPTH or shrink out_cols and re-synthesize")
+
+            return result_buf.copy()
+        finally:
+            feature_buf.freebuffer()
+            weight_buf.freebuffer()
+            result_buf.freebuffer()
+
+    @staticmethod
+    def _wait(channel, label, timeout_s=_DMA_WAIT_TIMEOUT_S):
+        deadline = time.time() + timeout_s
+        while not channel.idle:
+            if time.time() > deadline:
+                raise TimeoutError(f"{label} DMA channel did not go idle within {timeout_s}s")
+            time.sleep(0.001)

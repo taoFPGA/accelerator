@@ -90,6 +90,15 @@ SOFTMAX_FILES = \
 	$(TB)/stall_monitor.sv \
 	$(TB)/Softmax_top_tb.sv
 
+# Debug-only reproduction of a real PYNQ-Z2 hardware finding (see
+# report/project_story.md) -- not part of the regular verification suite.
+SOFTMAX_ROW1_DEBUG_FILES = \
+	$(CORE)/Softmax_control.v \
+	$(CORE)/Softmax.v \
+	$(CORE)/Exp_module.v \
+	$(CORE)/Ln_module.v \
+	$(TB)/Softmax_row1_debug_tb.sv
+
 MM_FILES = \
 	$(CORE)/MM_ultra.v \
 	$(CORE)/MM_in_buffer.v \
@@ -128,13 +137,13 @@ TRANSFORMER_FILES = \
 	$(TOP)/transformer_block_top.v \
 	$(TB)/transformer_block_tb.sv
 
-.PHONY: run_all run_gelu run_softmax run_mm run_transformer \
+.PHONY: run_all run_gelu run_softmax run_softmax_row1_debug run_mm run_transformer \
         waves_gelu waves_softmax waves_mm waves_transformer \
         profile_gelu profile_softmax profile_mm profile_transformer \
         clean help
 
 help:
-	@echo "Targets: run_gelu run_softmax run_mm run_transformer run_all"
+	@echo "Targets: run_gelu run_softmax run_softmax_row1_debug run_mm run_transformer run_all"
 	@echo "         waves_gelu waves_softmax waves_mm waves_transformer"
 	@echo "         profile_gelu profile_softmax profile_mm profile_transformer"
 	@echo "         clean"
@@ -149,6 +158,10 @@ run_gelu:
 run_softmax:
 	mkdir -p $(RUNROOT)/softmax $(REPORTS)
 	cd $(RUNROOT)/softmax && $(XRUN) $(COMMON_FLAGS) $(SOFTMAX_FILES) -top Softmax_top_tb 2>&1 | tee $(REPORTS)/sim_softmax_top_tb.rpt
+
+run_softmax_row1_debug:
+	mkdir -p $(RUNROOT)/softmax_row1_debug $(REPORTS)
+	cd $(RUNROOT)/softmax_row1_debug && $(XRUN) $(COMMON_FLAGS) $(SOFTMAX_ROW1_DEBUG_FILES) -top Softmax_row1_debug_tb 2>&1 | tee $(REPORTS)/sim_softmax_row1_debug_tb.rpt
 
 run_mm:
 	mkdir -p $(RUNROOT)/mm $(REPORTS)
