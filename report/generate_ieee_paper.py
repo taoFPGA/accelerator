@@ -5,11 +5,17 @@ the RTL itself during this project's hardware bring-up work -- no
 figures in this script are invented; every number below traces to a
 specific section cited inline.
 
-Run on the dev machine (needs python-docx):
+Run on the dev machine (needs python-docx AND pandoc on PATH -- pandoc
+is used to convert this file's LaTeX equation sources into real Word
+OMML equation objects, not a Unicode-character approximation):
     python generate_ieee_paper.py
 Output: report/taoFPGA_IEEE_paper.docx
 """
+import copy
 import os
+import subprocess
+import tempfile
+import zipfile
 
 from docx import Document
 from docx.shared import Pt, Inches, Cm, RGBColor
@@ -17,6 +23,9 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.section import WD_SECTION
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
+from lxml import etree
+
+M_NS = "http://schemas.openxmlformats.org/officeDocument/2006/math"
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 FIGURES = os.path.join(HERE, "figures")
@@ -168,19 +177,46 @@ def add_table(doc, headers, rows, caption):
     return table
 
 
-def equation(doc, lines, number):
-    """Centered, italicized equation block (one or more aligned lines),
-    with a single IEEE-style right-parenthesized number on the last line."""
-    if isinstance(lines, str):
-        lines = [lines]
-    for i, line in enumerate(lines):
+def _latex_line_to_omath_para(latex_src):
+    """Runs pandoc on one LaTeX display-math line and returns the
+    <m:oMathPara> element it produces, as a real Word OMML object --
+    not a Unicode-character approximation. NOTE: pandoc's LaTeX->OMML
+    path mishandles multi-row 'aligned' environments (the '&' column
+    separators and '\\\\' row breaks leak through as literal text
+    instead of splitting into separate <m:e> rows) -- verified directly
+    by inspecting its output before relying on it. Multi-line equations
+    must therefore be built by converting each line independently (see
+    latex_equation()), never as one aligned block."""
+    with tempfile.TemporaryDirectory() as td:
+        md_path = os.path.join(td, "eq.md")
+        docx_path = os.path.join(td, "eq.docx")
+        with open(md_path, "w", encoding="utf-8") as f:
+            f.write(f"$${latex_src}$$")
+        subprocess.run(["pandoc", md_path, "-o", docx_path],
+                        check=True, capture_output=True)
+        with zipfile.ZipFile(docx_path) as z:
+            xml_bytes = z.read("word/document.xml")
+        root = etree.fromstring(xml_bytes)
+        omath_para = root.find(f".//{{{M_NS}}}oMathPara")
+        if omath_para is None:
+            raise RuntimeError(f"pandoc produced no oMathPara for: {latex_src}")
+        return omath_para
+
+
+def latex_equation(doc, latex_lines, number):
+    """Insert one or more LaTeX-sourced display equations as real Word
+    equation objects (via pandoc), each its own centered paragraph, with
+    the IEEE-style equation number attached to the last line."""
+    if isinstance(latex_lines, str):
+        latex_lines = [latex_lines]
+    for i, latex_src in enumerate(latex_lines):
+        omath_para = _latex_line_to_omath_para(latex_src)
         p = doc.add_paragraph()
         p.alignment = WD_ALIGN_PARAGRAPH.CENTER
         p.paragraph_format.space_before = Pt(4 if i == 0 else 0)
-        p.paragraph_format.space_after = Pt(4 if i == len(lines) - 1 else 0)
-        r = p.add_run(line)
-        style_run(r, size=BODY_SIZE, italic=True)
-        if i == len(lines) - 1:
+        p.paragraph_format.space_after = Pt(4 if i == len(latex_lines) - 1 else 0)
+        p._p.append(copy.deepcopy(omath_para))
+        if i == len(latex_lines) - 1:
             r2 = p.add_run(f"    ({number})")
             style_run(r2, size=BODY_SIZE, italic=False)
 
@@ -194,6 +230,21 @@ def _shade_cell(cell, hex_color):
     tcPr.append(shd)
 
 
+def _border_cell(cell, hex_color, sz="10"):
+    """Explicit visible border on all four sides -- the shading alone
+    reads too faintly as a distinct 'code box' at print contrast."""
+    tcPr = cell._tc.get_or_add_tcPr()
+    borders = OxmlElement("w:tcBorders")
+    for side in ("top", "left", "bottom", "right"):
+        el = OxmlElement(f"w:{side}")
+        el.set(qn("w:val"), "single")
+        el.set(qn("w:sz"), sz)
+        el.set(qn("w:space"), "0")
+        el.set(qn("w:color"), hex_color)
+        borders.append(el)
+    tcPr.append(borders)
+
+
 def listing(doc, number, code_lines, caption, mono_size=Pt(8)):
     """IEEE-style code listing: a shaded, monospace box (via a 1-cell
     table, for a clean bordered background) followed by a centered
@@ -202,6 +253,14 @@ def listing(doc, number, code_lines, caption, mono_size=Pt(8)):
     table.autofit = True
     cell = table.rows[0].cells[0]
     _shade_cell(cell, "F2F2F0")
+    _border_cell(cell, "888680")
+    tcMar = OxmlElement("w:tcMar")
+    for side, val in (("top", "80"), ("bottom", "80"), ("left", "100"), ("right", "100")):
+        el = OxmlElement(f"w:{side}")
+        el.set(qn("w:w"), val)
+        el.set(qn("w:type"), "dxa")
+        tcMar.append(el)
+    cell._tc.get_or_add_tcPr().append(tcMar)
     cell.paragraphs[0].paragraph_format.space_after = Pt(0)
     first = True
     for line in code_lines:
@@ -251,7 +310,7 @@ section0.bottom_margin = Cm(2.5)
 title_p = doc.add_paragraph()
 title_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
 r = title_p.add_run(
-    "taoFPGA: Architecture, Implementation, and Evaluation of a\n"
+    "taoFPGA: Architecture, Implementation, and Evaluation of a "
     "Quantized Transformer Processing Core on Edge FPGA"
 )
 style_run(r, size=Pt(18), bold=True)
@@ -265,11 +324,11 @@ authors_p.paragraph_format.space_after = Pt(2)
 
 affil_p = doc.add_paragraph()
 affil_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-r = affil_p.add_run(
-    "Faculty of Engineering, Bar-Ilan University\n"
-    "Academic Supervisor: Dr. Leonid Yavits | Project Mentor: David Freud"
-)
+r = affil_p.add_run("Faculty of Engineering, Bar-Ilan University")
 style_run(r, size=Pt(10), italic=True)
+r.add_break()
+r2 = affil_p.add_run("Academic Supervisor: Dr. Leonid Yavits | Project Mentor: David Freud")
+style_run(r2, size=Pt(10), italic=True)
 affil_p.paragraph_format.space_after = Pt(14)
 
 # ---- Abstract + keywords (single column) ----
@@ -406,8 +465,10 @@ body_para(doc,
     "RTL. Formally, for a pre-shift accumulator value z and a "
     "runtime-configurable shift ∈ ℤ⁺, the quantization operator realized "
     "in hardware is")
-equation(doc,
-    "Quant(z) = clip( ⌊(z + 2^(shift−1))·2^(−shift)⌋, −128, 127 )",
+latex_equation(doc,
+    r"\operatorname{Quant}(z) = \operatorname{clip}\!\left("
+    r"\left\lfloor (z + 2^{\,\mathrm{shift}-1}) \cdot 2^{-\mathrm{shift}} \right\rfloor,"
+    r"\ -128,\ 127 \right)",
     1)
 body_para(doc,
     "where ⌊·⌋ denotes floor (equivalently, arithmetic right shift for "
@@ -445,22 +506,22 @@ body_para(doc,
     "same exponential unit combined with a piecewise logarithm "
     "approximation (Ln_module) to avoid an explicit division. Formally, "
     "for a row x with elements xᵢ, the three passes compute")
-equation(doc,
-    ["m = maxᵢ(xᵢ)",
-     "S = Σᵢ 2^((xᵢ − m)·log₂e)",
-     "yᵢ = 2^(((xᵢ − m) − ln S)·log₂e)"],
+latex_equation(doc,
+    [r"m = \max_i(x_i)",
+     r"S = \sum_i 2^{(x_i-m)\log_2 e}",
+     r"y_i = 2^{((x_i-m)-\ln S)\log_2 e}"],
     2)
 body_para(doc,
     "an exact base-2 reformulation of softmax(x)ᵢ = exp(xᵢ−m)/Σ that "
     "matches the hardware's own log₂(e)-scaled exponential and Ln_module "
     "log-domain division-avoidance strategy exactly, rather than the "
-    "textbook exp/ln formulation alone. Fig. X depicts the resulting "
+    "textbook exp/ln formulation alone. Fig. 1 depicts the resulting "
     "finite-state control flow: each of the three passes streams the "
     "full N-element row exactly once, strictly sequentially, for a total "
     "latency of 3N cycles per row — the structural origin of the serial "
     "Softmax bottleneck quantified in Section VII.B.")
 figure(doc, os.path.join(FIGURES, "fig_softmax_fsm.png"),
-       "Fig. X. Softmax_control's 3-pass FSM and its per-pass equations (Eq. 2).",
+       "Fig. 1. Softmax_control's 3-pass FSM and its per-pass equations (Eq. 2).",
        width_in=3.0)
 body_para(doc,
     "The GELU "
@@ -527,17 +588,17 @@ body_para(doc,
     "dual-core ARM Cortex-A9 processing system, an AXI SmartConnect "
     "interconnect, and three independent AXI Direct Memory Access engines "
     "(feature, weight, and result channels) via Xilinx IP Integrator. "
-    "Fig. Y shows the complete top-level datapath: the PS7 configures the "
+    "Fig. 2 shows the complete top-level datapath: the PS7 configures the "
     "pipeline over AXI-Lite and streams feature and weight tensors in via "
     "two MM2S DMA channels, while a third, independent S2MM channel "
     "returns the GELU stage's output; internally, width-adapter glue logic "
     "bridges each stage's differing datapath width, exactly as detailed "
     "in Section IV.B.")
 
-# Fig. Y is wide (8 pipeline stages); span both columns for legibility.
+# Fig. 2 is wide (8 pipeline stages); span both columns for legibility.
 new_section(doc, columns=1)
 figure(doc, os.path.join(FIGURES, "fig_soc_architecture.png"),
-       "Fig. Y. Complete top-level SoC architecture: PS7, three AXI DMA "
+       "Fig. 2. Complete top-level SoC architecture: PS7, three AXI DMA "
        "channels, and the transformer_block_axi_top internal pipeline.",
        width_in=7.0)
 new_section(doc, columns=2)
@@ -678,15 +739,15 @@ body_para(doc,
     "activity-based power estimate for the full SoC design — not a "
     "physically instrumented power reading synchronized to the benchmark "
     "run itself — and should be read as a signoff-grade estimate "
-    "accordingly. Figs. 1–3 present latency, throughput, and "
+    "accordingly. Figs. 3–5 present latency, throughput, and "
     "speedup for both shapes.")
 
 figure(doc, os.path.join(FIGURES, "latency_comparison.png"),
-       "Fig. 1. Latency, CPU vs. hardware, both benchmarked shapes.")
+       "Fig. 3. Latency, CPU vs. hardware, both benchmarked shapes.")
 figure(doc, os.path.join(FIGURES, "throughput_comparison.png"),
-       "Fig. 2. Throughput (GOP/s), CPU vs. hardware, both shapes.")
+       "Fig. 4. Throughput (GOP/s), CPU vs. hardware, both shapes.")
 figure(doc, os.path.join(FIGURES, "speedup_factor.png"),
-       "Fig. 3. Measured hardware kernel speedup over CPU.")
+       "Fig. 5. Measured hardware kernel speedup over CPU.")
 
 bench_table = [
     ["Shape", "HW latency", "CPU latency", "Speedup"],

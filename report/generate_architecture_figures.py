@@ -68,7 +68,7 @@ def arrow(ax, p0, p1, color=INK, style="-|>", lw=1.3, connectionstyle="arc3,rad=
 # ============================================================================
 fig, ax = plt.subplots(figsize=(12.6, 4.4))
 ax.set_xlim(0, 130)
-ax.set_ylim(0, 44)
+ax.set_ylim(0, 39)
 ax.axis("off")
 
 # --- PS7 ---
@@ -125,10 +125,6 @@ last_cx = centers[-1]
 arrow(ax, (last_cx, py), (last_cx, 5), color=INK_SECONDARY, connectionstyle="arc3,rad=0")
 arrow(ax, (last_cx, 5), (16, dma_y - 16 + 3), color=INK_SECONDARY, connectionstyle="arc3,rad=-0.15")
 
-ax.text(65, 40.5, "Fig. Y. Top-level SoC datapath: PS7, three AXI DMA channels, and the\n"
-                  "transformer_block_axi_top accelerator pipeline.",
-        fontsize=8.5, ha="center", color=INK)
-
 fig.tight_layout()
 for ext in ("png", "pdf"):
     fig.savefig(os.path.join(OUT_DIR, f"fig_soc_architecture.{ext}"), dpi=300)
@@ -141,7 +137,7 @@ print("Wrote fig_soc_architecture.png/pdf")
 # ============================================================================
 fig, ax = plt.subplots(figsize=(3.5, 4.6))
 ax.set_xlim(0, 10)
-ax.set_ylim(0, 20.5)
+ax.set_ylim(0, 18.3)
 ax.axis("off")
 
 state_w, state_h = 7.6, 2.5
@@ -168,10 +164,6 @@ arrow(ax, (xs - 0.9, ys[-1] + state_h / 2), (xs - 0.9, ys[0] + state_h / 2), col
 arrow(ax, (xs - 0.9, ys[0] + state_h / 2), (xs, ys[0] + state_h / 2), color=INK_SECONDARY)
 ax.text(xs - 1.3, (ys[0] + ys[-1]) / 2 + 1, "row done", fontsize=6.5,
         color=INK_SECONDARY, rotation=90, ha="center", va="center")
-
-ax.text(5, 19.3, "Fig. X. Softmax_control's 3-pass FSM: each pass streams the\n"
-                 "full N-element row once, serially -- total latency 3N cycles.",
-        fontsize=7.3, ha="center", color=INK)
 
 fig.tight_layout()
 for ext in ("png", "pdf"):
