@@ -1286,6 +1286,92 @@ the benchmark itself with a real, defensible result set: a validated, correct en
 ViT-Tiny software baseline (10.68s / 0.094 img/sec) alongside a genuine, measured 70-98x
 kernel-level hardware speedup, honestly scoped as exactly that and nothing more.
 
+---
+
+## 32. Future Work & Hardware Constraints
+
+**Codebase freeze.** With §31's benchmark closed out, the team is deliberately freezing the
+codebase here for the final report. Two known, real, open items are explicitly **not** being
+chased further in this scope — recorded here for completeness, not as unsolved mysteries:
+
+- **The `n_rows=2` hang (§29).** A concrete row-address-wrap bug was found and explained for
+  `F_length==1` in `MM_in_buffer.v`; the separate `n_rows=2` DMA hang was traced far enough to rule
+  out that same cause but not far enough to find its actual root. Both are confined to
+  tiny-shape configurations far outside anything this design was ever validated for or would see
+  in real use (§29's full-scale 200×96×160 run passed with 0/32,000 errors) — a real gap, not a
+  correctness risk to the results already reported.
+- **The `softmax_to_gelu_fifo_overflow` status bit's reliability (§27, §29, §31).** Documented in
+  the RTL as "live, not latched," it fired inconsistently across otherwise-identical benchmark
+  runs without any corresponding data corruption observed. Whether it's a genuine transient
+  condition, a read-timing artifact, or something that occasionally *does* matter and simply
+  wasn't caught by these particular runs' tolerance checks was never conclusively determined.
+
+### Pushing further: batch processing
+
+The natural next step for maximizing this accelerator's throughput is **batch processing** —
+streaming multiple images' feature matrices through the systolic array against a single loaded
+weight matrix, rather than one image (one `TransformerAccelerator.run()` call) at a time.
+
+**Why this would matter.** `MM_ultra` is a weight-stationary systolic array: for a given
+`(feature, weight)` pair, the weight matrix is loaded into the PE array once and then reused
+against every row of the feature matrix already (this is exactly why a single image's 197 tokens
+stream through one loaded weight rather than reloading it per token). Batching multiple images
+against the *same* weight matrix — which is exactly what happens across a batch dimension in any
+real transformer layer, since every token in every image in a batch is projected by the identical
+learned weights — extends that same reuse further: more feature rows amortize the fixed cost of
+getting the weight matrix into the array before the next `configure()`/weight-reload, directly
+increasing the array's utilization and effective throughput. This is standard practice for
+systolic-array accelerators generally, not specific to this design, and is a genuine, well-motivated
+next experiment — not implemented here, but worth being explicit about *why* it's the right next
+lever to pull.
+
+**Why it can't be implemented in the current scope.** Batching means stacking `N` images' token
+sequences into one larger feature matrix: `rows = N * 197` instead of `197`, feeding the same
+shared weight matrix. The weight buffer itself (`in_cols * out_cols` bytes) is unaffected by batch
+size — but the feature buffer (`rows * in_cols`) and result buffer (`rows * out_cols`) both scale
+linearly with `N`, and both run straight into §31's 64KB single-DMA-transfer ceiling almost
+immediately:
+
+| Shape | Per-image buffer (N=1) | At N=2 | Headroom at N=1 |
+|---|---|---|---|
+| Projection (192×192) feature/result | 197×192 = 37,824 B | 75,648 B — **exceeds 65,536** | ~42% used |
+| MLP-shaped (192×320) result | 197×320 = 63,040 B | 126,080 B — **exceeds 65,536** | ~96% used already |
+
+Batching even **two** images already overflows the feature/result buffers for every shape
+benchmarked in §31 — and the MLP-shaped case has almost no headroom left even at a single image
+(63,040 of 65,536 bytes already used, which is exactly why `out_cols` was capped at 320 rather
+than the real 768 in the first place). Batching is therefore not a small extension of the current
+driver; it is blocked by the same root constraint §31 already identified and chose not to work
+around in software.
+
+**The necessary prerequisite: Scatter-Gather DMA.** §31 established that naively splitting a
+transfer across multiple direct-register-mode DMA calls is unsafe with the current RTL — each
+call's hardware-asserted `tlast` would prematurely reset `MM_in_buffer.v`'s write-address
+counters, silently corrupting the buffer rather than raising an error. Unlocking batching
+correctly needs one of:
+
+1. **A larger `c_sg_length_width`** on all three `axi_dma` cores (re-synthesizing with, e.g., 23
+   bits instead of 16 raises the single-transfer ceiling to several MB, comfortably covering
+   realistic batch sizes without any protocol change) — the simpler fix if the length-register
+   width alone is the binding constraint, still direct-register mode.
+2. **True Scatter-Gather DMA** (`c_include_sg=1`, replacing the direct-register driver calls with
+   `pynq`'s SG buffer-descriptor API), which gives explicit per-descriptor `TXSOF`/`TXEOF` control
+   — letting a batch be assembled from multiple descriptors while asserting `tlast` only on the
+   genuinely final one, avoiding the premature-reset failure mode entirely and scaling to
+   arbitrarily large batches without a single-descriptor size ceiling at all.
+
+Either path requires re-synthesizing the block design (`prj.tcl`'s `axi_dma` `CONFIG` properties)
+and is real engineering work, not a driver patch — explicitly out of scope for this frozen
+codebase, and the recommended starting point for whoever picks this project up next.
+
+**Lesson (closing this project's hardware bring-up arc):** every constraint found in
+Sections 22-32 — the board's DDR preset, the register map, the IP naming, the tiny-shape edge
+case, the DMA transfer ceiling — was a fact about a specific layer of the system that no other
+layer's correctness could substitute for checking. Documenting a limitation precisely, with the
+exact numbers that make it concrete (here, the byte-for-byte buffer arithmetic showing batching
+fails at N=2), is what turns "we ran out of time for this" into an actionable starting point for
+whoever continues the work.
+
 ## Summary of lessons learned (rollup)
 
 1. **Verify infrastructure assumptions before deep technical investigation** — the PBS saga
