@@ -144,6 +144,20 @@ mem_gen/*.coe
 
 mem_gen/*.mem
 
+# --- ViT benchmark assets (large, regenerable via apps/vit/export_vit_weights.py) ---
+#
+# vit_tiny_weights.npz (~23MB pretrained timm weights), vit_input.npy, and
+# vit_reference_logits.npy are pulled/derived from a public pretrained
+# checkpoint, not original project work -- regenerate with
+# `python export_vit_weights.py` (needs torch+timm on the dev machine only,
+# never on the board). sample_dog.jpg and imagenet_classes.txt are small,
+# standard, and kept tracked below via the negation pattern.
+apps/vit/assets/*.npz
+
+apps/vit/assets/vit_input.npy
+
+apps/vit/assets/vit_reference_logits.npy
+
 # --- OS & Editor Junk ---
 
 .DS_Store
