@@ -51,13 +51,27 @@ N_RUNS_KERNEL = 10
 # Representative ViT-Tiny matrix shapes, in the hardware's terms. Row count
 # (seq_len) has no A_size tiling constraint -- only the two column counts
 # do (both already multiples of A_size=16 here). Both shapes' block counts
-# (12 and 48) are comfortably inside the regime report/project_story.md
-# Section 29 confirmed correct on real hardware (F_width_block_num=6/
+# are comfortably inside the regime report/project_story.md Section 29
+# confirmed correct on real hardware (F_width_block_num=6/
 # W_width_block_num=10 passed cleanly); nowhere near the small-block-count
 # edge case (Section 29) that's still an open bug.
+#
+# MLP_SHAPE's out_cols is capped at 320, NOT the real MLP hidden dim (768):
+# this design's 3 AXI DMA cores were synthesized with c_sg_length_width=16
+# (prj.tcl), capping any single transfer at 65536 bytes. The real MLP
+# weight buffer (192*768=147456 bytes) exceeds that. Splitting it into
+# multiple smaller DMA transfers is NOT a safe software workaround here --
+# MM_in_buffer.v's write-address counters reset to 0 on the stream's
+# tlast, and this design's direct-register DMA mode asserts tlast at the
+# end of *every* transfer issued, not just a true final one; two chunked
+# transfers would each look like "the last beat" to the RTL and the
+# second would silently overwrite the first. A real fix (larger
+# c_sg_length_width, or real Scatter-Gather DMA) needs re-synthesis, not
+# a driver patch -- see report/project_story.md Section 31.
 SEQ_LEN = 197           # ViT-Tiny token count (196 patches + 1 cls token)
-PROJECTION_SHAPE = (SEQ_LEN, EMBED_DIM, EMBED_DIM)   # projection-sized kernel (192 -> 192)
-MLP_SHAPE = (SEQ_LEN, EMBED_DIM, EMBED_DIM * 4)      # real MLP up-projection size (192 -> 768)
+MLP_HIDDEN_CAPPED = 320  # largest multiple of A_size keeping all 3 buffers <= 65536 bytes at EMBED_DIM=192/SEQ_LEN=197
+PROJECTION_SHAPE = (SEQ_LEN, EMBED_DIM, EMBED_DIM)          # projection-sized kernel (192 -> 192)
+MLP_SHAPE = (SEQ_LEN, EMBED_DIM, MLP_HIDDEN_CAPPED)         # MLP-shaped, DMA-limited to 320 (real MLP hidden dim is 768)
 
 
 def software_vit_baseline():
@@ -148,7 +162,7 @@ def main():
     acc = TransformerAccelerator("design.bit")
     results = []
     for shape, label in [(PROJECTION_SHAPE, "projection-sized (192x192)"),
-                          (MLP_SHAPE, "MLP-sized (192x768)")]:
+                          (MLP_SHAPE, f"MLP-shaped, DMA-limited (192x{MLP_HIDDEN_CAPPED}, real MLP hidden dim is 768)")]:
         r = hardware_kernel_benchmark(acc, shape, label)
         results.append(r)
         print(f"\n{r['label']}  rows={shape[0]} in_cols={shape[1]} out_cols={shape[2]}")

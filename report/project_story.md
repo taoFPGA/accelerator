@@ -1230,6 +1230,51 @@ model needs, and "does the hardware's fixed pipeline structurally match this mod
 is a question worth answering explicitly, in writing, before any numbers get generated, especially
 for results headed into a report someone else will evaluate.
 
+---
+
+## 31. First real ViT benchmark run — a genuine 70.6x kernel speedup, and a real 64KB DMA
+    ceiling found (and correctly *not* worked around in software)
+
+**Context:** Ran `vit_benchmark.py` on the board for the first time.
+
+**Part 1 (software baseline) worked cleanly:** the validated NumPy ViT-Tiny forward pass took
+10.58s (0.094 images/sec) on the ARM Cortex-A9 and reproduced the exact same classification
+(Samoyed, 87.26%) as the PyTorch reference — confirms §30's validation holds on the real board,
+not just the dev machine.
+
+**Part 2's first shape (192x192 projection) gave a real, measured result: 5.77ms hardware vs.
+407.7ms CPU for the identical fused matmul+softmax+GELU operation — a 70.6x kernel speedup.** The
+`softmax_to_gelu_fifo_overflow` warning fired again (as in §29's full-scale run), still presumed
+benign per the "live, not latched" register semantics, still an open item to actually pin down.
+
+**The second shape (192x768, the real MLP hidden dim) crashed:** `pynq.lib.dma` refused the
+transfer outright — `ValueError: ... exceeds the maximum DMA buffer size 65536`. Root cause: the
+three `axi_dma` cores were synthesized with `c_sg_length_width=16` (`prj.tcl`, unchanged since the
+original integration in §17-19) — a 16-bit length register caps any single DMA transfer at 65,536
+bytes, and `192*768=147,456` bytes exceeds it.
+
+**Deliberately did not paper over this with software chunking.** The obvious-looking fix — split
+the oversized transfer into multiple smaller DMA calls — was checked against the actual RTL before
+being ruled out: `MM_in_buffer.v`'s `in_F_addr`/`in_W_addr` write-pointer counters reset to `0` on
+the stream's `tlast`, and this design's direct-register (non-Scatter-Gather) DMA mode asserts
+`tlast` at the end of *every* transfer issued, not only a true final one. Two chunked transfers
+would each look like "the last beat" to the RTL — the second chunk would silently overwrite the
+first starting from address 0, corrupting the buffer rather than raising any error. A real fix
+(a larger `c_sg_length_width`, or genuine Scatter-Gather DMA with explicit `TXEOF` control per
+descriptor) needs re-synthesis, not a driver patch — logged as an open item, not implemented here.
+
+**Immediate fix:** capped the MLP-shaped benchmark at `out_cols=320` (the largest multiple of
+`A_size` keeping all three buffers under 65,536 bytes at the real `embed_dim=192`/`seq_len=197`),
+labeled explicitly in both the code and its printed output as DMA-limited, not the real 768-wide
+MLP dimension — consistent with §30's standing rule against reporting a number as something it
+isn't.
+
+**Lesson:** the fastest-looking fix for a hardware error isn't automatically the correct one —
+checking what a workaround would actually do to the specific RTL logic involved (here, tracing
+exactly what drives `in_F_addr`'s reset before assuming DMA chunking was safe) caught a
+data-corrupting bug before it shipped, the same discipline as refusing to hand-wave `MM_in_buffer.v`'s
+addressing logic in §29 rather than accepting a fix that merely made the error message go away.
+
 ## Summary of lessons learned (rollup)
 
 1. **Verify infrastructure assumptions before deep technical investigation** — the PBS saga
