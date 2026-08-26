@@ -82,18 +82,11 @@ def _title(fig, title, subtitle):
     fig.text(0.02, 0.91, subtitle, ha="left", fontsize=10, color=INK_SECONDARY)
 
 
-def _footnote(fig):
-    fig.text(0.02, 0.01,
-              "PYNQ-Z2 kernel benchmark vs. equivalent CPU computation of the same fused op.\n"
-              "See report/project_story.md Section 31.",
-              ha="left", va="bottom", fontsize=7.5, color=INK_MUTED, linespacing=1.4)
-
-
 def grouped_bar_chart(values_a, values_b, label_a, label_b, ylabel, title, subtitle, filename, value_fmt):
     x = range(len(SHAPES))
     width = 0.32
     fig, ax = plt.subplots(figsize=(7.2, 4.6))
-    fig.subplots_adjust(top=0.78, bottom=0.20)
+    fig.subplots_adjust(top=0.78, bottom=0.14)
 
     bars_a = ax.bar([i - width / 2 for i in x], values_a, width, label=label_a, color=COLOR_CPU, zorder=3)
     bars_b = ax.bar([i + width / 2 for i in x], values_b, width, label=label_b, color=COLOR_HW, zorder=3)
@@ -109,7 +102,6 @@ def grouped_bar_chart(values_a, values_b, label_a, label_b, ylabel, title, subti
                         fontsize=10, labelcolor=INK_SECONDARY)
 
     _title(fig, title, subtitle)
-    _footnote(fig)
 
     for ext in ("png", "pdf"):
         fig.savefig(os.path.join(OUT_DIR, f"{filename}.{ext}"), dpi=300)
@@ -119,10 +111,10 @@ def grouped_bar_chart(values_a, values_b, label_a, label_b, ylabel, title, subti
 
 def speedup_chart():
     fig, ax = plt.subplots(figsize=(7.2, 4.6))
-    fig.subplots_adjust(top=0.78, bottom=0.20)
+    fig.subplots_adjust(top=0.78, bottom=0.14)
 
     bars = ax.bar(SHAPES, SPEEDUP, width=0.45, color=COLOR_HW, zorder=3)
-    _bar_labels(ax, bars, "{:.1f}x")
+    _bar_labels(ax, bars, "{:.2f}x")
 
     _style_axes(ax, "Speedup (CPU time / hardware time)")
     ax.margins(y=0.15)
@@ -130,7 +122,6 @@ def speedup_chart():
 
     _title(fig, "Hardware Kernel Speedup",
            "Same fused matmul+softmax+GELU operation, hardware vs. CPU")
-    _footnote(fig)
 
     for ext in ("png", "pdf"):
         fig.savefig(os.path.join(OUT_DIR, f"speedup_factor.{ext}"), dpi=300)
