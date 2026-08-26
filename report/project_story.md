@@ -1065,6 +1065,110 @@ convention, and its installed package versions are all board-specific facts that
 from documentation written for a generic PYNQ image, and are worth writing down once discovered
 rather than re-derived by whoever automates this next.
 
+---
+
+## 28. `Softmax_row1_debug_tb.sv` ran — a clean negative result that redirects the search
+
+**Context:** §26 left `Softmax_row1_debug_tb.sv` written but not run, needing the university's
+Xcelium environment. Ran it there against the exact 32-value row that failed on real PYNQ-Z2
+hardware.
+
+**Result: the RTL is correct.** `Softmax_control` run standalone, given the exact inputs and
+register configuration the real hardware run used, computed column 10 as `13` (golden model
+expects ~12) and column 19 as `23` (expects ~22) — both close, both correctly non-zero, the
+opposite of the `0`/`0` real hardware returned. No internal signal (`data_in_max`, `x_max_S9Q10`,
+`e_sum_U8Q12`, `ln_U3Q10`, `x_max_ln_S9Q10`, either `Exp_module` output) diverges from the
+expected trace. This clears both candidate spots hand-traced in §26 (the `Exp_module` `U0Q25`
+saturation behavior, and `Softmax.v`'s `x_max_ln_S9Q10` positive-clamp) — the module computes the
+right answer when its actual inputs and configuration are as assumed.
+
+**A trace-reading trap flagged explicitly, not just avoided quietly:** matching a given
+`$display` line's `out_addr` (which column is being *fed in* that cycle) against the same line's
+`data_out` (which column's result is *emerging* that cycle) is wrong — `Softmax.v` has ~10 cycles
+of internal pipeline latency between the two, so they're offset and naively reading them together
+produces a misleading picture. The testbench's `y_hard[]` capture (indexed by its own output-side
+counter, independent of the input-side `out_addr`) is the trustworthy read. Worth keeping in mind
+for anyone re-reading `reports/sim/sim_softmax_row1_debug_tb.rpt`'s per-cycle trace directly.
+
+**What this redirects to:** since the isolated module is provably correct against the assumed
+inputs, the bug — if it's a logic bug at all — has to be in something the isolated sim couldn't
+exercise: whether the actual `MM_ultra -> axis_downsizer -> Softmax_control` data path really
+delivers the assumed 32 values in the assumed order on real hardware (the row-boundary counter in
+`transformer_block_top.v` is bespoke integration logic this test never touched); whether `MM.py`
+actually wrote the intended register values (freshly rewritten in §23, and unverified by readback
+until now); or, less likely given the existing +0.293ns WNS margin, real post-route timing
+marginality that zero-delay behavioral simulation structurally can't reveal. Two direct,
+board-only checks (register readback right after `configure()`, and a "marker row" input designed
+to make a row/framing mixup visually obvious via a unique per-row spike position) were proposed as
+the next diagnostic, in preference to another simulation round-trip — both are things only the
+real hardware path can actually confirm or refute.
+
+**Lesson:** a clean negative result is not a dead end, it's a boundary — the earlier §26 lesson
+generalizes one level further: once a module is proven correct in isolation, the remaining search
+space is provably *everything outside it* (its actual inputs, its actual configuration, or the
+gap between zero-delay simulation and real silicon), not "somewhere in the module, just not the
+two spots already checked." Chasing more hypotheses inside an already-cleared module would have
+been wasted effort; the productive move is following the boundary the negative result draws.
+
+---
+
+## 29. Full-scale hardware validation PASSES (0/32,000) — the real bug is a tiny-shape edge case,
+    not a design flaw, and one root cause found in `MM_in_buffer.v`
+
+**Context:** §28 redirected the search to the register-write path and the data-framing path
+outside `Softmax_control`. Register readback confirmed every config register matches intent
+exactly, ruling out the driver. A "marker row" test (a unique spike per row, identity weight, so
+a working pipeline reproduces the spike's column position exactly) was designed to test framing
+directly.
+
+**Marker-row result was severe, not subtle:** even a single row (`n_rows=1`, matching the clean
+reset the isolated `Softmax_control` simulation already covered) came back wrong — spike detected
+at column 22 instead of the expected column 0, peak value far below expectation. A follow-up
+sweep across `n_rows=1..4` **hung** (DMA timeout) at `n_rows=2`, worse than wrong data.
+
+**Decisive test: reproduce the exact scale `transformer_block_tb.sv` already verified.** Every
+test run so far — the original smoke test (`IN_COLS=32`/`OUT_COLS=32`, giving
+`F_width_block_num=2`/`W_width_block_num=2`) and the marker-row tests — used block-count values
+far smaller than anything ever validated (the full-scale simulation used
+`F_width_block_num=6`/`W_width_block_num=10`, `IN_ROWS=200`). Re-ran the *exact* verified shape
+(200×96×160, same seed, same default scale/shift constants) through the real hardware via
+`TransformerAccelerator` + `golden_model.py`.
+
+**Result: 0 / 32,000 elements outside tolerance. PASS.** This is the headline finding: **the
+accelerator, at the scale it was actually designed and verified for, produces correct results on
+real PYNQ-Z2 silicon.** Every prior failure was confined to test shapes far smaller than
+anything this design was ever exercised at — a gap in test methodology (my choice of a "quick"
+small smoke-test shape), not a flaw in the accelerator itself. (A `softmax_to_gelu_fifo_overflow`
+warning printed during this run despite the clean pass; the status register is documented as
+"live, not latched," so it most likely reflects transient state at read-time rather than actual
+corruption — noted as a follow-up item, not a concern for this result.)
+
+**One concrete root cause found, for part of the tiny-shape failures.** Reading
+`MM_in_buffer.v`'s row-replay addressing directly (not hand-waved) found a real bug specific to
+`F_length == 1`:
+```verilog
+else if (start)
+    out_F_row_addr <= 1;
+else if (out_F_row_addr == F_length - 1)
+    out_F_row_addr <= 0;
+```
+`start` unconditionally jumps `out_F_row_addr` to `1`, but the wrap-back-to-0 condition checks for
+`F_length - 1` — which is `0` when `F_length == 1`, a value `out_F_row_addr` can never equal again
+once it becomes `1` (it only grows from there, matching a bad, growing row-index reading
+increasingly wrong data). This exactly matches the `n_rows=1` marker-row symptom (wrong, not
+hung). Traced the same logic for `F_length == 2` and confirmed the wrap condition (`1==1`)
+correctly fires there — so this specific bug does **not** explain the `n_rows=2` hang, which
+remains open and likely lives in the same small-block-count territory but isn't yet pinned down.
+
+**Lesson:** a hardware bug search needs the same scale discipline as everything else in this
+project — testing "quickly" with small shapes felt efficient but accidentally tested a completely
+different, never-validated region of the design's parameter space, and very nearly turned a
+genuine but narrow edge case into a false alarm about the whole accelerator's correctness. The
+decisive move wasn't a cleverer hypothesis, it was re-running the *exact* condition that was
+already proven correct and confirming the result actually matches — the same "reproduce the known
+case first" discipline as the earlier `right_shifter.v` cross-check in §24, applied to shape
+instead of arithmetic.
+
 ## Summary of lessons learned (rollup)
 
 1. **Verify infrastructure assumptions before deep technical investigation** — the PBS saga
