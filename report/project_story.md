@@ -1169,6 +1169,67 @@ already proven correct and confirming the result actually matches — the same "
 case first" discipline as the earlier `right_shifter.v` cross-check in §24, applied to shape
 instead of arithmetic.
 
+---
+
+## 30. E2E ViT benchmark scoped honestly — the accelerator's pipeline doesn't match any real
+    ViT operation, so it gets a kernel-level benchmark, not a fabricated E2E speedup
+
+**Context:** Asked for a complete "E2E ViT benchmark" on the PYNQ-Z2: load an image, run a
+software baseline, run the same inference "hardware-accelerated" via `TransformerAccelerator`,
+compare latency/throughput/speedup.
+
+**Flagged a real architectural mismatch before writing anything.** `transformer_block_axi_top`'s
+pipeline is a fixed `matmul -> per-row softmax -> GELU`, fused as one inseparable stage — the
+AXI-Stream output is always post-softmax-post-GELU, with no way to tap the raw matmul result. No
+real ViT operation has that sequence: attention (`Q@Kᵀ` → softmax → `@V`) has matmuls and a
+softmax but no GELU; the MLP (`GELU(X@W1)@W2`) has a matmul and GELU but no softmax between them.
+There is therefore no ViT sub-block this accelerator can be substituted into and still produce
+numerically correct results — doing so silently would have meant reporting a broken classification
+and a fabricated "speedup" as if they were real, for a benchmark going into a supervised final
+report. Presented the honest options and the user chose a **kernel-level benchmark**: a real
+software ViT baseline for correctness, and a separate, clearly-labeled hardware kernel throughput
+number that does not claim to be an accelerated ViT run.
+
+**Second constraint found before writing code:** the PS7 is a 32-bit ARM Cortex-A9. PyTorch has no
+official wheels for that architecture — a `pip install torch` on the board would very likely fail
+outright, independent of the accelerator question. Solved by doing all PyTorch/timm work on the
+dev machine only and shipping the board a pure-NumPy reimplementation plus exported weights, so
+the board never needs anything beyond NumPy.
+
+**Built and validated a real ViT.** Installed `torch`+`timm` on the dev machine, pulled the
+pretrained `vit_tiny_patch16_224` checkpoint (5.7M params, 12 layers, embed_dim=192), and exported
+its full state_dict plus a preprocessed sample image (the standard PyTorch-hub sample dog photo)
+and PyTorch's own reference logits (`apps/vit/export_vit_weights.py`). Wrote a from-scratch,
+NumPy-only forward pass (`apps/vit/vit_numpy.py`) matching timm's architecture exactly (patch
+embed as a per-patch linear, pre-norm blocks, multi-head attention, tanh-free *exact* erf-based
+GELU — deliberately not the tanh approximation `golden_model.py` uses for the accelerator's own
+GELU, since this has to match what the real pretrained checkpoint was actually trained with).
+Validated numerically against the real PyTorch forward pass before it ever went near the board:
+**max abs logit difference 1.02e-5, identical top-1 prediction (Samoyed, 87.26%)** — this is not
+an approximation, it's the same computation to float32 noise.
+
+**`apps/vit/vit_benchmark.py`** reports two honestly separate numbers: (1) the validated NumPy ViT
+running end-to-end on the ARM CPU (real latency/throughput/classification), and (2)
+`TransformerAccelerator`'s kernel throughput on synthetic int8 data at ViT-Tiny-representative
+matrix shapes (`embed_dim=192`, `mlp_hidden=768`, `seq_len=197`), compared against an equivalent
+CPU computation of the identical fused `mm_soft -> softmax_ref -> gelu_ref` operation from
+`golden_model.py` — a fair, direct kernel-level speedup. Both benchmark shapes were deliberately
+chosen with block counts (12 and 48) well inside the regime §29 already proved correct on real
+hardware, not anywhere near the small-block-count edge case that's still open. The script prints
+an explicit disclaimer that the kernel speedup does not transfer to an end-to-end ViT claim.
+Deployed alongside `MM.py`/`golden_model.py` on the board via the same Jupyter content-API upload
+method as §27 (including creating the new `assets/` subdirectory first). The large pretrained
+weights (~23MB, regenerable via `export_vit_weights.py`, not original project work) are gitignored
+rather than committed, matching this project's existing size-discipline for large generated
+artifacts (`mem_gen/*.coe`/`*.mem`).
+
+**Lesson:** the most valuable thing to check before writing a benchmark isn't the code, it's
+whether the comparison it will report is actually true — an accelerator that computes a plausible-
+sounding fused op is not automatically a drop-in replacement for the specific op sequence a real
+model needs, and "does the hardware's fixed pipeline structurally match this model's actual math"
+is a question worth answering explicitly, in writing, before any numbers get generated, especially
+for results headed into a report someone else will evaluate.
+
 ## Summary of lessons learned (rollup)
 
 1. **Verify infrastructure assumptions before deep technical investigation** — the PBS saga
