@@ -28,11 +28,14 @@ file mkdir $REPORTS
 
 create_project project_1 "$PROJ_DIR/myproj" -part $PART -force
 
-# PYNQ-Z1 board_part definition isn't installed (not in Digilent's current
-# vivado-boards repo) -- non-fatal, board_part is only I/O pin-constraint
-# metadata for physical bring-up and doesn't affect synthesis. See
-# project_story.md for the full investigation.
-if { [catch {set_property board_part www.digilentinc.com:pynq-z1:part0:1.0 [current_project]} err] } {
+# Physical board is a PYNQ-Z2 (TUL), not the PYNQ-Z1 this flow was
+# originally built against -- same xc7z020clg400-1 part, so this line is
+# non-fatal either way (board_part is only I/O pin-constraint metadata and
+# doesn't affect synthesis). See project_story.md for the full
+# investigation, and prj.tcl's processing_system7_0 comment for why the
+# DDR3/MIO CONFIG values still need a real board-preset re-apply (not just
+# this board_part string) before trusting a bitstream on physical hardware.
+if { [catch {set_property board_part tul.com.tw:pynq-z2:part0:1.0 [current_project]} err] } {
     puts "WARNING: could not set board_part (continuing without it): $err"
 }
 

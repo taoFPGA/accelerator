@@ -57,7 +57,19 @@ if { [string first $scripts_vivado_version $current_vivado_version] == -1 } {
 set list_projs [get_projects -quiet]
 if { $list_projs eq "" } {
    create_project project_1 myproj -part xc7z020clg400-1
-   set_property BOARD_PART www.digilentinc.com:pynq-z1:part0:1.0 [current_project]
+   # Physical board is a PYNQ-Z2 (TUL), not the PYNQ-Z1 this script was
+   # originally generated against. Same xc7z020clg400-1 part, so this is
+   # purely I/O/board-preset metadata -- non-fatal if the pynq-z2 board
+   # files aren't installed (see the catch below and synth_soc.tcl).
+   # NOTE: the processing_system7_0 CONFIG block further down (DDR3 part,
+   # board-delay/DQS trace-length numbers, MIO peripheral map) still
+   # reflects the real PYNQ-Z1 board preset, not PYNQ-Z2's. That is only
+   # cosmetic for simulation/synthesis, but matters for real DDR3 training
+   # on physical hardware -- see report/project_story.md for the fix
+   # procedure (install pynq-z2 board files, re-apply the board preset on
+   # processing_system7_0, regenerate this script) before trusting a
+   # bitstream built from this file on the physical PYNQ-Z2 board.
+   catch {set_property BOARD_PART tul.com.tw:pynq-z2:part0:1.0 [current_project]}
 }
 
 
@@ -336,6 +348,14 @@ proc create_root_design { parentCell } {
  ] $axis_dwidth_converter_2
 
   # Create instance: processing_system7_0, and set properties
+  #
+  # PYNQ-Z1-SPECIFIC CONFIG BELOW: the PCW_UIPARAM_DDR_* values (DDR3 part
+  # number, board-delay, DQ/DQS/CLOCK trace-length numbers) and the MIO
+  # peripheral map are Digilent's PYNQ-Z1 board preset, not PYNQ-Z2's. Do
+  # not hand-edit these numbers -- once TUL's pynq-z2 board files are
+  # installed, re-apply the board preset to this IP in Vivado's Board tab
+  # and re-export this script (write_bd_tcl) instead. See
+  # report/project_story.md for the full procedure/rationale.
   set processing_system7_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:processing_system7:5.5 processing_system7_0 ]
   set_property -dict [ list \
    CONFIG.PCW_ACT_APU_PERIPHERAL_FREQMHZ {650.000000} \

@@ -768,6 +768,303 @@ version control precisely because they're the evidence, from disposable intermed
 state, which doesn't. That distinction, not a blanket policy in either direction, is what
 "the repository stays clean" and "the analysis is reproducible" turn out to have in common.
 
+---
+
+## 22. PYNQ-Z1 → PYNQ-Z2 hardware audit — same chip, but the DDR board preset doesn't travel
+
+**Context:** The physical board actually on hand is a PYNQ-Z2 (TUL), not the PYNQ-Z1 this whole
+flow was built against. Asked to audit the project for what needs to change to run on the real
+Z2 and to write hardware bring-up instructions.
+
+**Good news first:** `design_1_wrapper`'s only top-level ports are `DDR`/`FIXED_IO` (§19-21) —
+there is no XDC in this repo at all (`inputs/` is empty), and none is needed, because the
+accelerator has zero PL-side user I/O (no LEDs/switches/HDMI/audio pins are used — everything is
+driven from software over AXI-Lite/AXI-DMA). Both boards use the identical
+`xc7z020clg400-1` part, so the chip target, DSP/LUT/timing numbers throughout this document, and
+the bitstream's fabric logic are unaffected by the board swap.
+
+**Real gap found:** `scripts/prj.tcl`'s `processing_system7_0` CONFIG block hardcodes Digilent's
+real PYNQ-Z1 board preset — not just the `BOARD_PART` string (already known non-fatal, §16/§20 —
+that only disables the GUI's "Apply Board Preset" convenience button) but the actual
+`PCW_UIPARAM_DDR_*` values themselves: DDR3 part number (`MT41J256M16 RE-125`), and per-pin
+board-delay/DQS-to-CLK/trace-length numbers (`PCW_UIPARAM_DDR_BOARD_DELAY0-3`,
+`PCW_UIPARAM_DDR_DQ/DQS/CLOCK_*_LENGTH_MM`, etc.) that model the PYNQ-Z1 PCB's specific DDR3
+trace geometry. §20's optimistic read ("board files may not actually be a hard blocker for a
+functional bitstream") is correct for *Vivado accepting the script and building a bitstream* —
+but is a different claim from *DDR3 training succeeding reliably on physical PYNQ-Z2 silicon*,
+since TUL's Z2 is a different PCB layout (and, per public TUL documentation, a different DDR3
+device) than Digilent's Z1. This is exactly the class of gap simulation and synthesis DRC
+structurally cannot catch (§17-18's lesson again, one layer further out: this time it's a
+physical-layer PHY calibration concern, not a logic-timing one), and it was never actually
+exercised — real hardware bring-up on PYNQ-Z1 itself was never attempted either (§20's open
+item #5).
+
+**Deliberately not fixed by hand-editing numbers:** the correct DDR3 board-delay/trace-length
+values are derived from TUL's real PCB layout and DRAM part, not something to approximate or
+guess — a plausible-looking wrong number is worse than the current, honestly-wrong PYNQ-Z1
+number, because it would look fixed while still being fabricated. The correct fix is
+installing TUL's official `pynq-z2` Vivado board files and re-applying the board preset to
+`processing_system7_0` in the GUI (which pulls the authoritative numbers from that board
+definition), then re-exporting `prj.tcl` via `write_bd_tcl` — not something to do inside this
+Tcl file directly. Updated `BOARD_PART` in both `prj.tcl` and `synth_soc.tcl` to attempt
+`tul.com.tw:pynq-z2:part0:1.0` (still non-fatal if the board files aren't installed, matching
+the existing pattern) and left explicit comments on the `processing_system7_0` CONFIG block
+flagging exactly which values are still PYNQ-Z1-specific, so this isn't silently forgotten the
+way the `array_size` drift in §15 was.
+
+**Unrelated bug found in the same pass, also blocking real hardware bring-up regardless of
+board:** `apps/Defines.h` defines `MM_ADDR` from `XPAR_MM_ULTRA_TOP_0_BASEADDR` — a stale symbol
+name from before the AXI-wrapped block was renamed to `transformer_block_axi_top` (§19's
+renaming). The block Vitis will actually generate `xparameters.h` for is
+`transformer_block_axi_top_0`, so this would fail to compile against any XSA generated from the
+current design, on either board. Fixed to `XPAR_TRANSFORMER_BLOCK_AXI_TOP_0_BASEADDR`.
+
+**Lesson:** "Same silicon part number" and "same board" are not the same claim — the Zynq
+`xc7z020clg400-1` chip is identical between Z1 and Z2, so everything about this project that
+lives inside the fabric (RTL, timing closure, DSP/LUT utilization, the lack of any XDC) travels
+unchanged, but anything that models the physical PCB the chip sits on (DDR3 trace lengths, the
+specific DRAM device, board-preset metadata) does not, and needs the target board's own
+authoritative board file rather than a hand-patched guess.
+
+---
+
+## 23. Pivoted to the PYNQ/Jupyter run path, and found `apps/MM.py` was a stale, mismatched
+    driver — rewrote it against the real register map
+
+**Context:** Hardware access changed: the PYNQ-Z2 is now booting the standard PYNQ Linux image
+from its SD card and being driven from Jupyter over a direct Ethernet link, not JTAG/UART with a
+bare-metal Vitis app (§22's path). This meant `apps/MM.py` — the repo's existing PYNQ/Python
+driver attempt — became the relevant file to get right, in place of `apps/main.cpp`/`Matrix.cpp`.
+
+**Found `apps/MM.py` was comprehensively stale, not just outdated in one field.** Reading it in
+full turned up four independent mismatches against the actual integrated hardware: `A_SIZE = 25`
+(the real, synthesized systolic array is `A_size=16` everywhere else in this project);
+hardcoded peripheral addresses in the `0xA00x0000` range that don't match `prj.tcl`'s real
+address map (`0x43C00000` control, `0x40400000`/`0x40410000`/`0x40420000` for the three DMAs);
+and — the significant one — it only ever configured the old 4-register `mm_*` control interface
+and streamed a raw matmul result, with no knowledge of `softmax_scale_in/out` or `gelu_scale` at
+all. That's consistent with this file predating §19's integration of the full
+`transformer_block_axi_top` (MM→Softmax→GELU) pipeline in place of the bare `MM_ultra_top`
+matmul-only wrapper — it was never updated for that change. Its one saving grace: the AXI DMA
+direct-register-mode offsets it pokes (`0x00/0x04/0x18/0x28` for MM2S, `0x30/0x34/0x48/0x58` for
+S2MM) are the real Xilinx-documented `axi_dma` register layout — those were never wrong, just
+irrelevant once the base addresses and register count were.
+
+**Rewrote `apps/MM.py` from scratch** as `TransformerAccelerator`, a small class wrapping the
+real `transformer_block_axi_top_0` control interface and the three real `axi_dma_N` PYNQ IP
+objects (resolved by name from the `Overlay`, not hardcoded addresses — the whole point of
+building the driver from `design.hwh` instead of guessing). Register offsets and the
+softmax_scale_out == gelu_scale constraint come directly from
+`sourcecode/top/transformer_block_axi.v`'s own header comment; the default calibration constants
+(`shift=9`, `softmax_scale_in=6`, `softmax_scale_out=7`, `gelu_scale=7`) are not new guesses —
+they're the exact values `sourcecode/tb/transformer_block_tb.sv` already verified end-to-end
+(`P_shift`/`P_softmax_scale_in`/`P_softmax_scale_out`/`P_gelu_scale`), so a first hardware run
+using the driver's defaults is calibrated the same way the last verified simulation was, not an
+arbitrary new configuration. `run()` mirrors `apps/Matrix.cpp`'s DMA-ordering discipline (arm the
+S2MM receive channel before the two MM2S sends), waits on each channel with an explicit timeout
+rather than blocking forever, and surfaces the `softmax_to_gelu_fifo_overflow` status bit after
+the transfer.
+
+**Explicitly scoped out, not silently skipped:** this driver validates that data moves through
+the real pipeline correctly — transfer completes, output shape/dtype are right, no FIFO
+overflow — it does not check output values against a bit-exact numerical golden model of
+softmax+GELU. Building that would mean porting the real-valued reference model
+`transformer_block_tb.sv` already chains from `MM_Ultra_tb.sv`/`Softmax_top_tb.sv`/`gelu_tb.sv`'s
+individual golden models into Python, which is a real follow-up task, not something to fake with
+an unverified approximation.
+
+**Lesson:** A driver file that "looks done" (helper functions, matrix wrapper, DMA transfer
+calls, error-checked shape validation) can still be built entirely against the wrong version of
+the hardware — every symptom here (wrong array size, wrong addresses, missing registers) traces
+back to one root cause: nobody had updated it since `transformer_block_axi_top` replaced
+`MM_ultra_top`. The fix wasn't a patch to the wrong addresses; it was re-deriving the whole
+register/DMA contract from the current RTL's own source of truth, the same discipline
+Sections 15-16 established for `prj.tcl`.
+
+---
+
+## 24. Ported the verified golden model into Python, for bit-accurate hardware validation from Jupyter
+
+**Context:** §23's driver validates that data moves through the real pipeline correctly, but
+explicitly stopped short of checking output values against a numerical reference — asked to
+close that gap for final project verification/documentation, by porting the actual golden model
+already validated in simulation (not inventing a new one).
+
+**Found the exact reference chain already exists, in three testbenches.**
+`transformer_block_tb.sv`'s `initial` block chains `MM_soft` (matmul + round + saturate) ->
+`Softmax_task` (numerically-stable softmax) -> `gelu_ref` (tanh-approximation GELU) row by row,
+and its final `always` block compares the hardware's actual int8 output — dequantized by
+`2**-gelu_scale` — against that chain within a **6-LSB tolerance**, because errors compound
+across the two int8 quantization stages (softmax's output, then GELU's). `Softmax_top_tb.sv` and
+`gelu_tb.sv` independently verify the softmax and GELU stages alone with the same math. This is
+the project's real, already-verified ground truth — porting it faithfully was the job, not
+writing a new golden model from a textbook formula that might not match what the RTL was
+actually checked against.
+
+**Cross-checked `MM_soft`'s rounding against the actual synthesized hardware before trusting
+it.** `MM_soft` computes `(temp + (1<<(scale-1))) >>> scale` (round-then-shift) before saturating
+to int8 — read `sourcecode/core/right_shifter.v` (the real rounding hardware inside `MM_ultra`)
+line by line to confirm this isn't just a testbench convenience: `right_shifter.v` computes
+`temp1_out = data_in >>> shift; temp2_out = data_in[shift-1] ? temp1_out+1 : temp1_out` (round up
+if the top discarded bit is set) before the same saturate-to-int8 clamp. These are two different-
+looking formulations of the identical round-half-up-on-arithmetic-shift operation — confirmed
+mathematically equivalent, not just "close enough," before treating `MM_soft` as trustworthy.
+
+**Ported to `apps/golden_model.py`:** `mm_soft()`, `softmax_ref()`, `gelu_ref()`, and
+`transformer_golden()` (the full per-row chain) mirror the SV tasks/functions 1:1, and
+`compare_to_hardware()` reproduces the testbench's exact final check — same dequantization, same
+6-LSB tolerance — against a `TransformerAccelerator.run()` result from §23's driver. One quirk
+preserved verbatim rather than silently "fixed": `Softmax_task`'s row-max seed starts at `0.0`,
+not `-inf`, so an all-negative row would compute the wrong max — documented in the module
+docstring as intentional literal replication of the verified reference, not an oversight, since
+the goal is reproducing what was actually validated, not a mathematically idealized softmax.
+
+**Lesson:** "Write a golden model" is ambiguous between two very different tasks — deriving
+correct math from first principles, or faithfully reproducing the specific reference a design was
+already verified against — and only the second one is actually useful for hardware validation
+here, because the RTL's own quantization/rounding choices (confirmed by reading
+`right_shifter.v` directly) are baked into what "correct" means for this design. A textbook
+GELU/softmax implementation that didn't replicate `MM_soft`'s specific round-half-up scheme, or
+used a tighter tolerance than the two-quantization-stage error the testbench already established
+as expected, would produce false failures against genuinely correct hardware.
+
+---
+
+## 25. First real hardware run on the PYNQ-Z2 — `ol.ip_dict` named the control IP differently
+    than assumed, caught before it could silently break `TransformerAccelerator`
+
+**Context:** With `design.bit`/`design.hwh`/`MM.py`/`golden_model.py` uploaded to the board over
+Jupyter's own content API (Samba write access to the board's share turned out to be read-only for
+the `xilinx` account — not worth fighting; Jupyter's `/api/contents` PUT endpoint, authenticated
+the same way the browser session is, worked directly once the content root's path convention was
+corrected — it's already rooted at `jupyter_notebooks/`, so paths must NOT repeat that prefix),
+ran the very first real command against the physical accelerator: `Overlay("design.bit")` +
+`ol.ip_dict.keys()`.
+
+**Result:** `['axi_dma_0', 'axi_dma_1', 'axi_dma_2', 'transformer_block_axi_top_0/s00_axi']` — the
+overlay loaded and PYNQ found all four expected peripherals, but the control IP's key is
+`transformer_block_axi_top_0/s00_axi`, not the plain `transformer_block_axi_top_0` §23's driver
+assumed. PYNQ names a custom AXI-Lite peripheral like this after its actual AXI interface name
+(`s00_axi`, from `transformer_block_axi.v`'s own S_AXI port), not the block instance, because
+that's what the `.hwh` associates the address segment with — `self.ol.transformer_block_axi_top_0`
+would have resolved to a hierarchy wrapper, not the register-accessible object, and every
+`.write()`/`.read()` call in `configure()`/`fifo_overflowed()` would have failed the moment they
+were exercised on real hardware.
+
+**Fix:** replaced the hardcoded attribute access with `_resolve_ip()`, a small helper that
+searches `ol.ip_dict` for a key equal to or prefixed by the expected instance name and walks the
+resulting `/`-separated path via `getattr` — so it resolves correctly whether PYNQ exposes the IP
+under its bare instance name or `<instance>/<interface>`, instead of hardcoding the one naming
+convention this build happened to produce. Re-uploaded the fixed `MM.py` to the board the same
+way.
+
+**Also noted, not a defect:** the browser showed `Javascript Error: require is not defined`
+alongside the correct Python output — JupyterLab's widget renderer failing on a legacy RequireJS
+call `Overlay()` makes for its progress display. Cosmetic only; the Python-side result was
+correct regardless.
+
+**Lesson:** a driver can be internally consistent and still be wrong about how the *tool*
+(PYNQ, here) names things — `ol.ip_dict` is the actual ground truth for what an overlay looks
+like once built, and checking a key list before trusting an attribute-access guess is exactly the
+kind of fact that only surfaces by running against the real generated `.hwh`, not by reading RTL.
+Consistent with every other finding in this project's hardware bring-up phase (§22-24): each
+layer — board, register map, IP naming — has its own source of truth, and none of them can be
+safely assumed from a previous layer being correct.
+
+---
+
+## 26. First numerical hardware test FAILs against the golden model — real, reproducible,
+    and not yet root-caused
+
+**Context:** With `_resolve_ip()` fixed (§25), ran the first real accelerator test against
+`golden_model.py`'s reference: an 8×32 feature matrix times a 32×32 weight matrix, comparing the
+hardware's dequantized output to `transformer_golden()` within the testbench's own 6-LSB
+tolerance.
+
+**Result: 11 / 256 elements (~4.3%) outside tolerance.** Investigated methodically rather than
+guessing at a fix:
+
+1. **Ruled out a timing/race explanation.** Re-ran the identical seeded input three times —
+   `bad_indices` and `max_abs_diff` came back bit-for-bit identical every time. Real electrical/
+   timing noise would show at least some run-to-run variation; full determinism points at
+   something structural instead.
+2. **Ruled out the FIFO-overflow safeguard** (`fifo_overflowed()` read `False` throughout) and
+   **ruled out `EightGelus.v`'s known missing-skid-buffer gap** (§19's documented limitation) —
+   that would corrupt a contiguous run of a row from the drop point onward, not isolated,
+   modest-magnitude single elements.
+3. **Batched 15 additional random trials** and correlated every element's pass/fail against its
+   `gap` (row-max minus that element's own matmul-output value). Failures cluster overwhelmingly
+   at `gap=0` (the element ties the row's own maximum) — but reconstructing the actual failing
+   row from the very first test (`np.random.seed(0)`, exact `mm_soft` output, done locally in
+   Python rather than re-extracting from the board) showed one of the two failures, column 19,
+   is the row's **unique, untied** maximum — so "duplicate ties" alone isn't the full story either.
+4. **Every failing hardware output was exactly `0`** (not a rounding-magnitude miss) against
+   golden values of ~0.05-0.10 — a flat, suspicious value rather than an approximation error.
+5. **Traced `Softmax_control.v`/`Softmax.v`/`Exp_module.v`/`Ln_module.v` by hand**, specifically
+   checking whether `exp(0)` (the case for an element exactly at the row max) could wrap to zero
+   in `Exp_module.v`'s `U0Q25` (zero-integer-bit) output format. It doesn't — the module correctly
+   saturates to `25'h1FFFFFF` (~0.99999997), refuting that specific hypothesis. Found one other
+   suspicious spot (`Softmax.v`'s `x_max_ln_S9Q10` forces exactly `0` whenever the log-probability
+   computation comes out non-negative, which should only happen near `x==max`), but hand-tracing
+   its downstream effect predicts a **large** output (~127, near-maximum probability), not zero —
+   so it doesn't cleanly explain the symptom either.
+
+**Deliberately stopped hand-tracing rather than guessing further.** A 10-stage pipelined
+fixed-point circuit is exactly the kind of thing manual RTL reading gets subtly wrong — the
+responsible next step is a targeted simulation, not another round of eyeballing `always` blocks.
+Wrote `sourcecode/tb/Softmax_row1_debug_tb.sv`: reproduces the exact 32-element failing row from
+the first hardware run standalone through `Softmax_control` (not the full pipeline), with a
+`$display` trace of every internal pipeline signal (`data_in_max`, `x_max_S9Q10`, `e_sum_U8Q12`,
+`ln_U3Q10`, `x_max_ln_S9Q10`, both `Exp_module` outputs) every cycle, tagged by source column
+index so column 10's and column 19's exact processing cycles across all 3 of
+`Softmax_control`'s internal passes can be found directly in the log. Added a
+`run_softmax_row1_debug` target to `sourcecode/sim/Makefile` alongside the existing four
+suites. **Not yet run** — needs the project's Xcelium/PBS environment, which this session
+doesn't have; this is the next concrete action, not a resolved finding.
+
+**Lesson:** a hardware result that's real, reproducible, and doesn't match simulation-verified
+software math is a genuine open finding, not something to paper over with a plausible-sounding
+guess. The discipline that mattered here was the same one from §17-18 (the async-reset DRC gap):
+narrow the failure with cheap, checkable tests before touching RTL (determinism check, FIFO
+status, gap-correlation across 15 trials, reconstructing the exact failing input locally instead
+of re-asking for board output) — and know when hand-analysis has stopped being reliable and a
+real simulation is the only honest way to get the next fact.
+
+---
+
+## 27. Deployment logistics: getting files onto the board, and an older-numpy gotcha
+
+**Context:** Getting `design.bit`/`design.hwh`/`MM.py`/`golden_model.py` from the dev machine onto
+the PYNQ-Z2's Jupyter workspace, and getting the smoke test to actually run, surfaced two small
+but real environmental facts worth recording so nobody re-discovers them the hard way.
+
+**Samba share is read-only for the `xilinx` account.** The board's SMB share
+(`\\<board-ip>\xilinx`) is reachable and lists directory contents fine, but `Copy-Item` onto it
+fails with `UnauthorizedAccessException` — not a networking problem, a permissions one. Worked
+around it by using Jupyter's own `/api/contents` REST endpoint instead (login via `/login` with
+the board's password to get a session + `_xsrf` token, then `PUT` file content as base64 to
+`/api/contents/<path>`).
+
+**That API's path convention tripped a same-looking 500 error the first time.** The server's
+content root is already `jupyter_notebooks/` — a path like `jupyter_notebooks/transformer_test/
+design.bit` gets silently doubled server-side into
+`/home/xilinx/jupyter_notebooks/jupyter_notebooks/transformer_test/design.bit` (a `No such file or
+directory` 500, with an empty body unless read via `$_.ErrorDetails.Message` rather than the
+default exception message). Paths must be relative to `jupyter_notebooks/` already, e.g.
+`transformer_test/design.bit`, not repeat that prefix.
+
+**The board's numpy predates 1.17** (no `np.random.default_rng`/`Generator` API) — use the legacy
+`np.random.seed(n)` + `np.random.randint(...)` interface in any notebook code intended to run on
+this board, not the modern `Generator`-based one that's become the default recommendation
+elsewhere.
+
+**Lesson:** deployment mechanics are not exempt from this project's own standing principle
+(§16's rollup, restated at §22 and again here) that "same silicon" or "same framework" doesn't
+mean "same everything" — a board's actual filesystem permissions, its content-API's root
+convention, and its installed package versions are all board-specific facts that don't transfer
+from documentation written for a generic PYNQ image, and are worth writing down once discovered
+rather than re-derived by whoever automates this next.
+
 ## Summary of lessons learned (rollup)
 
 1. **Verify infrastructure assumptions before deep technical investigation** — the PBS saga
