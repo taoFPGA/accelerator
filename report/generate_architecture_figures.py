@@ -87,10 +87,13 @@ arrow(ax, (16, 13), (24, 15.5), color=INK_SECONDARY, connectionstyle="arc3,rad=0
 ax.text(19, 25.5, "AXI-Lite\n(ctrl regs)", fontsize=6.5, color=INK_SECONDARY, ha="center")
 
 # --- transformer_block_axi_top dashed boundary ---
-boundary = Rectangle((23, 2), 104, 34, fill=False, linestyle="--",
-                      edgecolor=INK_SECONDARY, linewidth=1.2, zorder=1)
+# Sized to hug the single pipeline row (y=12..21) plus enough headroom for
+# the label and enough footroom for the S2MM exit arrow's dip to y=5 --
+# not stretched to match the unrelated PS7/DMA column's height.
+boundary = Rectangle((23, 2), 104, 23, fill=False, linestyle="--",
+                      edgecolor=INK_SECONDARY, linewidth=1.0, zorder=1)
 ax.add_patch(boundary)
-ax.text(24, 37.5, "transformer_block_axi_top", fontsize=8.5, style="italic",
+ax.text(24, 26.3, "transformer_block_axi_top", fontsize=8.5, style="italic",
         color=INK_SECONDARY, ha="left")
 
 # --- Internal pipeline (single row, left to right) ---
