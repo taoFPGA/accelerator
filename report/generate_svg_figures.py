@@ -265,7 +265,7 @@ def label(ctx, cv, x, y, text, size=2.6, color=INK, align="left"):
 # ============================================================================
 def draw_fig1(cv, ctx):
     dashed_rect(ctx, cv, 8, 0, 114, 96)
-    label(ctx, cv, 10, 92, "PE (sourcecode/core/PE.v)", size=2.7, color=INK_SECONDARY)
+    label(ctx, cv, 10, 90.5, "PE (sourcecode/core/PE.v)", size=2.7, color=INK_SECONDARY)
 
     draw_box(ctx, cv, 80, 78, 30, 12, "reg_w\n(stationary weight, INT8,\nloaded on set_w)", COLOR_CTRL, fontsize=2.55)
     draw_box(ctx, cv, 80, 58, 30, 12, "×  (INT8 × INT8)", COLOR_HW, fontsize=3.0)
@@ -280,10 +280,10 @@ def draw_fig1(cv, ctx):
     orthogonal_path(ctx, cv, [(10, 8), (10, 64)], arrow=False)
     orthogonal_path(ctx, cv, [(10, 8), (16, 8)])
     orthogonal_path(ctx, cv, [(10, 64), (80, 64)])
-    label(ctx, cv, -2, 64, "x_in [7:0]\n(from west PE)", size=2.65, align="left")
+    label(ctx, cv, -2, 66.5, "x_in [7:0]\n(from west PE)", size=2.65, align="left")
 
     orthogonal_path(ctx, cv, [(-2, 88), (80, 88)])
-    label(ctx, cv, -4, 92.5, "set_w", size=2.65, align="left")
+    label(ctx, cv, -4, 91.0, "set_w", size=2.65, align="left")
     orthogonal_path(ctx, cv, [(-2, 80), (80, 80)])
     label(ctx, cv, -4, 84.5, "w [7:0]", size=2.65, align="left")
 
