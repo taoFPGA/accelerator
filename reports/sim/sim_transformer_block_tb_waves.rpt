@@ -1,0 +1,85 @@
+TOOL:	xrun(64)	23.09-s013: Started on Aug 28, 2026 at 08:46:04 UTC
+SOFTINCLUDE $XPEDION/aa/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,25): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,27): cds.lib Invalid environment variable ''.
+xrun(64): 23.09-s013: (c) Copyright 1995-2024 Cadence Design Systems, Inc.
+SOFTINCLUDE $XPEDION/aa/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,25): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,27): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $XPEDION/aa/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,25): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,27): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $XPEDION/aa/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,25): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,27): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $XPEDION/aa/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,25): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,27): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $XPEDION/aa/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,25): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,27): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $XPEDION/aa/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,25): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,27): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $XPEDION/aa/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,25): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
+|
+xrun: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,27): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $XPEDION/aa/cds.lib
+|
+xmsim: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,25): cds.lib Invalid environment variable ''.
+SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
+|
+xmsim: *W,DLCVAR (/tools/rubyeda/RubySKILL/r20260616.1/cds.site.lib,27): cds.lib Invalid environment variable ''.
+Loading snapshot worklib.transformer_block_tb:sv .................... Done
+xcelium> source /tools/cadence/XCELIUM/23.09.013/tools/xcelium/files/xmsimrc
+xcelium> # Xcelium simcontrol script: dump every signal in the design to a SHM
+xcelium> # waveform database and run to completion.
+xcelium> #
+xcelium> # Usage: xrun ... -input waves.tcl
+xcelium> # View:  simvision waves.shm &
+xcelium> #
+xcelium> # NOTE: `probe -create /` (bare VHDL-hierarchy-separator root) fails on
+xcelium> # this all-Verilog/SystemVerilog design with "*E,PNOVHD: No VHDL root in
+xcelium> # design" -- Xcelium tries to resolve '/' as the VHDL design root, which
+xcelium> # doesn't exist here. Omitting the scope argument lets `probe` resolve
+xcelium> # the current (Verilog) top scope implicitly instead.
+xcelium> database -open waves -shm -default
+Created default SHM database waves
+xcelium> probe -create -all -depth all -database waves
+Created probe 1
+xcelium> run
+---------------------------------------------------------
+transformer_block_tb: 0 / 32000 elements outside tolerance (+/-0.0469)
+End-to-end pipeline latency (mm_in_F_valid -> final out_last): 18083 cycles (180830 ns)
+[stall_monitor:mm_in_F] total=116119 transfer=1200 valid_stall=0 ready_stall=98592 idle=16327 | stall=84.91% util=1.03%
+[stall_monitor:mm_in_W] total=116119 transfer=960 valid_stall=0 ready_stall=98592 idle=16567 | stall=84.91% util=0.83%
+[stall_monitor:pipe_out] total=116119 transfer=8000 valid_stall=0 ready_stall=108119 idle=0 | stall=93.11% util=6.89%
+---------------------------------------------------------
+Simulation complete via $finish(1) at time 1161245 NS + 0
+/project/tsmc65/users/turgeme/ws/taoFPGA/sourcecode/tb/transformer_block_tb.sv:455         $finish();
+xcelium> exit
+TOOL:	xrun(64)	23.09-s013: Exiting on Aug 28, 2026 at 08:46:16 UTC  (total: 00:00:12)
