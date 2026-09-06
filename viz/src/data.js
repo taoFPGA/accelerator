@@ -68,8 +68,8 @@ var N = {
         note:"Matches the 32-bit GELU result stream to the S2MM DMA word."},
  mm:   {name:"transformer_block_axi_top_0", path:"design_1_i/transformer_block_axi_top_0",
         ref:"transformer_block_axi · MatMul + Softmax + GELU", kind:"compute", reg:0.245, big:true,
-        lut:13330,ff:8488,dsp:205,bram:73,srl:478, bbox:[0,0,108,133],
-        cr:{X0Y0:3014,X1Y0:5983,X0Y1:2042,X1Y1:10241,X0Y2:654,X1Y2:1829}, lane:[5,2],
+        lut:13426,ff:8488,dsp:205,bram:73,srl:478, bbox:[0,0,108,133],
+        cr:{X0Y0:3157,X1Y0:5983,X0Y1:2056,X1Y1:10243,X0Y2:656,X1Y2:1829}, lane:[5,2],
         note:"The whole accelerator: a 16x16 systolic MatMul feeding LayerNorm, Softmax and GELU as one streaming pipeline. 205 of the device's 220 DSP48E1. Spans all six clock regions, densest in X1Y1. Expands into the systolic + pipeline views."}
 };
 var EDGES = [
