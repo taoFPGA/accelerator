@@ -1,0 +1,35 @@
+digraph dataflow {
+  rankdir=LR; splines=ortho; node [shape=box style="rounded,filled" fillcolor="#eef3fb" fontname=Helvetica];
+  edge [fontname=Helvetica fontsize=9];
+  "design_1_i__axi_dma_0__U0" [label="axi_dma\nU0\n[clk_fpga_0]"];
+  "design_1_i__axi_dma_1__U0" [label="axi_dma__1\nU0\n[clk_fpga_0]"];
+  "design_1_i__axi_dma_2__U0" [label="axi_dma__parameterized2\nU0\n[clk_fpga_0]"];
+  "design_1_i__axi_smc__inst" [label="bd_afc3\ninst\n[clk_fpga_0]"];
+  "design_1_i__axi_smc_1__inst" [label="bd_a878\ninst\n[clk_fpga_0]"];
+  "design_1_i__axi_smc_2__inst" [label="bd_a888\ninst\n[clk_fpga_0]"];
+  "design_1_i__axis_dwidth_converter_0__inst" [label="axis_dwidth_converter_v1_1_34_axis_dwidth_converter_4\ninst\n[clk_fpga_0]"];
+  "design_1_i__axis_dwidth_converter_1__inst" [label="axis_dwidth_converter_v1_1_34_axis_dwidth_converter\ninst\n[clk_fpga_0]"];
+  "design_1_i__axis_dwidth_converter_2__inst" [label="axis_dwidth_converter_v1_1_34_axis_dwidth_converter__parameterized0\ninst\n[clk_fpga_0]"];
+  "design_1_i__processing_system7_0__inst" [label="processing_system7_v5_5_processing_system7\ninst\n[clk_fpga_0]"];
+  "design_1_i__ps7_0_axi_periph__s00_couplers" [label="s00_couplers_imp_UYSKKA\ns00_couplers\n[clk_fpga_0]"];
+  "design_1_i__ps7_0_axi_periph__xbar" [label="design_1_ps7_0_axi_periph_imp_xbar_0\nxbar\n[clk_fpga_0]"];
+  "design_1_i__rst_ps7_0_100M__U0" [label="proc_sys_reset__parameterized2\nU0\n[clk_fpga_0]"];
+  "design_1_i__transformer_block_axi_top_0__inst" [label="transformer_block_axi_top\ninst\n[clk_fpga_0]"];
+  "design_1_i__ps7_0_axi_periph__s00_couplers" -> "design_1_i__ps7_0_axi_periph__xbar" [label="m_axi_araddr (52)" penwidth=4.97 color="#5b6b7f"];
+  "design_1_i__ps7_0_axi_periph__s00_couplers" -> "design_1_i__ps7_0_axi_periph__xbar" [label="m_axi_arvalid (2)" penwidth=2.10 color="#5b6b7f"];
+  "design_1_i__ps7_0_axi_periph__s00_couplers" -> "design_1_i__ps7_0_axi_periph__xbar" [label="m_axi_awaddr (52)" penwidth=4.97 color="#5b6b7f"];
+  "design_1_i__ps7_0_axi_periph__s00_couplers" -> "design_1_i__ps7_0_axi_periph__xbar" [label="m_axi_awvalid (2)" penwidth=2.10 color="#5b6b7f"];
+  "design_1_i__ps7_0_axi_periph__s00_couplers" -> "design_1_i__ps7_0_axi_periph__xbar" [label="m_axi_bready (2)" penwidth=2.10 color="#5b6b7f"];
+  "design_1_i__ps7_0_axi_periph__s00_couplers" -> "design_1_i__ps7_0_axi_periph__xbar" [label="m_axi_rready (2)" penwidth=2.10 color="#5b6b7f"];
+  "design_1_i__ps7_0_axi_periph__s00_couplers" -> "design_1_i__ps7_0_axi_periph__xbar" [label="m_axi_wdata (64)" penwidth=5.17 color="#5b6b7f"];
+  "design_1_i__ps7_0_axi_periph__s00_couplers" -> "design_1_i__ps7_0_axi_periph__xbar" [label="m_axi_wstrb (8)" penwidth=3.20 color="#5b6b7f"];
+  "design_1_i__ps7_0_axi_periph__s00_couplers" -> "design_1_i__ps7_0_axi_periph__xbar" [label="m_axi_wvalid (2)" penwidth=2.10 color="#5b6b7f"];
+  "design_1_i__ps7_0_axi_periph__xbar" -> "design_1_i__ps7_0_axi_periph__s00_couplers" [label="s_axi_arready (2)" penwidth=2.10 color="#5b6b7f"];
+  "design_1_i__ps7_0_axi_periph__xbar" -> "design_1_i__ps7_0_axi_periph__s00_couplers" [label="s_axi_awready (2)" penwidth=2.10 color="#5b6b7f"];
+  "design_1_i__ps7_0_axi_periph__xbar" -> "design_1_i__ps7_0_axi_periph__s00_couplers" [label="s_axi_bresp (4)" penwidth=2.61 color="#5b6b7f"];
+  "design_1_i__ps7_0_axi_periph__xbar" -> "design_1_i__ps7_0_axi_periph__s00_couplers" [label="s_axi_bvalid (2)" penwidth=2.10 color="#5b6b7f"];
+  "design_1_i__ps7_0_axi_periph__xbar" -> "design_1_i__ps7_0_axi_periph__s00_couplers" [label="s_axi_rdata (64)" penwidth=5.17 color="#5b6b7f"];
+  "design_1_i__ps7_0_axi_periph__xbar" -> "design_1_i__ps7_0_axi_periph__s00_couplers" [label="s_axi_rresp (4)" penwidth=2.61 color="#5b6b7f"];
+  "design_1_i__ps7_0_axi_periph__xbar" -> "design_1_i__ps7_0_axi_periph__s00_couplers" [label="s_axi_rvalid (2)" penwidth=2.10 color="#5b6b7f"];
+  "design_1_i__ps7_0_axi_periph__xbar" -> "design_1_i__ps7_0_axi_periph__s00_couplers" [label="s_axi_wready (2)" penwidth=2.10 color="#5b6b7f"];
+}

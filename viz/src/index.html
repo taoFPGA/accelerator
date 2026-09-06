@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>taoFPGA Dataflow</title>
-<meta name="description" content="Photoreal interactive 3D walkthrough of the taoFPGA transformer accelerator — Zynq-7020 floorplan, logical pipeline, and the 24x24 systolic array, from a routed Vivado checkpoint." />
+<meta name="description" content="Photoreal interactive 3D walkthrough of the taoFPGA transformer accelerator — Zynq-7020 floorplan, logical pipeline, and the 16x16 systolic array, from the routed Vivado checkpoint behind the shipped bitstream." />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="style.css" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" />
@@ -16,7 +16,7 @@
   <div id="top">
     <div class="brand">
       <b>taoFPGA Dataflow</b>
-      <span>transformer matmul core · Zynq-7020</span>
+      <span>MatMul + Softmax + GELU · Zynq-7020</span>
     </div>
     <div class="facts">
       <div class="fact"><span class="k">Part</span><span class="v mono">xc7z020clg400-1</span></div>
@@ -26,9 +26,9 @@
     </div>
     <div class="spacer"></div>
     <div class="util">
-      <div class="chip"><span>DSP</span><span class="bar"><i style="width:100%"></i></span><b class="mono">220/220</b></div>
-      <div class="chip"><span>LUT</span><span class="bar"><i style="width:97%;background:var(--ctrl)"></i></span><b class="mono">51.5k/53.2k</b></div>
-      <div class="chip"><span>BRAM</span><span class="bar"><i style="width:86%;background:var(--hard)"></i></span><b class="mono">120/140</b></div>
+      <div class="chip"><span>DSP</span><span class="bar"><i style="width:93%"></i></span><b class="mono">205/220</b></div>
+      <div class="chip"><span>LUT</span><span class="bar"><i style="width:37%;background:var(--ctrl)"></i></span><b class="mono">19.9k/53.2k</b></div>
+      <div class="chip"><span>BRAM</span><span class="bar"><i style="width:59%;background:var(--hard)"></i></span><b class="mono">83/140</b></div>
     </div>
   </div>
 
@@ -56,8 +56,8 @@
         <div class="sw" id="flowSw" role="button" aria-pressed="true" tabindex="0" aria-label="Toggle dataflow pulses"></div>
       </div>
       <div class="toggle" style="margin-top:9px">
-        <span>Transformer ext. <span class="mono" style="color:var(--ink-faint);font-size:10px">RTL</span></span>
-        <div class="sw" id="ghostSw" role="button" aria-pressed="false" tabindex="0" aria-label="Show Softmax and GELU transformer extension (RTL only)"></div>
+        <span>Post-MatMul pipeline</span>
+        <div class="sw" id="ghostSw" role="button" aria-pressed="true" tabindex="0" aria-label="Show the Softmax and GELU pipeline stages"></div>
       </div>
     </div>
   </div>

@@ -1,0 +1,1689 @@
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
+---------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2025.2 (lin64) Build 6299465 Fri Nov 14 12:34:56 MST 2025
+| Date         : Sun Sep  6 14:30:34 2026
+| Host         : ip-10-70-154-191.il-central-1.compute.internal running 64-bit Rocky Linux release 8.10 (Green Obsidian)
+| Command      : report_timing_summary -delay_type max -max_paths 20 -file exports/arch_dump_architecture_data_full_accel/timing_summary.rpt
+| Design       : design_1_wrapper
+| Device       : 7z020-clg400
+| Speed File   : -1  PRODUCTION 1.12 2019-11-22
+| Design State : Routed
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+Timing Summary Report
+
+------------------------------------------------------------------------------------------------
+| Timer Settings
+| --------------
+------------------------------------------------------------------------------------------------
+
+  Enable Multi Corner Analysis               :  Yes
+  Enable Pessimism Removal                   :  Yes
+  Pessimism Removal Resolution               :  Nearest Common Node
+  Enable Input Delay Default Clock           :  No
+  Enable Preset / Clear Arcs                 :  No
+  Disable Flight Delays                      :  No
+  Ignore I/O Paths                           :  No
+  Timing Early Launch at Borrowing Latches   :  No
+  Borrow Time for Max Delay Exceptions       :  Yes
+  Merge Timing Exceptions                    :  Yes
+  Inter-SLR Compensation                     :  Conservative
+
+  Corner  Analyze    Analyze    
+  Name    Max Paths  Min Paths  
+  ------  ---------  ---------  
+  Slow    Yes        Yes        
+  Fast    Yes        Yes        
+
+
+------------------------------------------------------------------------------------------------
+| Report Methodology
+| ------------------
+------------------------------------------------------------------------------------------------
+
+No report available as report_methodology has not been run prior. Run report_methodology on the current design for the summary of methodology violations.
+
+
+
+check_timing report
+
+Table of Contents
+-----------------
+1. checking no_clock (0)
+2. checking constant_clock (0)
+3. checking pulse_width_clock (0)
+4. checking unconstrained_internal_endpoints (0)
+5. checking no_input_delay (0)
+6. checking no_output_delay (0)
+7. checking multiple_clock (0)
+8. checking generated_clocks (0)
+9. checking loops (0)
+10. checking partial_input_delay (0)
+11. checking partial_output_delay (0)
+12. checking latch_loops (0)
+
+1. checking no_clock (0)
+------------------------
+ There are 0 register/latch pins with no clock.
+
+
+2. checking constant_clock (0)
+------------------------------
+ There are 0 register/latch pins with constant_clock.
+
+
+3. checking pulse_width_clock (0)
+---------------------------------
+ There are 0 register/latch pins which need pulse_width check
+
+
+4. checking unconstrained_internal_endpoints (0)
+------------------------------------------------
+ There are 0 pins that are not constrained for maximum delay.
+
+ There are 0 pins that are not constrained for maximum delay due to constant clock.
+
+
+5. checking no_input_delay (0)
+------------------------------
+ There are 0 input ports with no input delay specified.
+
+ There are 0 input ports with no input delay but user has a false path constraint.
+
+
+6. checking no_output_delay (0)
+-------------------------------
+ There are 0 ports with no output delay specified.
+
+ There are 0 ports with no output delay but user has a false path constraint
+
+ There are 0 ports with no output delay but with a timing clock defined on it or propagating through it
+
+
+7. checking multiple_clock (0)
+------------------------------
+ There are 0 register/latch pins with multiple clocks.
+
+
+8. checking generated_clocks (0)
+--------------------------------
+ There are 0 generated clocks that are not connected to a clock source.
+
+
+9. checking loops (0)
+---------------------
+ There are 0 combinational loops in the design.
+
+
+10. checking partial_input_delay (0)
+------------------------------------
+ There are 0 input ports with partial input delay specified.
+
+
+11. checking partial_output_delay (0)
+-------------------------------------
+ There are 0 ports with partial output delay specified.
+
+
+12. checking latch_loops (0)
+----------------------------
+ There are 0 combinational latch loops in the design through latch input
+
+
+
+------------------------------------------------------------------------------------------------
+| Design Timing Summary
+| ---------------------
+------------------------------------------------------------------------------------------------
+
+    WNS(ns)      TNS(ns)  TNS Failing Endpoints  TNS Total Endpoints     WPWS(ns)     TPWS(ns)  TPWS Failing Endpoints  TPWS Total Endpoints  
+    -------      -------  ---------------------  -------------------     --------     --------  ----------------------  --------------------  
+      0.086        0.000                      0                63175        3.750        0.000                       0                 16725  
+
+
+All user specified timing constraints are met.
+
+
+------------------------------------------------------------------------------------------------
+| Clock Summary
+| -------------
+------------------------------------------------------------------------------------------------
+
+Clock       Waveform(ns)       Period(ns)      Frequency(MHz)
+-----       ------------       ----------      --------------
+clk_fpga_0  {0.000 5.000}      10.000          100.000         
+
+
+------------------------------------------------------------------------------------------------
+| Intra Clock Table
+| -----------------
+------------------------------------------------------------------------------------------------
+
+Clock             WNS(ns)      TNS(ns)  TNS Failing Endpoints  TNS Total Endpoints     WPWS(ns)     TPWS(ns)  TPWS Failing Endpoints  TPWS Total Endpoints  
+-----             -------      -------  ---------------------  -------------------     --------     --------  ----------------------  --------------------  
+clk_fpga_0          0.086        0.000                      0                63175        3.750        0.000                       0                 16725  
+
+
+------------------------------------------------------------------------------------------------
+| Inter Clock Table
+| -----------------
+------------------------------------------------------------------------------------------------
+
+From Clock    To Clock          WNS(ns)      TNS(ns)  TNS Failing Endpoints  TNS Total Endpoints  
+----------    --------          -------      -------  ---------------------  -------------------  
+
+
+------------------------------------------------------------------------------------------------
+| Other Path Groups Table
+| -----------------------
+------------------------------------------------------------------------------------------------
+
+Path Group    From Clock    To Clock          WNS(ns)      TNS(ns)  TNS Failing Endpoints  TNS Total Endpoints  
+----------    ----------    --------          -------      -------  ---------------------  -------------------  
+
+
+------------------------------------------------------------------------------------------------
+| Timing Details
+| --------------
+------------------------------------------------------------------------------------------------
+
+
+---------------------------------------------------------------------------------------------------
+From Clock:  clk_fpga_0
+  To Clock:  clk_fpga_0
+
+Setup :            0  Failing Endpoints,  Worst Slack        0.086ns,  Total Violation        0.000ns
+Hold  :           NA  Failing Endpoints,  Worst Slack           NA  ,  Total Violation           NA
+PW    :            0  Failing Endpoints,  Worst Slack        3.750ns,  Total Violation        0.000ns
+---------------------------------------------------------------------------------------------------
+
+
+Max Delay Paths
+--------------------------------------------------------------------------------------
+Slack (MET) :             0.086ns  (required time - arrival time)
+  Source:                 design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7/CLKBWRCLK
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_fpga_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7/DIADI[3]
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_fpga_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            10.000ns  (clk_fpga_0 rise@10.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        9.292ns  (logic 4.115ns (44.284%)  route 5.177ns (55.716%))
+  Logic Levels:           8  (CARRY4=6 LUT2=1 LUT4=1)
+  Clock Path Skew:        -0.024ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.802ns = ( 12.802 - 10.000 ) 
+    Source Clock Delay      (SCD):    3.091ns
+    Clock Pessimism Removal (CPR):    0.266ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  design_1_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           1.193     1.193    design_1_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.101     1.294 r  design_1_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=16732, routed)       1.797     3.091    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/aclk
+    RAMB36_X0Y8          RAMB36E1                                     r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7/CLKBWRCLK
+  -------------------------------------------------------------------    -------------------
+    RAMB36_X0Y8          RAMB36E1 (Prop_ramb36e1_CLKBWRCLK_DOBDO[0])
+                                                      2.454     5.545 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7/DOBDO[0]
+                         net (fo=2, routed)           2.284     7.829    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/out_F_array_data[63]
+    SLICE_X61Y54         LUT2 (Prop_lut2_I1_O)        0.124     7.953 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_24/O
+                         net (fo=1, routed)           0.000     7.953    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_24_n_0
+    SLICE_X61Y54         CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.532     8.485 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_13/CO[3]
+                         net (fo=1, routed)           0.000     8.485    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_13_n_0
+    SLICE_X61Y55         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114     8.599 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_12/CO[3]
+                         net (fo=1, routed)           0.000     8.599    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_12_n_0
+    SLICE_X61Y56         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114     8.713 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_14/CO[3]
+                         net (fo=1, routed)           0.000     8.713    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_14_n_0
+    SLICE_X61Y57         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114     8.827 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_8_i_11/CO[3]
+                         net (fo=1, routed)           0.000     8.827    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_8_i_11_n_0
+    SLICE_X61Y58         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114     8.941 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_8_i_10/CO[3]
+                         net (fo=1, routed)           0.000     8.941    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_8_i_10_n_0
+    SLICE_X61Y59         CARRY4 (Prop_carry4_CI_O[0])
+                                                      0.222     9.163 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_11/O[0]
+                         net (fo=20, routed)          1.141    10.304    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/u_MM_out_buffer/U_Adders/temp[3]_39[20]
+    SLICE_X52Y59         LUT4 (Prop_lut4_I1_O)        0.327    10.631 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_6/O
+                         net (fo=1, routed)           1.753    12.384    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/in_F_array_data[66]
+    RAMB36_X0Y8          RAMB36E1                                     r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7/DIADI[3]
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                     10.000    10.000 r  
+    PS7_X0Y0             PS7                          0.000    10.000 r  design_1_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           1.088    11.088    design_1_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.091    11.179 r  design_1_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=16732, routed)       1.623    12.802    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/aclk
+    RAMB36_X0Y8          RAMB36E1                                     r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7/CLKARDCLK
+                         clock pessimism              0.266    13.067    
+                         clock uncertainty           -0.154    12.913    
+    RAMB36_X0Y8          RAMB36E1 (Setup_ramb36e1_CLKARDCLK_DIADI[3])
+                                                     -0.443    12.470    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7
+  -------------------------------------------------------------------
+                         required time                         12.470    
+                         arrival time                         -12.384    
+  -------------------------------------------------------------------
+                         slack                                  0.086    
+
+Slack (MET) :             0.156ns  (required time - arrival time)
+  Source:                 design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7/CLKBWRCLK
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_fpga_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7/DIADI[2]
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_fpga_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            10.000ns  (clk_fpga_0 rise@10.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        9.221ns  (logic 4.078ns (44.224%)  route 5.143ns (55.776%))
+  Logic Levels:           8  (CARRY4=6 LUT2=1 LUT4=1)
+  Clock Path Skew:        -0.024ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.802ns = ( 12.802 - 10.000 ) 
+    Source Clock Delay      (SCD):    3.091ns
+    Clock Pessimism Removal (CPR):    0.266ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  design_1_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           1.193     1.193    design_1_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.101     1.294 r  design_1_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=16732, routed)       1.797     3.091    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/aclk
+    RAMB36_X0Y8          RAMB36E1                                     r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7/CLKBWRCLK
+  -------------------------------------------------------------------    -------------------
+    RAMB36_X0Y8          RAMB36E1 (Prop_ramb36e1_CLKBWRCLK_DOBDO[0])
+                                                      2.454     5.545 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7/DOBDO[0]
+                         net (fo=2, routed)           2.284     7.829    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/out_F_array_data[63]
+    SLICE_X61Y54         LUT2 (Prop_lut2_I1_O)        0.124     7.953 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_24/O
+                         net (fo=1, routed)           0.000     7.953    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_24_n_0
+    SLICE_X61Y54         CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.532     8.485 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_13/CO[3]
+                         net (fo=1, routed)           0.000     8.485    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_13_n_0
+    SLICE_X61Y55         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114     8.599 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_12/CO[3]
+                         net (fo=1, routed)           0.000     8.599    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_12_n_0
+    SLICE_X61Y56         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114     8.713 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_14/CO[3]
+                         net (fo=1, routed)           0.000     8.713    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_14_n_0
+    SLICE_X61Y57         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114     8.827 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_8_i_11/CO[3]
+                         net (fo=1, routed)           0.000     8.827    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_8_i_11_n_0
+    SLICE_X61Y58         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114     8.941 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_8_i_10/CO[3]
+                         net (fo=1, routed)           0.000     8.941    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_8_i_10_n_0
+    SLICE_X61Y59         CARRY4 (Prop_carry4_CI_CO[1])
+                                                      0.157     9.098 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_11/CO[1]
+                         net (fo=21, routed)          2.202    11.300    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_11_n_2
+    SLICE_X18Y41         LUT4 (Prop_lut4_I2_O)        0.355    11.655 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_7/O
+                         net (fo=1, routed)           0.657    12.313    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/in_F_array_data[65]
+    RAMB36_X0Y8          RAMB36E1                                     r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7/DIADI[2]
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                     10.000    10.000 r  
+    PS7_X0Y0             PS7                          0.000    10.000 r  design_1_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           1.088    11.088    design_1_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.091    11.179 r  design_1_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=16732, routed)       1.623    12.802    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/aclk
+    RAMB36_X0Y8          RAMB36E1                                     r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7/CLKARDCLK
+                         clock pessimism              0.266    13.067    
+                         clock uncertainty           -0.154    12.913    
+    RAMB36_X0Y8          RAMB36E1 (Setup_ramb36e1_CLKARDCLK_DIADI[2])
+                                                     -0.445    12.468    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7
+  -------------------------------------------------------------------
+                         required time                         12.468    
+                         arrival time                         -12.313    
+  -------------------------------------------------------------------
+                         slack                                  0.156    
+
+Slack (MET) :             0.157ns  (required time - arrival time)
+  Source:                 design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7/CLKBWRCLK
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_fpga_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7/DIADI[5]
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_fpga_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            10.000ns  (clk_fpga_0 rise@10.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        9.222ns  (logic 4.078ns (44.220%)  route 5.144ns (55.780%))
+  Logic Levels:           8  (CARRY4=6 LUT2=1 LUT4=1)
+  Clock Path Skew:        -0.024ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.802ns = ( 12.802 - 10.000 ) 
+    Source Clock Delay      (SCD):    3.091ns
+    Clock Pessimism Removal (CPR):    0.266ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  design_1_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           1.193     1.193    design_1_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.101     1.294 r  design_1_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=16732, routed)       1.797     3.091    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/aclk
+    RAMB36_X0Y8          RAMB36E1                                     r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7/CLKBWRCLK
+  -------------------------------------------------------------------    -------------------
+    RAMB36_X0Y8          RAMB36E1 (Prop_ramb36e1_CLKBWRCLK_DOBDO[0])
+                                                      2.454     5.545 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7/DOBDO[0]
+                         net (fo=2, routed)           2.284     7.829    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/out_F_array_data[63]
+    SLICE_X61Y54         LUT2 (Prop_lut2_I1_O)        0.124     7.953 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_24/O
+                         net (fo=1, routed)           0.000     7.953    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_24_n_0
+    SLICE_X61Y54         CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.532     8.485 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_13/CO[3]
+                         net (fo=1, routed)           0.000     8.485    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_13_n_0
+    SLICE_X61Y55         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114     8.599 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_12/CO[3]
+                         net (fo=1, routed)           0.000     8.599    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_12_n_0
+    SLICE_X61Y56         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114     8.713 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_14/CO[3]
+                         net (fo=1, routed)           0.000     8.713    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_14_n_0
+    SLICE_X61Y57         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114     8.827 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_8_i_11/CO[3]
+                         net (fo=1, routed)           0.000     8.827    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_8_i_11_n_0
+    SLICE_X61Y58         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114     8.941 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_8_i_10/CO[3]
+                         net (fo=1, routed)           0.000     8.941    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_8_i_10_n_0
+    SLICE_X61Y59         CARRY4 (Prop_carry4_CI_CO[1])
+                                                      0.157     9.098 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_11/CO[1]
+                         net (fo=21, routed)          0.912    10.010    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_11_n_2
+    SLICE_X55Y59         LUT4 (Prop_lut4_I2_O)        0.355    10.365 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_4/O
+                         net (fo=1, routed)           1.949    12.314    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/in_F_array_data[68]
+    RAMB36_X0Y8          RAMB36E1                                     r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7/DIADI[5]
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                     10.000    10.000 r  
+    PS7_X0Y0             PS7                          0.000    10.000 r  design_1_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           1.088    11.088    design_1_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.091    11.179 r  design_1_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=16732, routed)       1.623    12.802    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/aclk
+    RAMB36_X0Y8          RAMB36E1                                     r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7/CLKARDCLK
+                         clock pessimism              0.266    13.067    
+                         clock uncertainty           -0.154    12.913    
+    RAMB36_X0Y8          RAMB36E1 (Setup_ramb36e1_CLKARDCLK_DIADI[5])
+                                                     -0.443    12.470    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7
+  -------------------------------------------------------------------
+                         required time                         12.470    
+                         arrival time                         -12.314    
+  -------------------------------------------------------------------
+                         slack                                  0.157    
+
+Slack (MET) :             0.173ns  (required time - arrival time)
+  Source:                 design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7/CLKBWRCLK
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_fpga_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7/DIADI[1]
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_fpga_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            10.000ns  (clk_fpga_0 rise@10.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        9.408ns  (logic 4.052ns (43.072%)  route 5.356ns (56.928%))
+  Logic Levels:           8  (CARRY4=6 LUT2=1 LUT4=1)
+  Clock Path Skew:        -0.024ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.802ns = ( 12.802 - 10.000 ) 
+    Source Clock Delay      (SCD):    3.091ns
+    Clock Pessimism Removal (CPR):    0.266ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  design_1_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           1.193     1.193    design_1_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.101     1.294 r  design_1_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=16732, routed)       1.797     3.091    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/aclk
+    RAMB36_X0Y8          RAMB36E1                                     r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7/CLKBWRCLK
+  -------------------------------------------------------------------    -------------------
+    RAMB36_X0Y8          RAMB36E1 (Prop_ramb36e1_CLKBWRCLK_DOBDO[0])
+                                                      2.454     5.545 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7/DOBDO[0]
+                         net (fo=2, routed)           2.284     7.829    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/out_F_array_data[63]
+    SLICE_X61Y54         LUT2 (Prop_lut2_I1_O)        0.124     7.953 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_24/O
+                         net (fo=1, routed)           0.000     7.953    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_24_n_0
+    SLICE_X61Y54         CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.532     8.485 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_13/CO[3]
+                         net (fo=1, routed)           0.000     8.485    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_13_n_0
+    SLICE_X61Y55         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114     8.599 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_12/CO[3]
+                         net (fo=1, routed)           0.000     8.599    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_12_n_0
+    SLICE_X61Y56         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114     8.713 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_14/CO[3]
+                         net (fo=1, routed)           0.000     8.713    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_14_n_0
+    SLICE_X61Y57         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114     8.827 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_8_i_11/CO[3]
+                         net (fo=1, routed)           0.000     8.827    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_8_i_11_n_0
+    SLICE_X61Y58         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114     8.941 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_8_i_10/CO[3]
+                         net (fo=1, routed)           0.000     8.941    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_8_i_10_n_0
+    SLICE_X61Y59         CARRY4 (Prop_carry4_CI_CO[1])
+                                                      0.157     9.098 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_11/CO[1]
+                         net (fo=21, routed)          1.409    10.507    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_11_n_2
+    SLICE_X52Y47         LUT4 (Prop_lut4_I2_O)        0.329    10.836 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_8/O
+                         net (fo=1, routed)           1.663    12.499    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/in_F_array_data[64]
+    RAMB36_X0Y8          RAMB36E1                                     r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7/DIADI[1]
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                     10.000    10.000 r  
+    PS7_X0Y0             PS7                          0.000    10.000 r  design_1_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           1.088    11.088    design_1_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.091    11.179 r  design_1_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=16732, routed)       1.623    12.802    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/aclk
+    RAMB36_X0Y8          RAMB36E1                                     r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7/CLKARDCLK
+                         clock pessimism              0.266    13.067    
+                         clock uncertainty           -0.154    12.913    
+    RAMB36_X0Y8          RAMB36E1 (Setup_ramb36e1_CLKARDCLK_DIADI[1])
+                                                     -0.241    12.672    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7
+  -------------------------------------------------------------------
+                         required time                         12.672    
+                         arrival time                         -12.499    
+  -------------------------------------------------------------------
+                         slack                                  0.173    
+
+Slack (MET) :             0.189ns  (required time - arrival time)
+  Source:                 design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7/CLKBWRCLK
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_fpga_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7/DIADI[0]
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_fpga_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            10.000ns  (clk_fpga_0 rise@10.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        9.392ns  (logic 4.087ns (43.514%)  route 5.305ns (56.486%))
+  Logic Levels:           8  (CARRY4=6 LUT2=1 LUT4=1)
+  Clock Path Skew:        -0.024ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.802ns = ( 12.802 - 10.000 ) 
+    Source Clock Delay      (SCD):    3.091ns
+    Clock Pessimism Removal (CPR):    0.266ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  design_1_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           1.193     1.193    design_1_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.101     1.294 r  design_1_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=16732, routed)       1.797     3.091    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/aclk
+    RAMB36_X0Y8          RAMB36E1                                     r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7/CLKBWRCLK
+  -------------------------------------------------------------------    -------------------
+    RAMB36_X0Y8          RAMB36E1 (Prop_ramb36e1_CLKBWRCLK_DOBDO[0])
+                                                      2.454     5.545 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7/DOBDO[0]
+                         net (fo=2, routed)           2.284     7.829    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/out_F_array_data[63]
+    SLICE_X61Y54         LUT2 (Prop_lut2_I1_O)        0.124     7.953 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_24/O
+                         net (fo=1, routed)           0.000     7.953    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_24_n_0
+    SLICE_X61Y54         CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.532     8.485 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_13/CO[3]
+                         net (fo=1, routed)           0.000     8.485    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_13_n_0
+    SLICE_X61Y55         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114     8.599 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_12/CO[3]
+                         net (fo=1, routed)           0.000     8.599    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_12_n_0
+    SLICE_X61Y56         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114     8.713 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_14/CO[3]
+                         net (fo=1, routed)           0.000     8.713    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_14_n_0
+    SLICE_X61Y57         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114     8.827 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_8_i_11/CO[3]
+                         net (fo=1, routed)           0.000     8.827    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_8_i_11_n_0
+    SLICE_X61Y58         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114     8.941 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_8_i_10/CO[3]
+                         net (fo=1, routed)           0.000     8.941    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_8_i_10_n_0
+    SLICE_X61Y59         CARRY4 (Prop_carry4_CI_O[0])
+                                                      0.222     9.163 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_11/O[0]
+                         net (fo=20, routed)          1.141    10.304    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/u_MM_out_buffer/U_Adders/temp[3]_39[20]
+    SLICE_X52Y59         LUT4 (Prop_lut4_I1_O)        0.299    10.603 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_9/O
+                         net (fo=1, routed)           1.881    12.484    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/in_F_array_data[63]
+    RAMB36_X0Y8          RAMB36E1                                     r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7/DIADI[0]
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                     10.000    10.000 r  
+    PS7_X0Y0             PS7                          0.000    10.000 r  design_1_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           1.088    11.088    design_1_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.091    11.179 r  design_1_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=16732, routed)       1.623    12.802    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/aclk
+    RAMB36_X0Y8          RAMB36E1                                     r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7/CLKARDCLK
+                         clock pessimism              0.266    13.067    
+                         clock uncertainty           -0.154    12.913    
+    RAMB36_X0Y8          RAMB36E1 (Setup_ramb36e1_CLKARDCLK_DIADI[0])
+                                                     -0.241    12.672    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7
+  -------------------------------------------------------------------
+                         required time                         12.672    
+                         arrival time                         -12.484    
+  -------------------------------------------------------------------
+                         slack                                  0.189    
+
+Slack (MET) :             0.203ns  (required time - arrival time)
+  Source:                 design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7/CLKBWRCLK
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_fpga_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7/DIADI[6]
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_fpga_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            10.000ns  (clk_fpga_0 rise@10.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        9.377ns  (logic 4.087ns (43.583%)  route 5.290ns (56.417%))
+  Logic Levels:           8  (CARRY4=6 LUT2=1 LUT4=1)
+  Clock Path Skew:        -0.024ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.802ns = ( 12.802 - 10.000 ) 
+    Source Clock Delay      (SCD):    3.091ns
+    Clock Pessimism Removal (CPR):    0.266ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  design_1_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           1.193     1.193    design_1_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.101     1.294 r  design_1_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=16732, routed)       1.797     3.091    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/aclk
+    RAMB36_X0Y8          RAMB36E1                                     r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7/CLKBWRCLK
+  -------------------------------------------------------------------    -------------------
+    RAMB36_X0Y8          RAMB36E1 (Prop_ramb36e1_CLKBWRCLK_DOBDO[0])
+                                                      2.454     5.545 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7/DOBDO[0]
+                         net (fo=2, routed)           2.284     7.829    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/out_F_array_data[63]
+    SLICE_X61Y54         LUT2 (Prop_lut2_I1_O)        0.124     7.953 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_24/O
+                         net (fo=1, routed)           0.000     7.953    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_24_n_0
+    SLICE_X61Y54         CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.532     8.485 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_13/CO[3]
+                         net (fo=1, routed)           0.000     8.485    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_13_n_0
+    SLICE_X61Y55         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114     8.599 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_12/CO[3]
+                         net (fo=1, routed)           0.000     8.599    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_12_n_0
+    SLICE_X61Y56         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114     8.713 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_14/CO[3]
+                         net (fo=1, routed)           0.000     8.713    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_14_n_0
+    SLICE_X61Y57         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114     8.827 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_8_i_11/CO[3]
+                         net (fo=1, routed)           0.000     8.827    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_8_i_11_n_0
+    SLICE_X61Y58         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114     8.941 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_8_i_10/CO[3]
+                         net (fo=1, routed)           0.000     8.941    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_8_i_10_n_0
+    SLICE_X61Y59         CARRY4 (Prop_carry4_CI_O[0])
+                                                      0.222     9.163 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_11/O[0]
+                         net (fo=20, routed)          1.400    10.563    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/u_MM_out_buffer/U_Adders/temp[3]_39[20]
+    SLICE_X52Y47         LUT4 (Prop_lut4_I1_O)        0.299    10.862 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_3/O
+                         net (fo=1, routed)           1.607    12.469    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/in_F_array_data[69]
+    RAMB36_X0Y8          RAMB36E1                                     r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7/DIADI[6]
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                     10.000    10.000 r  
+    PS7_X0Y0             PS7                          0.000    10.000 r  design_1_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           1.088    11.088    design_1_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.091    11.179 r  design_1_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=16732, routed)       1.623    12.802    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/aclk
+    RAMB36_X0Y8          RAMB36E1                                     r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7/CLKARDCLK
+                         clock pessimism              0.266    13.067    
+                         clock uncertainty           -0.154    12.913    
+    RAMB36_X0Y8          RAMB36E1 (Setup_ramb36e1_CLKARDCLK_DIADI[6])
+                                                     -0.241    12.672    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7
+  -------------------------------------------------------------------
+                         required time                         12.672    
+                         arrival time                         -12.469    
+  -------------------------------------------------------------------
+                         slack                                  0.203    
+
+Slack (MET) :             0.211ns  (required time - arrival time)
+  Source:                 design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/out_W_addr_reg_rep[0]/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/in_W_array_reg_12/ADDRBWRADDR[3]
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_fpga_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            10.000ns  (clk_fpga_0 rise@10.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        9.051ns  (logic 0.456ns (5.038%)  route 8.595ns (94.962%))
+  Logic Levels:           0  
+  Clock Path Skew:        -0.018ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.872ns = ( 12.872 - 10.000 ) 
+    Source Clock Delay      (SCD):    3.005ns
+    Clock Pessimism Removal (CPR):    0.115ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  design_1_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           1.193     1.193    design_1_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.101     1.294 r  design_1_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=16732, routed)       1.711     3.005    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/aclk
+    SLICE_X57Y23         FDRE                                         r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/out_W_addr_reg_rep[0]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X57Y23         FDRE (Prop_fdre_C_Q)         0.456     3.461 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/out_W_addr_reg_rep[0]/Q
+                         net (fo=15, routed)          8.595    12.056    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/out_W_addr[0]
+    RAMB36_X2Y22         RAMB36E1                                     r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/in_W_array_reg_12/ADDRBWRADDR[3]
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                     10.000    10.000 r  
+    PS7_X0Y0             PS7                          0.000    10.000 r  design_1_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           1.088    11.088    design_1_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.091    11.179 r  design_1_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=16732, routed)       1.693    12.872    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/aclk
+    RAMB36_X2Y22         RAMB36E1                                     r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/in_W_array_reg_12/CLKBWRCLK
+                         clock pessimism              0.115    12.987    
+                         clock uncertainty           -0.154    12.832    
+    RAMB36_X2Y22         RAMB36E1 (Setup_ramb36e1_CLKBWRCLK_ADDRBWRADDR[3])
+                                                     -0.566    12.266    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/in_W_array_reg_12
+  -------------------------------------------------------------------
+                         required time                         12.266    
+                         arrival time                         -12.056    
+  -------------------------------------------------------------------
+                         slack                                  0.211    
+
+Slack (MET) :             0.215ns  (required time - arrival time)
+  Source:                 design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/out_W_addr_reg_rep[0]/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/in_W_array_reg_2/ADDRBWRADDR[3]
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_fpga_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            10.000ns  (clk_fpga_0 rise@10.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        9.051ns  (logic 0.456ns (5.038%)  route 8.595ns (94.962%))
+  Logic Levels:           0  
+  Clock Path Skew:        -0.014ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.876ns = ( 12.876 - 10.000 ) 
+    Source Clock Delay      (SCD):    3.005ns
+    Clock Pessimism Removal (CPR):    0.115ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  design_1_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           1.193     1.193    design_1_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.101     1.294 r  design_1_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=16732, routed)       1.711     3.005    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/aclk
+    SLICE_X57Y23         FDRE                                         r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/out_W_addr_reg_rep[0]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X57Y23         FDRE (Prop_fdre_C_Q)         0.456     3.461 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/out_W_addr_reg_rep[0]/Q
+                         net (fo=15, routed)          8.595    12.056    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/out_W_addr[0]
+    RAMB36_X2Y20         RAMB36E1                                     r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/in_W_array_reg_2/ADDRBWRADDR[3]
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                     10.000    10.000 r  
+    PS7_X0Y0             PS7                          0.000    10.000 r  design_1_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           1.088    11.088    design_1_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.091    11.179 r  design_1_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=16732, routed)       1.697    12.876    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/aclk
+    RAMB36_X2Y20         RAMB36E1                                     r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/in_W_array_reg_2/CLKBWRCLK
+                         clock pessimism              0.115    12.991    
+                         clock uncertainty           -0.154    12.836    
+    RAMB36_X2Y20         RAMB36E1 (Setup_ramb36e1_CLKBWRCLK_ADDRBWRADDR[3])
+                                                     -0.566    12.270    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/in_W_array_reg_2
+  -------------------------------------------------------------------
+                         required time                         12.270    
+                         arrival time                         -12.056    
+  -------------------------------------------------------------------
+                         slack                                  0.215    
+
+Slack (MET) :             0.220ns  (required time - arrival time)
+  Source:                 design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7/CLKBWRCLK
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_fpga_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7/DIADI[4]
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_fpga_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            10.000ns  (clk_fpga_0 rise@10.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        9.361ns  (logic 4.087ns (43.660%)  route 5.274ns (56.340%))
+  Logic Levels:           8  (CARRY4=6 LUT2=1 LUT4=1)
+  Clock Path Skew:        -0.024ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.802ns = ( 12.802 - 10.000 ) 
+    Source Clock Delay      (SCD):    3.091ns
+    Clock Pessimism Removal (CPR):    0.266ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  design_1_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           1.193     1.193    design_1_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.101     1.294 r  design_1_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=16732, routed)       1.797     3.091    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/aclk
+    RAMB36_X0Y8          RAMB36E1                                     r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7/CLKBWRCLK
+  -------------------------------------------------------------------    -------------------
+    RAMB36_X0Y8          RAMB36E1 (Prop_ramb36e1_CLKBWRCLK_DOBDO[0])
+                                                      2.454     5.545 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7/DOBDO[0]
+                         net (fo=2, routed)           2.284     7.829    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/out_F_array_data[63]
+    SLICE_X61Y54         LUT2 (Prop_lut2_I1_O)        0.124     7.953 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_24/O
+                         net (fo=1, routed)           0.000     7.953    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_24_n_0
+    SLICE_X61Y54         CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.532     8.485 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_13/CO[3]
+                         net (fo=1, routed)           0.000     8.485    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_13_n_0
+    SLICE_X61Y55         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114     8.599 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_12/CO[3]
+                         net (fo=1, routed)           0.000     8.599    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_12_n_0
+    SLICE_X61Y56         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114     8.713 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_14/CO[3]
+                         net (fo=1, routed)           0.000     8.713    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_14_n_0
+    SLICE_X61Y57         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114     8.827 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_8_i_11/CO[3]
+                         net (fo=1, routed)           0.000     8.827    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_8_i_11_n_0
+    SLICE_X61Y58         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114     8.941 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_8_i_10/CO[3]
+                         net (fo=1, routed)           0.000     8.941    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_8_i_10_n_0
+    SLICE_X61Y59         CARRY4 (Prop_carry4_CI_O[0])
+                                                      0.222     9.163 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_11/O[0]
+                         net (fo=20, routed)          1.402    10.566    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/u_MM_out_buffer/U_Adders/temp[3]_39[20]
+    SLICE_X51Y47         LUT4 (Prop_lut4_I1_O)        0.299    10.865 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_5/O
+                         net (fo=1, routed)           1.588    12.452    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/in_F_array_data[67]
+    RAMB36_X0Y8          RAMB36E1                                     r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7/DIADI[4]
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                     10.000    10.000 r  
+    PS7_X0Y0             PS7                          0.000    10.000 r  design_1_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           1.088    11.088    design_1_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.091    11.179 r  design_1_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=16732, routed)       1.623    12.802    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/aclk
+    RAMB36_X0Y8          RAMB36E1                                     r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7/CLKARDCLK
+                         clock pessimism              0.266    13.067    
+                         clock uncertainty           -0.154    12.913    
+    RAMB36_X0Y8          RAMB36E1 (Setup_ramb36e1_CLKARDCLK_DIADI[4])
+                                                     -0.241    12.672    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7
+  -------------------------------------------------------------------
+                         required time                         12.672    
+                         arrival time                         -12.452    
+  -------------------------------------------------------------------
+                         slack                                  0.220    
+
+Slack (MET) :             0.224ns  (required time - arrival time)
+  Source:                 design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7/CLKBWRCLK
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_fpga_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7/DIPADIP[0]
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_fpga_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            10.000ns  (clk_fpga_0 rise@10.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        9.155ns  (logic 4.081ns (44.575%)  route 5.074ns (55.425%))
+  Logic Levels:           8  (CARRY4=6 LUT2=1 LUT4=1)
+  Clock Path Skew:        -0.024ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.802ns = ( 12.802 - 10.000 ) 
+    Source Clock Delay      (SCD):    3.091ns
+    Clock Pessimism Removal (CPR):    0.266ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  design_1_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           1.193     1.193    design_1_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.101     1.294 r  design_1_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=16732, routed)       1.797     3.091    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/aclk
+    RAMB36_X0Y8          RAMB36E1                                     r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7/CLKBWRCLK
+  -------------------------------------------------------------------    -------------------
+    RAMB36_X0Y8          RAMB36E1 (Prop_ramb36e1_CLKBWRCLK_DOBDO[0])
+                                                      2.454     5.545 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7/DOBDO[0]
+                         net (fo=2, routed)           2.284     7.829    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/out_F_array_data[63]
+    SLICE_X61Y54         LUT2 (Prop_lut2_I1_O)        0.124     7.953 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_24/O
+                         net (fo=1, routed)           0.000     7.953    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_24_n_0
+    SLICE_X61Y54         CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.532     8.485 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_13/CO[3]
+                         net (fo=1, routed)           0.000     8.485    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_13_n_0
+    SLICE_X61Y55         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114     8.599 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_12/CO[3]
+                         net (fo=1, routed)           0.000     8.599    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_12_n_0
+    SLICE_X61Y56         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114     8.713 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_14/CO[3]
+                         net (fo=1, routed)           0.000     8.713    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_14_n_0
+    SLICE_X61Y57         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114     8.827 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_8_i_11/CO[3]
+                         net (fo=1, routed)           0.000     8.827    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_8_i_11_n_0
+    SLICE_X61Y58         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114     8.941 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_8_i_10/CO[3]
+                         net (fo=1, routed)           0.000     8.941    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_8_i_10_n_0
+    SLICE_X61Y59         CARRY4 (Prop_carry4_CI_O[0])
+                                                      0.222     9.163 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_11/O[0]
+                         net (fo=20, routed)          2.091    11.254    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/u_MM_out_buffer/U_Adders/temp[3]_39[20]
+    SLICE_X17Y43         LUT4 (Prop_lut4_I1_O)        0.293    11.547 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_7_i_10/O
+                         net (fo=1, routed)           0.700    12.247    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/in_F_array_data[71]
+    RAMB36_X0Y8          RAMB36E1                                     r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7/DIPADIP[0]
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                     10.000    10.000 r  
+    PS7_X0Y0             PS7                          0.000    10.000 r  design_1_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           1.088    11.088    design_1_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.091    11.179 r  design_1_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=16732, routed)       1.623    12.802    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/aclk
+    RAMB36_X0Y8          RAMB36E1                                     r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7/CLKARDCLK
+                         clock pessimism              0.266    13.067    
+                         clock uncertainty           -0.154    12.913    
+    RAMB36_X0Y8          RAMB36E1 (Setup_ramb36e1_CLKARDCLK_DIPADIP[0])
+                                                     -0.443    12.470    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_7
+  -------------------------------------------------------------------
+                         required time                         12.470    
+                         arrival time                         -12.247    
+  -------------------------------------------------------------------
+                         slack                                  0.224    
+
+Slack (MET) :             0.228ns  (required time - arrival time)
+  Source:                 design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/x_in_L_2Q7_abs_b_reg1_reg[4]/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg/A[23]
+                            (rising edge-triggered cell DSP48E1 clocked by clk_fpga_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            10.000ns  (clk_fpga_0 rise@10.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        9.054ns  (logic 4.130ns (45.617%)  route 4.924ns (54.383%))
+  Logic Levels:           11  (CARRY4=6 LUT2=1 LUT3=2 LUT4=1 LUT6=1)
+  Clock Path Skew:        -0.025ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.850ns = ( 12.850 - 10.000 ) 
+    Source Clock Delay      (SCD):    2.990ns
+    Clock Pessimism Removal (CPR):    0.115ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  design_1_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           1.193     1.193    design_1_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.101     1.294 r  design_1_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=16732, routed)       1.696     2.990    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/aclk
+    SLICE_X31Y61         FDRE                                         r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/x_in_L_2Q7_abs_b_reg1_reg[4]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X31Y61         FDRE (Prop_fdre_C_Q)         0.456     3.446 f  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/x_in_L_2Q7_abs_b_reg1_reg[4]/Q
+                         net (fo=32, routed)          0.963     4.409    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/x_in_L_2Q7_abs_b_reg1_reg[7]_0[1]
+    SLICE_X29Y57         LUT2 (Prop_lut2_I0_O)        0.150     4.559 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_130/O
+                         net (fo=1, routed)           0.434     4.993    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_130_n_0
+    SLICE_X28Y57         LUT6 (Prop_lut6_I3_O)        0.326     5.319 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_116/O
+                         net (fo=1, routed)           0.000     5.319    design_1_i/transformer_block_axi_top_0/inst_n_55
+    SLICE_X28Y57         CARRY4 (Prop_carry4_S[1]_CO[3])
+                                                      0.550     5.869 r  design_1_i/transformer_block_axi_top_0/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_52/CO[3]
+                         net (fo=1, routed)           0.000     5.869    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_49[0]
+    SLICE_X28Y58         CARRY4 (Prop_carry4_CI_O[1])
+                                                      0.334     6.203 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_91/O[1]
+                         net (fo=4, routed)           0.652     6.855    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/O[1]
+    SLICE_X28Y53         LUT3 (Prop_lut3_I0_O)        0.303     7.158 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_94/O
+                         net (fo=1, routed)           0.000     7.158    design_1_i/transformer_block_axi_top_0/inst_n_70
+    SLICE_X28Y53         CARRY4 (Prop_carry4_S[2]_CO[3])
+                                                      0.398     7.556 r  design_1_i/transformer_block_axi_top_0/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_49/CO[3]
+                         net (fo=1, routed)           0.000     7.556    design_1_i/transformer_block_axi_top_0/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_49_n_0
+    SLICE_X28Y54         CARRY4 (Prop_carry4_CI_O[0])
+                                                      0.222     7.778 r  design_1_i/transformer_block_axi_top_0/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_44/O[0]
+                         net (fo=2, routed)           1.237     9.015    design_1_i/transformer_block_axi_top_0/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_44_n_7
+    SLICE_X12Y48         LUT3 (Prop_lut3_I0_O)        0.291     9.306 r  design_1_i/transformer_block_axi_top_0/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_14/O
+                         net (fo=2, routed)           0.857    10.162    design_1_i/transformer_block_axi_top_0/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_14_n_0
+    SLICE_X12Y48         LUT4 (Prop_lut4_I3_O)        0.328    10.490 r  design_1_i/transformer_block_axi_top_0/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_18/O
+                         net (fo=1, routed)           0.000    10.490    design_1_i/transformer_block_axi_top_0/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_18_n_0
+    SLICE_X12Y48         CARRY4 (Prop_carry4_S[1]_CO[3])
+                                                      0.533    11.023 r  design_1_i/transformer_block_axi_top_0/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_2/CO[3]
+                         net (fo=1, routed)           0.000    11.023    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_0[0]
+    SLICE_X12Y49         CARRY4 (Prop_carry4_CI_O[2])
+                                                      0.239    11.262 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_1/O[2]
+                         net (fo=12, routed)          0.781    12.044    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/temp_4Q14[18]
+    DSP48_X0Y18          DSP48E1                                      r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg/A[23]
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                     10.000    10.000 r  
+    PS7_X0Y0             PS7                          0.000    10.000 r  design_1_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           1.088    11.088    design_1_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.091    11.179 r  design_1_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=16732, routed)       1.671    12.850    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/aclk
+    DSP48_X0Y18          DSP48E1                                      r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg/CLK
+                         clock pessimism              0.115    12.965    
+                         clock uncertainty           -0.154    12.811    
+    DSP48_X0Y18          DSP48E1 (Setup_dsp48e1_CLK_A[23])
+                                                     -0.539    12.272    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg
+  -------------------------------------------------------------------
+                         required time                         12.272    
+                         arrival time                         -12.044    
+  -------------------------------------------------------------------
+                         slack                                  0.228    
+
+Slack (MET) :             0.230ns  (required time - arrival time)
+  Source:                 design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/x_in_L_2Q7_abs_b_reg1_reg[4]/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg/A[27]
+                            (rising edge-triggered cell DSP48E1 clocked by clk_fpga_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            10.000ns  (clk_fpga_0 rise@10.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        9.051ns  (logic 4.130ns (45.628%)  route 4.921ns (54.372%))
+  Logic Levels:           11  (CARRY4=6 LUT2=1 LUT3=2 LUT4=1 LUT6=1)
+  Clock Path Skew:        -0.025ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.850ns = ( 12.850 - 10.000 ) 
+    Source Clock Delay      (SCD):    2.990ns
+    Clock Pessimism Removal (CPR):    0.115ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  design_1_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           1.193     1.193    design_1_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.101     1.294 r  design_1_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=16732, routed)       1.696     2.990    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/aclk
+    SLICE_X31Y61         FDRE                                         r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/x_in_L_2Q7_abs_b_reg1_reg[4]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X31Y61         FDRE (Prop_fdre_C_Q)         0.456     3.446 f  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/x_in_L_2Q7_abs_b_reg1_reg[4]/Q
+                         net (fo=32, routed)          0.963     4.409    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/x_in_L_2Q7_abs_b_reg1_reg[7]_0[1]
+    SLICE_X29Y57         LUT2 (Prop_lut2_I0_O)        0.150     4.559 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_130/O
+                         net (fo=1, routed)           0.434     4.993    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_130_n_0
+    SLICE_X28Y57         LUT6 (Prop_lut6_I3_O)        0.326     5.319 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_116/O
+                         net (fo=1, routed)           0.000     5.319    design_1_i/transformer_block_axi_top_0/inst_n_55
+    SLICE_X28Y57         CARRY4 (Prop_carry4_S[1]_CO[3])
+                                                      0.550     5.869 r  design_1_i/transformer_block_axi_top_0/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_52/CO[3]
+                         net (fo=1, routed)           0.000     5.869    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_49[0]
+    SLICE_X28Y58         CARRY4 (Prop_carry4_CI_O[1])
+                                                      0.334     6.203 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_91/O[1]
+                         net (fo=4, routed)           0.652     6.855    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/O[1]
+    SLICE_X28Y53         LUT3 (Prop_lut3_I0_O)        0.303     7.158 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_94/O
+                         net (fo=1, routed)           0.000     7.158    design_1_i/transformer_block_axi_top_0/inst_n_70
+    SLICE_X28Y53         CARRY4 (Prop_carry4_S[2]_CO[3])
+                                                      0.398     7.556 r  design_1_i/transformer_block_axi_top_0/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_49/CO[3]
+                         net (fo=1, routed)           0.000     7.556    design_1_i/transformer_block_axi_top_0/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_49_n_0
+    SLICE_X28Y54         CARRY4 (Prop_carry4_CI_O[0])
+                                                      0.222     7.778 r  design_1_i/transformer_block_axi_top_0/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_44/O[0]
+                         net (fo=2, routed)           1.237     9.015    design_1_i/transformer_block_axi_top_0/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_44_n_7
+    SLICE_X12Y48         LUT3 (Prop_lut3_I0_O)        0.291     9.306 r  design_1_i/transformer_block_axi_top_0/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_14/O
+                         net (fo=2, routed)           0.857    10.162    design_1_i/transformer_block_axi_top_0/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_14_n_0
+    SLICE_X12Y48         LUT4 (Prop_lut4_I3_O)        0.328    10.490 r  design_1_i/transformer_block_axi_top_0/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_18/O
+                         net (fo=1, routed)           0.000    10.490    design_1_i/transformer_block_axi_top_0/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_18_n_0
+    SLICE_X12Y48         CARRY4 (Prop_carry4_S[1]_CO[3])
+                                                      0.533    11.023 r  design_1_i/transformer_block_axi_top_0/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_2/CO[3]
+                         net (fo=1, routed)           0.000    11.023    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_0[0]
+    SLICE_X12Y49         CARRY4 (Prop_carry4_CI_O[2])
+                                                      0.239    11.262 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_1/O[2]
+                         net (fo=12, routed)          0.779    12.041    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/temp_4Q14[18]
+    DSP48_X0Y18          DSP48E1                                      r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg/A[27]
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                     10.000    10.000 r  
+    PS7_X0Y0             PS7                          0.000    10.000 r  design_1_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           1.088    11.088    design_1_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.091    11.179 r  design_1_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=16732, routed)       1.671    12.850    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/aclk
+    DSP48_X0Y18          DSP48E1                                      r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg/CLK
+                         clock pessimism              0.115    12.965    
+                         clock uncertainty           -0.154    12.811    
+    DSP48_X0Y18          DSP48E1 (Setup_dsp48e1_CLK_A[27])
+                                                     -0.539    12.272    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg
+  -------------------------------------------------------------------
+                         required time                         12.272    
+                         arrival time                         -12.041    
+  -------------------------------------------------------------------
+                         slack                                  0.230    
+
+Slack (MET) :             0.239ns  (required time - arrival time)
+  Source:                 design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/x_in_L_2Q7_abs_b_reg1_reg[4]/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg/A[20]
+                            (rising edge-triggered cell DSP48E1 clocked by clk_fpga_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            10.000ns  (clk_fpga_0 rise@10.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        9.042ns  (logic 4.130ns (45.673%)  route 4.912ns (54.327%))
+  Logic Levels:           11  (CARRY4=6 LUT2=1 LUT3=2 LUT4=1 LUT6=1)
+  Clock Path Skew:        -0.025ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.850ns = ( 12.850 - 10.000 ) 
+    Source Clock Delay      (SCD):    2.990ns
+    Clock Pessimism Removal (CPR):    0.115ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  design_1_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           1.193     1.193    design_1_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.101     1.294 r  design_1_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=16732, routed)       1.696     2.990    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/aclk
+    SLICE_X31Y61         FDRE                                         r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/x_in_L_2Q7_abs_b_reg1_reg[4]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X31Y61         FDRE (Prop_fdre_C_Q)         0.456     3.446 f  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/x_in_L_2Q7_abs_b_reg1_reg[4]/Q
+                         net (fo=32, routed)          0.963     4.409    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/x_in_L_2Q7_abs_b_reg1_reg[7]_0[1]
+    SLICE_X29Y57         LUT2 (Prop_lut2_I0_O)        0.150     4.559 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_130/O
+                         net (fo=1, routed)           0.434     4.993    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_130_n_0
+    SLICE_X28Y57         LUT6 (Prop_lut6_I3_O)        0.326     5.319 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_116/O
+                         net (fo=1, routed)           0.000     5.319    design_1_i/transformer_block_axi_top_0/inst_n_55
+    SLICE_X28Y57         CARRY4 (Prop_carry4_S[1]_CO[3])
+                                                      0.550     5.869 r  design_1_i/transformer_block_axi_top_0/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_52/CO[3]
+                         net (fo=1, routed)           0.000     5.869    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_49[0]
+    SLICE_X28Y58         CARRY4 (Prop_carry4_CI_O[1])
+                                                      0.334     6.203 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_91/O[1]
+                         net (fo=4, routed)           0.652     6.855    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/O[1]
+    SLICE_X28Y53         LUT3 (Prop_lut3_I0_O)        0.303     7.158 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_94/O
+                         net (fo=1, routed)           0.000     7.158    design_1_i/transformer_block_axi_top_0/inst_n_70
+    SLICE_X28Y53         CARRY4 (Prop_carry4_S[2]_CO[3])
+                                                      0.398     7.556 r  design_1_i/transformer_block_axi_top_0/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_49/CO[3]
+                         net (fo=1, routed)           0.000     7.556    design_1_i/transformer_block_axi_top_0/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_49_n_0
+    SLICE_X28Y54         CARRY4 (Prop_carry4_CI_O[0])
+                                                      0.222     7.778 r  design_1_i/transformer_block_axi_top_0/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_44/O[0]
+                         net (fo=2, routed)           1.237     9.015    design_1_i/transformer_block_axi_top_0/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_44_n_7
+    SLICE_X12Y48         LUT3 (Prop_lut3_I0_O)        0.291     9.306 r  design_1_i/transformer_block_axi_top_0/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_14/O
+                         net (fo=2, routed)           0.857    10.162    design_1_i/transformer_block_axi_top_0/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_14_n_0
+    SLICE_X12Y48         LUT4 (Prop_lut4_I3_O)        0.328    10.490 r  design_1_i/transformer_block_axi_top_0/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_18/O
+                         net (fo=1, routed)           0.000    10.490    design_1_i/transformer_block_axi_top_0/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_18_n_0
+    SLICE_X12Y48         CARRY4 (Prop_carry4_S[1]_CO[3])
+                                                      0.533    11.023 r  design_1_i/transformer_block_axi_top_0/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_2/CO[3]
+                         net (fo=1, routed)           0.000    11.023    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_0[0]
+    SLICE_X12Y49         CARRY4 (Prop_carry4_CI_O[2])
+                                                      0.239    11.262 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_1/O[2]
+                         net (fo=12, routed)          0.770    12.032    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/temp_4Q14[18]
+    DSP48_X0Y18          DSP48E1                                      r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg/A[20]
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                     10.000    10.000 r  
+    PS7_X0Y0             PS7                          0.000    10.000 r  design_1_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           1.088    11.088    design_1_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.091    11.179 r  design_1_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=16732, routed)       1.671    12.850    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/aclk
+    DSP48_X0Y18          DSP48E1                                      r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg/CLK
+                         clock pessimism              0.115    12.965    
+                         clock uncertainty           -0.154    12.811    
+    DSP48_X0Y18          DSP48E1 (Setup_dsp48e1_CLK_A[20])
+                                                     -0.539    12.272    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg
+  -------------------------------------------------------------------
+                         required time                         12.272    
+                         arrival time                         -12.032    
+  -------------------------------------------------------------------
+                         slack                                  0.239    
+
+Slack (MET) :             0.239ns  (required time - arrival time)
+  Source:                 design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/x_in_L_2Q7_abs_b_reg1_reg[4]/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg/A[21]
+                            (rising edge-triggered cell DSP48E1 clocked by clk_fpga_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            10.000ns  (clk_fpga_0 rise@10.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        9.042ns  (logic 4.130ns (45.673%)  route 4.912ns (54.327%))
+  Logic Levels:           11  (CARRY4=6 LUT2=1 LUT3=2 LUT4=1 LUT6=1)
+  Clock Path Skew:        -0.025ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.850ns = ( 12.850 - 10.000 ) 
+    Source Clock Delay      (SCD):    2.990ns
+    Clock Pessimism Removal (CPR):    0.115ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  design_1_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           1.193     1.193    design_1_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.101     1.294 r  design_1_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=16732, routed)       1.696     2.990    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/aclk
+    SLICE_X31Y61         FDRE                                         r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/x_in_L_2Q7_abs_b_reg1_reg[4]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X31Y61         FDRE (Prop_fdre_C_Q)         0.456     3.446 f  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/x_in_L_2Q7_abs_b_reg1_reg[4]/Q
+                         net (fo=32, routed)          0.963     4.409    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/x_in_L_2Q7_abs_b_reg1_reg[7]_0[1]
+    SLICE_X29Y57         LUT2 (Prop_lut2_I0_O)        0.150     4.559 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_130/O
+                         net (fo=1, routed)           0.434     4.993    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_130_n_0
+    SLICE_X28Y57         LUT6 (Prop_lut6_I3_O)        0.326     5.319 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_116/O
+                         net (fo=1, routed)           0.000     5.319    design_1_i/transformer_block_axi_top_0/inst_n_55
+    SLICE_X28Y57         CARRY4 (Prop_carry4_S[1]_CO[3])
+                                                      0.550     5.869 r  design_1_i/transformer_block_axi_top_0/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_52/CO[3]
+                         net (fo=1, routed)           0.000     5.869    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_49[0]
+    SLICE_X28Y58         CARRY4 (Prop_carry4_CI_O[1])
+                                                      0.334     6.203 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_91/O[1]
+                         net (fo=4, routed)           0.652     6.855    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/O[1]
+    SLICE_X28Y53         LUT3 (Prop_lut3_I0_O)        0.303     7.158 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_94/O
+                         net (fo=1, routed)           0.000     7.158    design_1_i/transformer_block_axi_top_0/inst_n_70
+    SLICE_X28Y53         CARRY4 (Prop_carry4_S[2]_CO[3])
+                                                      0.398     7.556 r  design_1_i/transformer_block_axi_top_0/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_49/CO[3]
+                         net (fo=1, routed)           0.000     7.556    design_1_i/transformer_block_axi_top_0/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_49_n_0
+    SLICE_X28Y54         CARRY4 (Prop_carry4_CI_O[0])
+                                                      0.222     7.778 r  design_1_i/transformer_block_axi_top_0/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_44/O[0]
+                         net (fo=2, routed)           1.237     9.015    design_1_i/transformer_block_axi_top_0/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_44_n_7
+    SLICE_X12Y48         LUT3 (Prop_lut3_I0_O)        0.291     9.306 r  design_1_i/transformer_block_axi_top_0/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_14/O
+                         net (fo=2, routed)           0.857    10.162    design_1_i/transformer_block_axi_top_0/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_14_n_0
+    SLICE_X12Y48         LUT4 (Prop_lut4_I3_O)        0.328    10.490 r  design_1_i/transformer_block_axi_top_0/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_18/O
+                         net (fo=1, routed)           0.000    10.490    design_1_i/transformer_block_axi_top_0/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_18_n_0
+    SLICE_X12Y48         CARRY4 (Prop_carry4_S[1]_CO[3])
+                                                      0.533    11.023 r  design_1_i/transformer_block_axi_top_0/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_2/CO[3]
+                         net (fo=1, routed)           0.000    11.023    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_0[0]
+    SLICE_X12Y49         CARRY4 (Prop_carry4_CI_O[2])
+                                                      0.239    11.262 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_1/O[2]
+                         net (fo=12, routed)          0.770    12.032    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/temp_4Q14[18]
+    DSP48_X0Y18          DSP48E1                                      r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg/A[21]
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                     10.000    10.000 r  
+    PS7_X0Y0             PS7                          0.000    10.000 r  design_1_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           1.088    11.088    design_1_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.091    11.179 r  design_1_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=16732, routed)       1.671    12.850    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/aclk
+    DSP48_X0Y18          DSP48E1                                      r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg/CLK
+                         clock pessimism              0.115    12.965    
+                         clock uncertainty           -0.154    12.811    
+    DSP48_X0Y18          DSP48E1 (Setup_dsp48e1_CLK_A[21])
+                                                     -0.539    12.272    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg
+  -------------------------------------------------------------------
+                         required time                         12.272    
+                         arrival time                         -12.032    
+  -------------------------------------------------------------------
+                         slack                                  0.239    
+
+Slack (MET) :             0.239ns  (required time - arrival time)
+  Source:                 design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/x_in_L_2Q7_abs_b_reg1_reg[4]/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg/A[22]
+                            (rising edge-triggered cell DSP48E1 clocked by clk_fpga_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            10.000ns  (clk_fpga_0 rise@10.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        9.042ns  (logic 4.130ns (45.673%)  route 4.912ns (54.327%))
+  Logic Levels:           11  (CARRY4=6 LUT2=1 LUT3=2 LUT4=1 LUT6=1)
+  Clock Path Skew:        -0.025ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.850ns = ( 12.850 - 10.000 ) 
+    Source Clock Delay      (SCD):    2.990ns
+    Clock Pessimism Removal (CPR):    0.115ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  design_1_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           1.193     1.193    design_1_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.101     1.294 r  design_1_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=16732, routed)       1.696     2.990    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/aclk
+    SLICE_X31Y61         FDRE                                         r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/x_in_L_2Q7_abs_b_reg1_reg[4]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X31Y61         FDRE (Prop_fdre_C_Q)         0.456     3.446 f  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/x_in_L_2Q7_abs_b_reg1_reg[4]/Q
+                         net (fo=32, routed)          0.963     4.409    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/x_in_L_2Q7_abs_b_reg1_reg[7]_0[1]
+    SLICE_X29Y57         LUT2 (Prop_lut2_I0_O)        0.150     4.559 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_130/O
+                         net (fo=1, routed)           0.434     4.993    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_130_n_0
+    SLICE_X28Y57         LUT6 (Prop_lut6_I3_O)        0.326     5.319 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_116/O
+                         net (fo=1, routed)           0.000     5.319    design_1_i/transformer_block_axi_top_0/inst_n_55
+    SLICE_X28Y57         CARRY4 (Prop_carry4_S[1]_CO[3])
+                                                      0.550     5.869 r  design_1_i/transformer_block_axi_top_0/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_52/CO[3]
+                         net (fo=1, routed)           0.000     5.869    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_49[0]
+    SLICE_X28Y58         CARRY4 (Prop_carry4_CI_O[1])
+                                                      0.334     6.203 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_91/O[1]
+                         net (fo=4, routed)           0.652     6.855    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/O[1]
+    SLICE_X28Y53         LUT3 (Prop_lut3_I0_O)        0.303     7.158 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_94/O
+                         net (fo=1, routed)           0.000     7.158    design_1_i/transformer_block_axi_top_0/inst_n_70
+    SLICE_X28Y53         CARRY4 (Prop_carry4_S[2]_CO[3])
+                                                      0.398     7.556 r  design_1_i/transformer_block_axi_top_0/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_49/CO[3]
+                         net (fo=1, routed)           0.000     7.556    design_1_i/transformer_block_axi_top_0/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_49_n_0
+    SLICE_X28Y54         CARRY4 (Prop_carry4_CI_O[0])
+                                                      0.222     7.778 r  design_1_i/transformer_block_axi_top_0/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_44/O[0]
+                         net (fo=2, routed)           1.237     9.015    design_1_i/transformer_block_axi_top_0/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_44_n_7
+    SLICE_X12Y48         LUT3 (Prop_lut3_I0_O)        0.291     9.306 r  design_1_i/transformer_block_axi_top_0/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_14/O
+                         net (fo=2, routed)           0.857    10.162    design_1_i/transformer_block_axi_top_0/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_14_n_0
+    SLICE_X12Y48         LUT4 (Prop_lut4_I3_O)        0.328    10.490 r  design_1_i/transformer_block_axi_top_0/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_18/O
+                         net (fo=1, routed)           0.000    10.490    design_1_i/transformer_block_axi_top_0/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_18_n_0
+    SLICE_X12Y48         CARRY4 (Prop_carry4_S[1]_CO[3])
+                                                      0.533    11.023 r  design_1_i/transformer_block_axi_top_0/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_2/CO[3]
+                         net (fo=1, routed)           0.000    11.023    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_0[0]
+    SLICE_X12Y49         CARRY4 (Prop_carry4_CI_O[2])
+                                                      0.239    11.262 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg_i_1/O[2]
+                         net (fo=12, routed)          0.770    12.032    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/temp_4Q14[18]
+    DSP48_X0Y18          DSP48E1                                      r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg/A[22]
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                     10.000    10.000 r  
+    PS7_X0Y0             PS7                          0.000    10.000 r  design_1_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           1.088    11.088    design_1_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.091    11.179 r  design_1_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=16732, routed)       1.671    12.850    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/aclk
+    DSP48_X0Y18          DSP48E1                                      r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg/CLK
+                         clock pessimism              0.115    12.965    
+                         clock uncertainty           -0.154    12.811    
+    DSP48_X0Y18          DSP48E1 (Setup_dsp48e1_CLK_A[22])
+                                                     -0.539    12.272    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg
+  -------------------------------------------------------------------
+                         required time                         12.272    
+                         arrival time                         -12.032    
+  -------------------------------------------------------------------
+                         slack                                  0.239    
+
+Slack (MET) :             0.270ns  (required time - arrival time)
+  Source:                 design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/in_F_addr_reg[0]/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/in_F_array_reg_1/ADDRARDADDR[3]
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_fpga_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            10.000ns  (clk_fpga_0 rise@10.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        9.027ns  (logic 0.456ns (5.051%)  route 8.571ns (94.949%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.018ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.843ns = ( 12.843 - 10.000 ) 
+    Source Clock Delay      (SCD):    2.954ns
+    Clock Pessimism Removal (CPR):    0.129ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  design_1_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           1.193     1.193    design_1_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.101     1.294 r  design_1_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=16732, routed)       1.660     2.954    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/aclk
+    SLICE_X44Y33         FDRE                                         r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/in_F_addr_reg[0]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X44Y33         FDRE (Prop_fdre_C_Q)         0.456     3.410 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/in_F_addr_reg[0]/Q
+                         net (fo=16, routed)          8.571    11.981    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/in_F_addr_reg[0]
+    RAMB36_X4Y1          RAMB36E1                                     r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/in_F_array_reg_1/ADDRARDADDR[3]
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                     10.000    10.000 r  
+    PS7_X0Y0             PS7                          0.000    10.000 r  design_1_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           1.088    11.088    design_1_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.091    11.179 r  design_1_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=16732, routed)       1.664    12.843    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/aclk
+    RAMB36_X4Y1          RAMB36E1                                     r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/in_F_array_reg_1/CLKARDCLK
+                         clock pessimism              0.129    12.972    
+                         clock uncertainty           -0.154    12.818    
+    RAMB36_X4Y1          RAMB36E1 (Setup_ramb36e1_CLKARDCLK_ADDRARDADDR[3])
+                                                     -0.566    12.252    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/in_F_array_reg_1
+  -------------------------------------------------------------------
+                         required time                         12.252    
+                         arrival time                         -11.981    
+  -------------------------------------------------------------------
+                         slack                                  0.270    
+
+Slack (MET) :             0.271ns  (required time - arrival time)
+  Source:                 design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/in_W_addr_reg[7]/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/in_W_array_reg_12/ADDRARDADDR[10]
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_fpga_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            10.000ns  (clk_fpga_0 rise@10.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        8.976ns  (logic 0.456ns (5.080%)  route 8.520ns (94.920%))
+  Logic Levels:           0  
+  Clock Path Skew:        -0.033ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.870ns = ( 12.870 - 10.000 ) 
+    Source Clock Delay      (SCD):    3.018ns
+    Clock Pessimism Removal (CPR):    0.115ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  design_1_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           1.193     1.193    design_1_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.101     1.294 r  design_1_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=16732, routed)       1.724     3.018    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/aclk
+    SLICE_X56Y36         FDRE                                         r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/in_W_addr_reg[7]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X56Y36         FDRE (Prop_fdre_C_Q)         0.456     3.474 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/in_W_addr_reg[7]/Q
+                         net (fo=16, routed)          8.520    11.994    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/in_W_addr_reg[7]
+    RAMB36_X2Y22         RAMB36E1                                     r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/in_W_array_reg_12/ADDRARDADDR[10]
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                     10.000    10.000 r  
+    PS7_X0Y0             PS7                          0.000    10.000 r  design_1_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           1.088    11.088    design_1_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.091    11.179 r  design_1_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=16732, routed)       1.691    12.870    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/aclk
+    RAMB36_X2Y22         RAMB36E1                                     r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/in_W_array_reg_12/CLKARDCLK
+                         clock pessimism              0.115    12.985    
+                         clock uncertainty           -0.154    12.830    
+    RAMB36_X2Y22         RAMB36E1 (Setup_ramb36e1_CLKARDCLK_ADDRARDADDR[10])
+                                                     -0.566    12.264    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_in_buffer/in_W_array_reg_12
+  -------------------------------------------------------------------
+                         required time                         12.264    
+                         arrival time                         -11.994    
+  -------------------------------------------------------------------
+                         slack                                  0.271    
+
+Slack (MET) :             0.295ns  (required time - arrival time)
+  Source:                 design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_25/CLKBWRCLK
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_fpga_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_25/DIPADIP[0]
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_fpga_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            10.000ns  (clk_fpga_0 rise@10.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        9.079ns  (logic 4.134ns (45.532%)  route 4.945ns (54.468%))
+  Logic Levels:           8  (CARRY4=6 LUT2=1 LUT4=1)
+  Clock Path Skew:        -0.024ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.803ns = ( 12.803 - 10.000 ) 
+    Source Clock Delay      (SCD):    3.092ns
+    Clock Pessimism Removal (CPR):    0.266ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  design_1_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           1.193     1.193    design_1_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.101     1.294 r  design_1_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=16732, routed)       1.798     3.092    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/aclk
+    RAMB36_X0Y9          RAMB36E1                                     r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_25/CLKBWRCLK
+  -------------------------------------------------------------------    -------------------
+    RAMB36_X0Y9          RAMB36E1 (Prop_ramb36e1_CLKBWRCLK_DOBDO[7])
+                                                      2.454     5.546 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_25/DOBDO[7]
+                         net (fo=2, routed)           2.185     7.731    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/out_F_array_data[232]
+    SLICE_X55Y39         LUT2 (Prop_lut2_I1_O)        0.124     7.855 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_25_i_17/O
+                         net (fo=1, routed)           0.000     7.855    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_25_i_17_n_0
+    SLICE_X55Y39         CARRY4 (Prop_carry4_S[1]_CO[3])
+                                                      0.550     8.405 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_25_i_11/CO[3]
+                         net (fo=1, routed)           0.000     8.405    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_25_i_11_n_0
+    SLICE_X55Y40         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114     8.519 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_26_i_12/CO[3]
+                         net (fo=1, routed)           0.000     8.519    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_26_i_12_n_0
+    SLICE_X55Y41         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114     8.633 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_26_i_11/CO[3]
+                         net (fo=1, routed)           0.000     8.633    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_26_i_11_n_0
+    SLICE_X55Y42         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114     8.747 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_27_i_11/CO[3]
+                         net (fo=1, routed)           0.000     8.747    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_27_i_11_n_0
+    SLICE_X55Y43         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114     8.861 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_27_i_10/CO[3]
+                         net (fo=1, routed)           0.000     8.861    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_27_i_10_n_0
+    SLICE_X55Y44         CARRY4 (Prop_carry4_CI_O[0])
+                                                      0.222     9.083 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_25_i_10/O[0]
+                         net (fo=20, routed)          1.857    10.941    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/u_MM_out_buffer/U_Adders/temp[11]_47[20]
+    SLICE_X18Y39         LUT4 (Prop_lut4_I1_O)        0.328    11.269 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_25_i_9/O
+                         net (fo=1, routed)           0.903    12.172    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/in_F_array_data[233]
+    RAMB36_X0Y9          RAMB36E1                                     r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_25/DIPADIP[0]
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                     10.000    10.000 r  
+    PS7_X0Y0             PS7                          0.000    10.000 r  design_1_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           1.088    11.088    design_1_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.091    11.179 r  design_1_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=16732, routed)       1.624    12.803    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/aclk
+    RAMB36_X0Y9          RAMB36E1                                     r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_25/CLKARDCLK
+                         clock pessimism              0.266    13.068    
+                         clock uncertainty           -0.154    12.914    
+    RAMB36_X0Y9          RAMB36E1 (Setup_ramb36e1_CLKARDCLK_DIPADIP[0])
+                                                     -0.448    12.466    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_25
+  -------------------------------------------------------------------
+                         required time                         12.466    
+                         arrival time                         -12.172    
+  -------------------------------------------------------------------
+                         slack                                  0.295    
+
+Slack (MET) :             0.296ns  (required time - arrival time)
+  Source:                 design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/F_length_reg[7]_replica/C
+                            (rising edge-triggered cell FDRE clocked by clk_fpga_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_15/ADDRBWRADDR[4]
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_fpga_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            10.000ns  (clk_fpga_0 rise@10.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        8.806ns  (logic 4.421ns (50.206%)  route 4.385ns (49.794%))
+  Logic Levels:           2  (DSP48E1=1 LUT4=1)
+  Clock Path Skew:        -0.178ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.757ns = ( 12.757 - 10.000 ) 
+    Source Clock Delay      (SCD):    3.050ns
+    Clock Pessimism Removal (CPR):    0.115ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  design_1_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           1.193     1.193    design_1_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.101     1.294 r  design_1_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=16732, routed)       1.756     3.050    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/aclk
+    SLICE_X13Y41         FDRE                                         r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/F_length_reg[7]_replica/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X13Y41         FDRE (Prop_fdre_C_Q)         0.456     3.506 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/F_length_reg[7]_replica/Q
+                         net (fo=12, routed)          0.458     3.964    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_length[7]_repN_alias
+    DSP48_X0Y17          DSP48E1 (Prop_dsp48e1_A[7]_P[1])
+                                                      3.841     7.805 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/out_data_addr/P[1]
+                         net (fo=3, routed)           0.991     8.796    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/out_data_addr_n_104
+    SLICE_X22Y40         LUT4 (Prop_lut4_I0_O)        0.124     8.920 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_0_i_25/O
+                         net (fo=28, routed)          2.936    11.856    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/out_F_array_addr[1]
+    RAMB36_X3Y19         RAMB36E1                                     r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_15/ADDRBWRADDR[4]
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                     10.000    10.000 r  
+    PS7_X0Y0             PS7                          0.000    10.000 r  design_1_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           1.088    11.088    design_1_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.091    11.179 r  design_1_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=16732, routed)       1.578    12.757    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/aclk
+    RAMB36_X3Y19         RAMB36E1                                     r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_15/CLKBWRCLK
+                         clock pessimism              0.115    12.872    
+                         clock uncertainty           -0.154    12.718    
+    RAMB36_X3Y19         RAMB36E1 (Setup_ramb36e1_CLKBWRCLK_ADDRBWRADDR[4])
+                                                     -0.566    12.152    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_15
+  -------------------------------------------------------------------
+                         required time                         12.152    
+                         arrival time                         -11.856    
+  -------------------------------------------------------------------
+                         slack                                  0.296    
+
+Slack (MET) :             0.297ns  (required time - arrival time)
+  Source:                 design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_0/CLKBWRCLK
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_fpga_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_0/DIADI[3]
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_fpga_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_fpga_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            10.000ns  (clk_fpga_0 rise@10.000ns - clk_fpga_0 rise@0.000ns)
+  Data Path Delay:        9.083ns  (logic 4.019ns (44.247%)  route 5.064ns (55.753%))
+  Logic Levels:           7  (CARRY4=5 LUT2=1 LUT4=1)
+  Clock Path Skew:        -0.023ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.797ns = ( 12.797 - 10.000 ) 
+    Source Clock Delay      (SCD):    3.084ns
+    Clock Pessimism Removal (CPR):    0.265ns
+  Clock Uncertainty:      0.154ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.300ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_fpga_0 rise edge)
+                                                      0.000     0.000 r  
+    PS7_X0Y0             PS7                          0.000     0.000 r  design_1_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           1.193     1.193    design_1_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.101     1.294 r  design_1_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=16732, routed)       1.790     3.084    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/aclk
+    RAMB36_X1Y7          RAMB36E1                                     r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_0/CLKBWRCLK
+  -------------------------------------------------------------------    -------------------
+    RAMB36_X1Y7          RAMB36E1 (Prop_ramb36e1_CLKBWRCLK_DOBDO[5])
+                                                      2.454     5.538 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_0/DOBDO[5]
+                         net (fo=2, routed)           2.227     7.766    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/out_F_array_data[5]
+    SLICE_X60Y53         LUT2 (Prop_lut2_I1_O)        0.124     7.890 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_0_i_49/O
+                         net (fo=1, routed)           0.000     7.890    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_0_i_49_n_0
+    SLICE_X60Y53         CARRY4 (Prop_carry4_S[1]_CO[3])
+                                                      0.550     8.440 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_0_i_41/CO[3]
+                         net (fo=1, routed)           0.000     8.440    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_0_i_41_n_0
+    SLICE_X60Y54         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114     8.554 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_0_i_43/CO[3]
+                         net (fo=1, routed)           0.000     8.554    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_0_i_43_n_0
+    SLICE_X60Y55         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114     8.668 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_1_i_11/CO[3]
+                         net (fo=1, routed)           0.000     8.668    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_1_i_11_n_0
+    SLICE_X60Y56         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114     8.782 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_1_i_10/CO[3]
+                         net (fo=1, routed)           0.000     8.782    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_1_i_10_n_0
+    SLICE_X60Y57         CARRY4 (Prop_carry4_CI_O[0])
+                                                      0.222     9.004 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_0_i_40/O[0]
+                         net (fo=20, routed)          1.125    10.128    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/u_MM_out_buffer/U_Adders/temp[0]_36[20]
+    SLICE_X60Y50         LUT4 (Prop_lut4_I1_O)        0.327    10.455 r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/F_array_reg_0_i_31/O
+                         net (fo=1, routed)           1.712    12.168    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/in_F_array_data[3]
+    RAMB36_X1Y7          RAMB36E1                                     r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_0/DIADI[3]
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_fpga_0 rise edge)
+                                                     10.000    10.000 r  
+    PS7_X0Y0             PS7                          0.000    10.000 r  design_1_i/processing_system7_0/inst/PS7_i/FCLKCLK[0]
+                         net (fo=1, routed)           1.088    11.088    design_1_i/processing_system7_0/inst/FCLK_CLK_unbuffered[0]
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.091    11.179 r  design_1_i/processing_system7_0/inst/buffer_fclk_clk_0.FCLK_CLK_0_BUFG/O
+                         net (fo=16732, routed)       1.618    12.797    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/aclk
+    RAMB36_X1Y7          RAMB36E1                                     r  design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_0/CLKARDCLK
+                         clock pessimism              0.265    13.061    
+                         clock uncertainty           -0.154    12.907    
+    RAMB36_X1Y7          RAMB36E1 (Setup_ramb36e1_CLKARDCLK_DIADI[3])
+                                                     -0.443    12.464    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_out_buffer/F_array_reg_0
+  -------------------------------------------------------------------
+                         required time                         12.464    
+                         arrival time                         -12.168    
+  -------------------------------------------------------------------
+                         slack                                  0.297    
+
+
+
+
+
+Pulse Width Checks
+--------------------------------------------------------------------------------------
+Clock Name:         clk_fpga_0
+Waveform(ns):       { 0.000 5.000 }
+Period(ns):         10.000
+Sources:            { design_1_i/processing_system7_0/inst/PS7_i/FCLKCLK[0] }
+
+Check Type        Corner  Lib Pin      Reference Pin  Required(ns)  Actual(ns)  Slack(ns)  Location      Pin
+Min Period        n/a     DSP48E1/CLK  n/a            3.884         10.000      6.116      DSP48_X0Y18   design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[0].u_gelu/u_lin/l_4Q21_reg1_reg/CLK
+Min Period        n/a     DSP48E1/CLK  n/a            3.884         10.000      6.116      DSP48_X1Y18   design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[1].u_gelu/u_lin/l_4Q21_reg1_reg/CLK
+Min Period        n/a     DSP48E1/CLK  n/a            3.884         10.000      6.116      DSP48_X1Y19   design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_EightGelus/genblk4[2].u_gelu/u_lin/l_4Q21_reg1_reg/CLK
+Min Period        n/a     DSP48E1/CLK  n/a            3.884         10.000      6.116      DSP48_X2Y0    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/u_PE_array/array[0].PE_line_u/array_line[0].PE_u/g_dsp_mapped.psum_out_r_reg/CLK
+Min Period        n/a     DSP48E1/CLK  n/a            3.884         10.000      6.116      DSP48_X3Y0    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/u_PE_array/array[0].PE_line_u/array_line[10].PE_u/g_dsp_mapped.psum_out_r_reg/CLK
+Min Period        n/a     DSP48E1/CLK  n/a            3.884         10.000      6.116      DSP48_X2Y12   design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/u_PE_array/array[0].PE_line_u/array_line[11].PE_u/g_dsp_mapped.psum_out_r_reg/CLK
+Min Period        n/a     DSP48E1/CLK  n/a            3.884         10.000      6.116      DSP48_X2Y24   design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/u_PE_array/array[0].PE_line_u/array_line[12].PE_u/g_dsp_mapped.psum_out_r_reg/CLK
+Min Period        n/a     DSP48E1/CLK  n/a            3.884         10.000      6.116      DSP48_X4Y27   design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/u_PE_array/array[0].PE_line_u/array_line[13].PE_u/g_dsp_mapped.psum_out_r_reg/CLK
+Min Period        n/a     DSP48E1/CLK  n/a            3.884         10.000      6.116      DSP48_X1Y0    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/u_PE_array/array[0].PE_line_u/array_line[14].PE_u/g_dsp_mapped.psum_out_r_reg/CLK
+Min Period        n/a     DSP48E1/CLK  n/a            3.884         10.000      6.116      DSP48_X3Y36   design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/u_PE_array/array[0].PE_line_u/array_line[15].PE_u/g_dsp_mapped.psum_out_r_reg/CLK
+Min Period        n/a     DSP48E1/CLK  n/a            3.884         10.000      6.116      DSP48_X0Y2    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/u_PE_array/array[0].PE_line_u/array_line[1].PE_u/g_dsp_mapped.psum_out_r_reg/CLK
+Min Period        n/a     DSP48E1/CLK  n/a            3.884         10.000      6.116      DSP48_X2Y36   design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/u_PE_array/array[0].PE_line_u/array_line[2].PE_u/g_dsp_mapped.psum_out_r_reg/CLK
+Min Period        n/a     DSP48E1/CLK  n/a            3.884         10.000      6.116      DSP48_X2Y48   design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/u_PE_array/array[0].PE_line_u/array_line[3].PE_u/g_dsp_mapped.psum_out_r_reg/CLK
+Min Period        n/a     DSP48E1/CLK  n/a            3.884         10.000      6.116      DSP48_X3Y48   design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/u_PE_array/array[0].PE_line_u/array_line[4].PE_u/g_dsp_mapped.psum_out_r_reg/CLK
+Min Period        n/a     DSP48E1/CLK  n/a            3.884         10.000      6.116      DSP48_X4Y14   design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/u_PE_array/array[0].PE_line_u/array_line[5].PE_u/g_dsp_mapped.psum_out_r_reg/CLK
+Min Period        n/a     DSP48E1/CLK  n/a            3.884         10.000      6.116      DSP48_X4Y41   design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/u_PE_array/array[0].PE_line_u/array_line[6].PE_u/g_dsp_mapped.psum_out_r_reg/CLK
+Min Period        n/a     DSP48E1/CLK  n/a            3.884         10.000      6.116      DSP48_X3Y24   design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/u_PE_array/array[0].PE_line_u/array_line[7].PE_u/g_dsp_mapped.psum_out_r_reg/CLK
+Min Period        n/a     DSP48E1/CLK  n/a            3.884         10.000      6.116      DSP48_X3Y12   design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/u_PE_array/array[0].PE_line_u/array_line[8].PE_u/g_dsp_mapped.psum_out_r_reg/CLK
+Min Period        n/a     DSP48E1/CLK  n/a            3.884         10.000      6.116      DSP48_X4Y0    design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/u_PE_array/array[0].PE_line_u/array_line[9].PE_u/g_dsp_mapped.psum_out_r_reg/CLK
+Min Period        n/a     DSP48E1/CLK  n/a            3.884         10.000      6.116      DSP48_X2Y10   design_1_i/transformer_block_axi_top_0/inst/U_transformer_block_axi/u_transformer_block_top/u_MM_ultra/u_MM_buffer/u_MM/u_PE_array/array[10].PE_line_u/array_line[0].PE_u/g_dsp_mapped.psum_out_r_reg/CLK
+Low Pulse Width   Slow    RAMD32/CLK   n/a            1.250         5.000       3.750      SLICE_X42Y50  design_1_i/axi_dma_2/U0/I_PRMRY_DATAMOVER/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_ENABLE_INDET_BTT_SF.I_INDET_BTT/I_XD_FIFO/NON_BLK_MEM.I_SYNC_FIFOGEN_FIFO/xpm_fifo_base_inst/gen_sdpram.xpm_memory_base_inst/gen_wr_a.gen_word_narrow.mem_reg_0_15_0_5/RAMA/CLK
+Low Pulse Width   Fast    RAMD32/CLK   n/a            1.250         5.000       3.750      SLICE_X42Y50  design_1_i/axi_dma_2/U0/I_PRMRY_DATAMOVER/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_ENABLE_INDET_BTT_SF.I_INDET_BTT/I_XD_FIFO/NON_BLK_MEM.I_SYNC_FIFOGEN_FIFO/xpm_fifo_base_inst/gen_sdpram.xpm_memory_base_inst/gen_wr_a.gen_word_narrow.mem_reg_0_15_0_5/RAMA/CLK
+Low Pulse Width   Slow    RAMD32/CLK   n/a            1.250         5.000       3.750      SLICE_X42Y50  design_1_i/axi_dma_2/U0/I_PRMRY_DATAMOVER/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_ENABLE_INDET_BTT_SF.I_INDET_BTT/I_XD_FIFO/NON_BLK_MEM.I_SYNC_FIFOGEN_FIFO/xpm_fifo_base_inst/gen_sdpram.xpm_memory_base_inst/gen_wr_a.gen_word_narrow.mem_reg_0_15_0_5/RAMA_D1/CLK
+Low Pulse Width   Fast    RAMD32/CLK   n/a            1.250         5.000       3.750      SLICE_X42Y50  design_1_i/axi_dma_2/U0/I_PRMRY_DATAMOVER/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_ENABLE_INDET_BTT_SF.I_INDET_BTT/I_XD_FIFO/NON_BLK_MEM.I_SYNC_FIFOGEN_FIFO/xpm_fifo_base_inst/gen_sdpram.xpm_memory_base_inst/gen_wr_a.gen_word_narrow.mem_reg_0_15_0_5/RAMA_D1/CLK
+Low Pulse Width   Slow    RAMD32/CLK   n/a            1.250         5.000       3.750      SLICE_X42Y50  design_1_i/axi_dma_2/U0/I_PRMRY_DATAMOVER/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_ENABLE_INDET_BTT_SF.I_INDET_BTT/I_XD_FIFO/NON_BLK_MEM.I_SYNC_FIFOGEN_FIFO/xpm_fifo_base_inst/gen_sdpram.xpm_memory_base_inst/gen_wr_a.gen_word_narrow.mem_reg_0_15_0_5/RAMB/CLK
+Low Pulse Width   Fast    RAMD32/CLK   n/a            1.250         5.000       3.750      SLICE_X42Y50  design_1_i/axi_dma_2/U0/I_PRMRY_DATAMOVER/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_ENABLE_INDET_BTT_SF.I_INDET_BTT/I_XD_FIFO/NON_BLK_MEM.I_SYNC_FIFOGEN_FIFO/xpm_fifo_base_inst/gen_sdpram.xpm_memory_base_inst/gen_wr_a.gen_word_narrow.mem_reg_0_15_0_5/RAMB/CLK
+Low Pulse Width   Slow    RAMD32/CLK   n/a            1.250         5.000       3.750      SLICE_X42Y50  design_1_i/axi_dma_2/U0/I_PRMRY_DATAMOVER/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_ENABLE_INDET_BTT_SF.I_INDET_BTT/I_XD_FIFO/NON_BLK_MEM.I_SYNC_FIFOGEN_FIFO/xpm_fifo_base_inst/gen_sdpram.xpm_memory_base_inst/gen_wr_a.gen_word_narrow.mem_reg_0_15_0_5/RAMB_D1/CLK
+Low Pulse Width   Fast    RAMD32/CLK   n/a            1.250         5.000       3.750      SLICE_X42Y50  design_1_i/axi_dma_2/U0/I_PRMRY_DATAMOVER/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_ENABLE_INDET_BTT_SF.I_INDET_BTT/I_XD_FIFO/NON_BLK_MEM.I_SYNC_FIFOGEN_FIFO/xpm_fifo_base_inst/gen_sdpram.xpm_memory_base_inst/gen_wr_a.gen_word_narrow.mem_reg_0_15_0_5/RAMB_D1/CLK
+Low Pulse Width   Slow    RAMD32/CLK   n/a            1.250         5.000       3.750      SLICE_X42Y50  design_1_i/axi_dma_2/U0/I_PRMRY_DATAMOVER/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_ENABLE_INDET_BTT_SF.I_INDET_BTT/I_XD_FIFO/NON_BLK_MEM.I_SYNC_FIFOGEN_FIFO/xpm_fifo_base_inst/gen_sdpram.xpm_memory_base_inst/gen_wr_a.gen_word_narrow.mem_reg_0_15_0_5/RAMC/CLK
+Low Pulse Width   Fast    RAMD32/CLK   n/a            1.250         5.000       3.750      SLICE_X42Y50  design_1_i/axi_dma_2/U0/I_PRMRY_DATAMOVER/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_ENABLE_INDET_BTT_SF.I_INDET_BTT/I_XD_FIFO/NON_BLK_MEM.I_SYNC_FIFOGEN_FIFO/xpm_fifo_base_inst/gen_sdpram.xpm_memory_base_inst/gen_wr_a.gen_word_narrow.mem_reg_0_15_0_5/RAMC/CLK
+Low Pulse Width   Slow    RAMD32/CLK   n/a            1.250         5.000       3.750      SLICE_X42Y50  design_1_i/axi_dma_2/U0/I_PRMRY_DATAMOVER/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_ENABLE_INDET_BTT_SF.I_INDET_BTT/I_XD_FIFO/NON_BLK_MEM.I_SYNC_FIFOGEN_FIFO/xpm_fifo_base_inst/gen_sdpram.xpm_memory_base_inst/gen_wr_a.gen_word_narrow.mem_reg_0_15_0_5/RAMC_D1/CLK
+Low Pulse Width   Fast    RAMD32/CLK   n/a            1.250         5.000       3.750      SLICE_X42Y50  design_1_i/axi_dma_2/U0/I_PRMRY_DATAMOVER/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_ENABLE_INDET_BTT_SF.I_INDET_BTT/I_XD_FIFO/NON_BLK_MEM.I_SYNC_FIFOGEN_FIFO/xpm_fifo_base_inst/gen_sdpram.xpm_memory_base_inst/gen_wr_a.gen_word_narrow.mem_reg_0_15_0_5/RAMC_D1/CLK
+Low Pulse Width   Slow    RAMS32/CLK   n/a            1.250         5.000       3.750      SLICE_X42Y50  design_1_i/axi_dma_2/U0/I_PRMRY_DATAMOVER/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_ENABLE_INDET_BTT_SF.I_INDET_BTT/I_XD_FIFO/NON_BLK_MEM.I_SYNC_FIFOGEN_FIFO/xpm_fifo_base_inst/gen_sdpram.xpm_memory_base_inst/gen_wr_a.gen_word_narrow.mem_reg_0_15_0_5/RAMD/CLK
+Low Pulse Width   Fast    RAMS32/CLK   n/a            1.250         5.000       3.750      SLICE_X42Y50  design_1_i/axi_dma_2/U0/I_PRMRY_DATAMOVER/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_ENABLE_INDET_BTT_SF.I_INDET_BTT/I_XD_FIFO/NON_BLK_MEM.I_SYNC_FIFOGEN_FIFO/xpm_fifo_base_inst/gen_sdpram.xpm_memory_base_inst/gen_wr_a.gen_word_narrow.mem_reg_0_15_0_5/RAMD/CLK
+Low Pulse Width   Slow    RAMS32/CLK   n/a            1.250         5.000       3.750      SLICE_X42Y50  design_1_i/axi_dma_2/U0/I_PRMRY_DATAMOVER/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_ENABLE_INDET_BTT_SF.I_INDET_BTT/I_XD_FIFO/NON_BLK_MEM.I_SYNC_FIFOGEN_FIFO/xpm_fifo_base_inst/gen_sdpram.xpm_memory_base_inst/gen_wr_a.gen_word_narrow.mem_reg_0_15_0_5/RAMD_D1/CLK
+Low Pulse Width   Fast    RAMS32/CLK   n/a            1.250         5.000       3.750      SLICE_X42Y50  design_1_i/axi_dma_2/U0/I_PRMRY_DATAMOVER/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_ENABLE_INDET_BTT_SF.I_INDET_BTT/I_XD_FIFO/NON_BLK_MEM.I_SYNC_FIFOGEN_FIFO/xpm_fifo_base_inst/gen_sdpram.xpm_memory_base_inst/gen_wr_a.gen_word_narrow.mem_reg_0_15_0_5/RAMD_D1/CLK
+Low Pulse Width   Slow    RAMD32/CLK   n/a            1.250         5.000       3.750      SLICE_X46Y50  design_1_i/axi_dma_2/U0/I_PRMRY_DATAMOVER/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_ENABLE_INDET_BTT_SF.I_INDET_BTT/I_XD_FIFO/NON_BLK_MEM.I_SYNC_FIFOGEN_FIFO/xpm_fifo_base_inst/gen_sdpram.xpm_memory_base_inst/gen_wr_a.gen_word_narrow.mem_reg_0_15_12_13/DP/CLK
+Low Pulse Width   Fast    RAMD32/CLK   n/a            1.250         5.000       3.750      SLICE_X46Y50  design_1_i/axi_dma_2/U0/I_PRMRY_DATAMOVER/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_ENABLE_INDET_BTT_SF.I_INDET_BTT/I_XD_FIFO/NON_BLK_MEM.I_SYNC_FIFOGEN_FIFO/xpm_fifo_base_inst/gen_sdpram.xpm_memory_base_inst/gen_wr_a.gen_word_narrow.mem_reg_0_15_12_13/DP/CLK
+Low Pulse Width   Slow    RAMD32/CLK   n/a            1.250         5.000       3.750      SLICE_X46Y50  design_1_i/axi_dma_2/U0/I_PRMRY_DATAMOVER/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_ENABLE_INDET_BTT_SF.I_INDET_BTT/I_XD_FIFO/NON_BLK_MEM.I_SYNC_FIFOGEN_FIFO/xpm_fifo_base_inst/gen_sdpram.xpm_memory_base_inst/gen_wr_a.gen_word_narrow.mem_reg_0_15_12_13/SP/CLK
+Low Pulse Width   Fast    RAMD32/CLK   n/a            1.250         5.000       3.750      SLICE_X46Y50  design_1_i/axi_dma_2/U0/I_PRMRY_DATAMOVER/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_ENABLE_INDET_BTT_SF.I_INDET_BTT/I_XD_FIFO/NON_BLK_MEM.I_SYNC_FIFOGEN_FIFO/xpm_fifo_base_inst/gen_sdpram.xpm_memory_base_inst/gen_wr_a.gen_word_narrow.mem_reg_0_15_12_13/SP/CLK
+High Pulse Width  Slow    RAMD32/CLK   n/a            1.250         5.000       3.750      SLICE_X42Y50  design_1_i/axi_dma_2/U0/I_PRMRY_DATAMOVER/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_ENABLE_INDET_BTT_SF.I_INDET_BTT/I_XD_FIFO/NON_BLK_MEM.I_SYNC_FIFOGEN_FIFO/xpm_fifo_base_inst/gen_sdpram.xpm_memory_base_inst/gen_wr_a.gen_word_narrow.mem_reg_0_15_0_5/RAMA/CLK
+High Pulse Width  Fast    RAMD32/CLK   n/a            1.250         5.000       3.750      SLICE_X42Y50  design_1_i/axi_dma_2/U0/I_PRMRY_DATAMOVER/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_ENABLE_INDET_BTT_SF.I_INDET_BTT/I_XD_FIFO/NON_BLK_MEM.I_SYNC_FIFOGEN_FIFO/xpm_fifo_base_inst/gen_sdpram.xpm_memory_base_inst/gen_wr_a.gen_word_narrow.mem_reg_0_15_0_5/RAMA/CLK
+High Pulse Width  Slow    RAMD32/CLK   n/a            1.250         5.000       3.750      SLICE_X42Y50  design_1_i/axi_dma_2/U0/I_PRMRY_DATAMOVER/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_ENABLE_INDET_BTT_SF.I_INDET_BTT/I_XD_FIFO/NON_BLK_MEM.I_SYNC_FIFOGEN_FIFO/xpm_fifo_base_inst/gen_sdpram.xpm_memory_base_inst/gen_wr_a.gen_word_narrow.mem_reg_0_15_0_5/RAMA_D1/CLK
+High Pulse Width  Fast    RAMD32/CLK   n/a            1.250         5.000       3.750      SLICE_X42Y50  design_1_i/axi_dma_2/U0/I_PRMRY_DATAMOVER/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_ENABLE_INDET_BTT_SF.I_INDET_BTT/I_XD_FIFO/NON_BLK_MEM.I_SYNC_FIFOGEN_FIFO/xpm_fifo_base_inst/gen_sdpram.xpm_memory_base_inst/gen_wr_a.gen_word_narrow.mem_reg_0_15_0_5/RAMA_D1/CLK
+High Pulse Width  Slow    RAMD32/CLK   n/a            1.250         5.000       3.750      SLICE_X42Y50  design_1_i/axi_dma_2/U0/I_PRMRY_DATAMOVER/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_ENABLE_INDET_BTT_SF.I_INDET_BTT/I_XD_FIFO/NON_BLK_MEM.I_SYNC_FIFOGEN_FIFO/xpm_fifo_base_inst/gen_sdpram.xpm_memory_base_inst/gen_wr_a.gen_word_narrow.mem_reg_0_15_0_5/RAMB/CLK
+High Pulse Width  Fast    RAMD32/CLK   n/a            1.250         5.000       3.750      SLICE_X42Y50  design_1_i/axi_dma_2/U0/I_PRMRY_DATAMOVER/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_ENABLE_INDET_BTT_SF.I_INDET_BTT/I_XD_FIFO/NON_BLK_MEM.I_SYNC_FIFOGEN_FIFO/xpm_fifo_base_inst/gen_sdpram.xpm_memory_base_inst/gen_wr_a.gen_word_narrow.mem_reg_0_15_0_5/RAMB/CLK
+High Pulse Width  Slow    RAMD32/CLK   n/a            1.250         5.000       3.750      SLICE_X42Y50  design_1_i/axi_dma_2/U0/I_PRMRY_DATAMOVER/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_ENABLE_INDET_BTT_SF.I_INDET_BTT/I_XD_FIFO/NON_BLK_MEM.I_SYNC_FIFOGEN_FIFO/xpm_fifo_base_inst/gen_sdpram.xpm_memory_base_inst/gen_wr_a.gen_word_narrow.mem_reg_0_15_0_5/RAMB_D1/CLK
+High Pulse Width  Fast    RAMD32/CLK   n/a            1.250         5.000       3.750      SLICE_X42Y50  design_1_i/axi_dma_2/U0/I_PRMRY_DATAMOVER/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_ENABLE_INDET_BTT_SF.I_INDET_BTT/I_XD_FIFO/NON_BLK_MEM.I_SYNC_FIFOGEN_FIFO/xpm_fifo_base_inst/gen_sdpram.xpm_memory_base_inst/gen_wr_a.gen_word_narrow.mem_reg_0_15_0_5/RAMB_D1/CLK
+High Pulse Width  Slow    RAMD32/CLK   n/a            1.250         5.000       3.750      SLICE_X42Y50  design_1_i/axi_dma_2/U0/I_PRMRY_DATAMOVER/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_ENABLE_INDET_BTT_SF.I_INDET_BTT/I_XD_FIFO/NON_BLK_MEM.I_SYNC_FIFOGEN_FIFO/xpm_fifo_base_inst/gen_sdpram.xpm_memory_base_inst/gen_wr_a.gen_word_narrow.mem_reg_0_15_0_5/RAMC/CLK
+High Pulse Width  Fast    RAMD32/CLK   n/a            1.250         5.000       3.750      SLICE_X42Y50  design_1_i/axi_dma_2/U0/I_PRMRY_DATAMOVER/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_ENABLE_INDET_BTT_SF.I_INDET_BTT/I_XD_FIFO/NON_BLK_MEM.I_SYNC_FIFOGEN_FIFO/xpm_fifo_base_inst/gen_sdpram.xpm_memory_base_inst/gen_wr_a.gen_word_narrow.mem_reg_0_15_0_5/RAMC/CLK
+High Pulse Width  Slow    RAMD32/CLK   n/a            1.250         5.000       3.750      SLICE_X42Y50  design_1_i/axi_dma_2/U0/I_PRMRY_DATAMOVER/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_ENABLE_INDET_BTT_SF.I_INDET_BTT/I_XD_FIFO/NON_BLK_MEM.I_SYNC_FIFOGEN_FIFO/xpm_fifo_base_inst/gen_sdpram.xpm_memory_base_inst/gen_wr_a.gen_word_narrow.mem_reg_0_15_0_5/RAMC_D1/CLK
+High Pulse Width  Fast    RAMD32/CLK   n/a            1.250         5.000       3.750      SLICE_X42Y50  design_1_i/axi_dma_2/U0/I_PRMRY_DATAMOVER/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_ENABLE_INDET_BTT_SF.I_INDET_BTT/I_XD_FIFO/NON_BLK_MEM.I_SYNC_FIFOGEN_FIFO/xpm_fifo_base_inst/gen_sdpram.xpm_memory_base_inst/gen_wr_a.gen_word_narrow.mem_reg_0_15_0_5/RAMC_D1/CLK
+High Pulse Width  Slow    RAMS32/CLK   n/a            1.250         5.000       3.750      SLICE_X42Y50  design_1_i/axi_dma_2/U0/I_PRMRY_DATAMOVER/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_ENABLE_INDET_BTT_SF.I_INDET_BTT/I_XD_FIFO/NON_BLK_MEM.I_SYNC_FIFOGEN_FIFO/xpm_fifo_base_inst/gen_sdpram.xpm_memory_base_inst/gen_wr_a.gen_word_narrow.mem_reg_0_15_0_5/RAMD/CLK
+High Pulse Width  Fast    RAMS32/CLK   n/a            1.250         5.000       3.750      SLICE_X42Y50  design_1_i/axi_dma_2/U0/I_PRMRY_DATAMOVER/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_ENABLE_INDET_BTT_SF.I_INDET_BTT/I_XD_FIFO/NON_BLK_MEM.I_SYNC_FIFOGEN_FIFO/xpm_fifo_base_inst/gen_sdpram.xpm_memory_base_inst/gen_wr_a.gen_word_narrow.mem_reg_0_15_0_5/RAMD/CLK
+High Pulse Width  Slow    RAMS32/CLK   n/a            1.250         5.000       3.750      SLICE_X42Y50  design_1_i/axi_dma_2/U0/I_PRMRY_DATAMOVER/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_ENABLE_INDET_BTT_SF.I_INDET_BTT/I_XD_FIFO/NON_BLK_MEM.I_SYNC_FIFOGEN_FIFO/xpm_fifo_base_inst/gen_sdpram.xpm_memory_base_inst/gen_wr_a.gen_word_narrow.mem_reg_0_15_0_5/RAMD_D1/CLK
+High Pulse Width  Fast    RAMS32/CLK   n/a            1.250         5.000       3.750      SLICE_X42Y50  design_1_i/axi_dma_2/U0/I_PRMRY_DATAMOVER/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_ENABLE_INDET_BTT_SF.I_INDET_BTT/I_XD_FIFO/NON_BLK_MEM.I_SYNC_FIFOGEN_FIFO/xpm_fifo_base_inst/gen_sdpram.xpm_memory_base_inst/gen_wr_a.gen_word_narrow.mem_reg_0_15_0_5/RAMD_D1/CLK
+High Pulse Width  Slow    RAMD32/CLK   n/a            1.250         5.000       3.750      SLICE_X46Y50  design_1_i/axi_dma_2/U0/I_PRMRY_DATAMOVER/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_ENABLE_INDET_BTT_SF.I_INDET_BTT/I_XD_FIFO/NON_BLK_MEM.I_SYNC_FIFOGEN_FIFO/xpm_fifo_base_inst/gen_sdpram.xpm_memory_base_inst/gen_wr_a.gen_word_narrow.mem_reg_0_15_12_13/DP/CLK
+High Pulse Width  Fast    RAMD32/CLK   n/a            1.250         5.000       3.750      SLICE_X46Y50  design_1_i/axi_dma_2/U0/I_PRMRY_DATAMOVER/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_ENABLE_INDET_BTT_SF.I_INDET_BTT/I_XD_FIFO/NON_BLK_MEM.I_SYNC_FIFOGEN_FIFO/xpm_fifo_base_inst/gen_sdpram.xpm_memory_base_inst/gen_wr_a.gen_word_narrow.mem_reg_0_15_12_13/DP/CLK
+High Pulse Width  Slow    RAMD32/CLK   n/a            1.250         5.000       3.750      SLICE_X46Y50  design_1_i/axi_dma_2/U0/I_PRMRY_DATAMOVER/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_ENABLE_INDET_BTT_SF.I_INDET_BTT/I_XD_FIFO/NON_BLK_MEM.I_SYNC_FIFOGEN_FIFO/xpm_fifo_base_inst/gen_sdpram.xpm_memory_base_inst/gen_wr_a.gen_word_narrow.mem_reg_0_15_12_13/SP/CLK
+High Pulse Width  Fast    RAMD32/CLK   n/a            1.250         5.000       3.750      SLICE_X46Y50  design_1_i/axi_dma_2/U0/I_PRMRY_DATAMOVER/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_ENABLE_INDET_BTT_SF.I_INDET_BTT/I_XD_FIFO/NON_BLK_MEM.I_SYNC_FIFOGEN_FIFO/xpm_fifo_base_inst/gen_sdpram.xpm_memory_base_inst/gen_wr_a.gen_word_narrow.mem_reg_0_15_12_13/SP/CLK
+
+
+

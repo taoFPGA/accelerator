@@ -51,14 +51,18 @@ foreach tok $argv {
     }
 }
 
-# Auto-locate a checkpoint written by *this* Vivado version if none given.
+# Auto-locate a routed checkpoint if none given. scripts/soc_build/post_route.dcp
+# is preferred: it is the checkpoint behind exports/design.bit (full transformer,
+# transformer_block_axi_top). The workspace/ impl_1 checkpoints are an older
+# matmul-only iteration (design_1 with MM_ultra_top) -- keep them as fallbacks.
 if {$OPT(dcp) eq ""} {
     set candidates {
+        scripts/soc_build/post_route.dcp
+        scripts/soc_build/post_place.dcp
+        dbs/design_1_wrapper_post_route_dspfix.dcp
         workspace/myproj/project_1.runs/impl_1/design_1_wrapper_routed.dcp
         workspace/myproj/project_1.runs/impl_1/design_1_wrapper_postroute_physopt.dcp
         workspace/myproj/project_1.runs/impl_1/design_1_wrapper_placed.dcp
-        scripts/soc_build/post_route.dcp
-        scripts/soc_build/post_place.dcp
         workspace/myproj/project_1.runs/impl_1/design_1_wrapper_opt.dcp
         workspace/myproj/project_1.runs/synth_1/design_1_wrapper.dcp
     }

@@ -8,7 +8,8 @@ if(!window.THREE){ return fail("WebGL / three.js failed to load."); }
 
 /* ======================================================================
    DATA  — distilled from architecture_data.json + architecture_data_accel.json
-   (dump_arch.tcl over design_1_wrapper, post-route, Vivado 2025.2)
+   (dump_arch.tcl over scripts/soc_build/post_route.dcp = the routed
+    checkpoint behind exports/design.bit, Vivado 2025.2)
    ====================================================================== */
 
 /* ======================================================================
@@ -281,44 +282,45 @@ function lanePos(l){
   });
 })();
 
-/* ---------- transformer extension (ghosted, RTL only) ---------- */
+/* ---------- post-MatMul pipeline: downsizer -> Softmax -> upsizer -> GELU
+   (real, placed & routed in this bitstream) ---------- */
 var gGhost = new THREE.Group(); gGhost.visible = false; gLogic.add(gGhost);
-var GHOSTC = 0x9a86c9;
 var ghostNodes = {}, ghostCurves = [];
-(function ghost(){
-  var startX = lanePos(N.mm.lane).x;   // branch off MM
+(function pipe(){
+  var startX = lanePos(N.mm.lane).x;   // continues east off the accelerator
   var pts = [ new THREE.Vector3(startX, 0.55, 0) ];
   GHOST.order.forEach(function(id, i){
     var g = GHOST[id];
     var x = startX + 3.4 + i*2.5;
     var s = [1.5, 0.95, 1.5];
-    var mat = new THREE.MeshStandardMaterial({ color:0x14121c, roughness:0.6, metalness:0.2,
-      transparent:true, opacity:0.16, emissive:GHOSTC, emissiveIntensity:0.10 });
+    var col = kcol(g.kind);
+    var mat = new THREE.MeshStandardMaterial({ color:0x11151d, roughness:0.5, metalness:0.3,
+      emissive:col, emissiveIntensity:0.16 });
     var mesh = new THREE.Mesh(new THREE.BoxGeometry(s[0],s[1],s[2]), mat);
     mesh.position.set(x, 0.55, 0);
+    mesh.castShadow = true;
     mesh.userData = {pick:"ghost", id:id};
     mesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(mesh.geometry),
-      new THREE.LineBasicMaterial({color:GHOSTC, transparent:true, opacity:0.7})));
+      new THREE.LineBasicMaterial({color:col, transparent:true, opacity:0.6})));
     gGhost.add(mesh); ghostNodes[id]=mesh; pickables.push(mesh);
-    gGhost.add(textSprite(g.name, 0.4, "#cdbff0", x, 0.55 + s[1]/2 + 0.4, 0, true));
+    gGhost.add(textSprite(g.name, 0.4, "#dfe6f0", x, 0.55 + s[1]/2 + 0.4, 0, true));
     pts.push(new THREE.Vector3(x, 0.55, 0));
   });
-  gGhost.add(textSprite("not in this bitstream · RTL synth only", 0.36, "#8f83b0",
+  gGhost.add(textSprite("MatMul → LayerNorm → Softmax → GELU  ·  one 100 MHz domain", 0.36, "#9aa4b2",
     startX + 3.4 + 1.5*2.5, 1.9, 0, true));
-  // dashed connectors
   for(var i=0;i<pts.length-1;i++){
     var a=pts[i], b=pts[i+1];
     var m=a.clone().add(b).multiplyScalar(0.5); m.y += 0.7;
     var c=new THREE.CatmullRomCurve3([a,m,b]);
     ghostCurves.push(c);
-    var tube=new THREE.Mesh(new THREE.TubeGeometry(c,30,0.02,6,false),
-      new THREE.MeshBasicMaterial({color:GHOSTC, transparent:true, opacity:0.35}));
+    var tube=new THREE.Mesh(new THREE.TubeGeometry(c,30,0.028,6,false),
+      new THREE.MeshBasicMaterial({color:KCOL.stream, transparent:true, opacity:0.4}));
     gGhost.add(tube);
   }
 })();
 var ghostPk = new THREE.InstancedMesh(
   new THREE.IcosahedronGeometry(0.05,0),
-  new THREE.MeshBasicMaterial({color:GHOSTC, toneMapped:false, transparent:true, opacity:0.9}),
+  new THREE.MeshBasicMaterial({color:KCOL.signal, toneMapped:false, transparent:true, opacity:0.95}),
   ghostCurves.length*3);
 ghostPk.frustumCulled=false; ghostPk.count=0; gGhost.add(ghostPk);
 var ghostT = 0;
@@ -380,10 +382,16 @@ var flowW, flowA, flowS, wf = {cycle:0, frac:0};
   gArray.position.copy(arrCenter);
   gLogic.add(gArray);
 
-  // DSP distribution per line (even spread — idealized; real per-(i,j) not in the netlist)
+  // DSP distribution per line: real per-row DSP counts from the netlist,
+  // spread evenly across the row (exact per-(i,j) placement isn't extracted).
   for(var r=0;r<ACC.rows;r++){
-    var row=[], n=ACC.dspPerLine[r], stride=GN/n, nxt=0;
-    for(var c=0;c<GN;c++){ if(c>=nxt){ row.push(1); nxt+=stride; } else row.push(0); }
+    var row=[], n=ACC.dspPerLine[r]|0;
+    if(n<=0){ for(var c0=0;c0<GN;c0++) row.push(0); }
+    else if(n>=GN){ for(var c1=0;c1<GN;c1++) row.push(1); }
+    else {
+      var stride=GN/n, nxt=0;
+      for(var c=0;c<GN;c++){ if(c>=nxt){ row.push(1); nxt+=stride; } else row.push(0); }
+    }
     peIsDsp.push(row);
   }
   var g = new THREE.BoxGeometry(cell*0.72, 1, cell*0.72);
@@ -420,11 +428,11 @@ var flowW, flowA, flowS, wf = {cycle:0, frac:0};
     }
     return grp;
   }
-  var inb = bram(43,22, -(AW/2)-1.0, new THREE.Color(KCOL.stream), "inbuf");
-  var outb = bram(56,28, (AW/2)+1.0, new THREE.Color(KCOL.compute), "outbuf");
+  var inb = bram(29,15, -(AW/2)-1.0, new THREE.Color(KCOL.stream), "inbuf");
+  var outb = bram(38,19, (AW/2)+1.0, new THREE.Color(KCOL.compute), "outbuf");
   gArray.add(inb); gArray.add(outb); pickables.push(inb, outb);
-  gArray.add(textSprite("MM_in_buffer · 43×RAMB36", 0.5, "#f0c89a", 0, 1.1, -(AW/2)-2.1, true));
-  gArray.add(textSprite("MM_out_buffer · 56×RAMB36", 0.5, "#9fe9d6", 0, 1.1, (AW/2)+2.4, true));
+  gArray.add(textSprite("MM_in_buffer · 29×RAMB36", 0.5, "#f0c89a", 0, 1.1, -(AW/2)-2.1, true));
+  gArray.add(textSprite("MM_out_buffer · 37.5 RAMB36", 0.5, "#9fe9d6", 0, 1.1, (AW/2)+2.4, true));
   gArray.add(textSprite("PE_array — weights ↓  activations →  Σ ↑   (idealized systolic schedule)", 0.44, "#aab4c2", 0, 2.4, 0, true));
 
   function flow(n, geo, color){
@@ -629,10 +637,10 @@ function inspectAcc(id){
   if(id==="array"){
     setTim("Systolic timing @ 100 MHz", [
       ["MAC latency", "3 cyc (A/B→M→P)"],
-      ["Array traversal", "2·24 = 48 cyc"],
-      ["First result", "≈ 51 cyc · 0.51 µs"],
+      ["Array traversal", "2·16 = 32 cyc"],
+      ["First result", "≈ 35 cyc · 0.35 µs"],
       ["Steady state", "1 result col / cyc"],
-      ["Peak compute", "220·2·100M = 44.0 GOP/s"]
+      ["Peak compute", "205·2·100M = 41.0 GOP/s"]
     ]);
   } else setTim(null);
 }
@@ -649,34 +657,29 @@ function inspectPE(r,c){
   renderCR(null);
   IEls.note.textContent = dsp
     ? "One 25×18 multiply-add per cycle. Weight held in the B register; activation passes A_in→A_out to column "+(c+1)+"; partial sum flows P→row "+(r+1)+"."
-    : "Only 220 of 576 PE slots get a DSP48E1 on xc7z020 — edge PEs fall back to LUT-based MAC or carry data through.";
+    : "The last 4 of the 16 PE rows get no DSP48E1 (the device is one DSP column short) — these fall back to LUT-based MAC.";
   if(dsp){
     setTim("Cycle-level timing", [
       ["MAC latency", "3 cyc  (A/B → M → P reg)"],
       ["A_in → A_out", "1 cyc / column hop"],
       ["Reaches PE["+r+"]["+(c)+"]", "≈ "+(r+c)+" cyc after row 0 col 0"],
-      ["Full array traverse", "48 + 3 ≈ 51 cyc"]
+      ["Full array traverse", "32 + 3 ≈ 35 cyc"]
     ]);
   } else setTim(null);
 }
 function inspectGhost(id){
   var g = GHOST[id]; if(!g) return;
-  IEls.tag.textContent = "transformer ext · RTL";
+  IEls.tag.textContent = "accelerator · pipeline";
   IEls.name.textContent = g.name;
   IEls.path.textContent = "transformer_block_top / " + g.inst;
   IEls.ref.textContent = g.role;
   IEls.clk.textContent = "clk_fpga_0 · 100 MHz";
-  IEls.reg.textContent = "—";
-  IEls.lut.textContent = "—"; IEls.ff.textContent = "—";
-  IEls.dsp.textContent = "—"; IEls.bram.textContent = "—";
-  renderCR(null);
+  IEls.reg.textContent = Math.round(g.reg*100)+"%";
+  IEls.lut.textContent = kfmt(g.lut); IEls.ff.textContent = kfmt(g.ff);
+  IEls.dsp.textContent = g.dsp; IEls.bram.textContent = kfmt(g.bram);
+  renderCR(g.cr || null);
   IEls.note.textContent = g.note;
-  setTim("Full block · 16-lane RTL synth", [
-    ["LUT / FF", "10.5k / 8.2k"],
-    ["DSP48E1", "205"],
-    ["RAMB36", "71"],
-    ["source", "Vivado 2026.1 OOC"]
-  ]);
+  setTim(null);
 }
 function inspectPkg(){
   IEls.tag.textContent = "package";
@@ -793,14 +796,15 @@ function drawDia(kind){
       "<text x='2' y='120' fill='#5b6470' font-size='7' font-family='IBM Plex Mono'>│ = pipeline reg</text>"+
       "</svg>";
   } else {
-    var chain = kind==="ingest" ? ["DDR","SMC","DMA","AXIS 384b","in_buf ×43"]
-              : kind==="drain"  ? ["array","out_buf ×56","AXIS","DMA","DDR"]
+    var chain = kind==="ingest" ? ["DDR","SMC","DMA","AXIS 128b","in_buf ×29"]
+              : kind==="drain"  ? ["array","out_buf 37.5","LayerNorm","Softmax","GELU","DMA"]
               : ["mm_out_data","axis_downsizer","Softmax_control","axis_upsizer_fifo","EightGelus"];
-    host.innerHTML = "<svg viewBox='0 0 230 150'>"+chain.map(function(t,i){
-      var y=14+i*30;
-      return "<rect x='30' y='"+y+"' width='170' height='20' rx='5' fill='#12161d' stroke='#2b3646'/>"+
-             "<text x='115' y='"+(y+14)+"' fill='#c7cfda' font-size='9.5' font-family='IBM Plex Mono' text-anchor='middle'>"+t+"</text>"+
-             (i<chain.length-1?"<line x1='115' y1='"+(y+20)+"' x2='115' y2='"+(y+30)+"' stroke='#5f9be0' stroke-width='1.5'/>":"");
+    var vh = 8 + chain.length*26;
+    host.innerHTML = "<svg viewBox='0 0 230 "+vh+"'>"+chain.map(function(t,i){
+      var y=6+i*26;
+      return "<rect x='30' y='"+y+"' width='170' height='18' rx='5' fill='#12161d' stroke='#2b3646'/>"+
+             "<text x='115' y='"+(y+13)+"' fill='#c7cfda' font-size='9.5' font-family='IBM Plex Mono' text-anchor='middle'>"+t+"</text>"+
+             (i<chain.length-1?"<line x1='115' y1='"+(y+18)+"' x2='115' y2='"+(y+26)+"' stroke='#5f9be0' stroke-width='1.5'/>":"");
     }).join("")+"</svg>";
   }
 }
@@ -813,7 +817,7 @@ document.getElementById("tNext").addEventListener("click", function(){ enterStag
 /* ======================================================================
    TRANSPORT
    ====================================================================== */
-var playing = !RM, speed = 1, flowVisible = true, ghostVisible = false;
+var playing = !RM, speed = 1, flowVisible = true, ghostVisible = true;
 var tPlay=document.getElementById("tPlay");
 function setPlaying(p){ playing=p; tPlay.textContent = p?"❚❚":"▶"; tPlay.setAttribute("aria-label", p?"Pause dataflow":"Play dataflow"); }
 tPlay.addEventListener("click", function(){ setPlaying(!playing); });
@@ -968,35 +972,33 @@ var telEl = {
   gopsBar:document.getElementById("tGopsBar"), ddr:document.getElementById("tDdr"),
   ddrBar:document.getElementById("tDdrBar"), ddrCap:document.getElementById("tDdrCap")
 };
-var GOPS_PEAK = 44.0;          // 220 DSP48E1 x 2 ops x 100 MHz
-var DDR_PEAK  = 14.4;          // 3 x (384 bit @ 100 MHz) = 3 x 4.8 GB/s
+var GOPS_PEAK = 41.0;          // 205 DSP48E1 x 2 ops x 100 MHz
+var DDR_PEAK  = 3.6;           // 2 x 128-bit in + 1 x 32-bit out @ 100 MHz = 2*1.6 + 0.4 GB/s
 var DDR_CEIL  = 4.3;           // 32-bit DDR3-1066 on the PS
 function updateTelem(dt){
-  // target duty cycle from view + play state
   var target = 0;
   if(playing){
     if(bookmark==="core"){
-      var fill = Math.min(1, wf.cycle/51);           // fills over the first ~51 cycles
-      target = 0.30 + 0.65*fill;                      // -> ~0.95 steady (edge PEs idle)
+      var fill = Math.min(1, wf.cycle/35);           // fills over the first ~35 cycles
+      target = 0.30 + 0.62*fill;                      // -> ~0.92 steady (192/205 DSP in the array)
     } else {
-      target = ghostVisible ? 0.55 : 0.72;           // matmul core busy; ext. bridge caps it lower
+      target = 0.68;                                  // pipeline running; downsizer bridge caps sustained rate
     }
   }
   TEL.duty += (target - TEL.duty) * Math.min(1, dt*3);
   TEL.gops = GOPS_PEAK * TEL.duty;
-  TEL.ddr  = flowVisible ? DDR_PEAK * (0.35 + 0.65*TEL.duty) : 0;
+  TEL.ddr  = flowVisible ? DDR_PEAK * (0.4 + 0.6*TEL.duty) : 0;
   if(playing && !RM && bookmark==="core") TEL.cyc = wf.cycle;
 
   if(telEl.gops){
     telEl.gops.textContent = TEL.gops.toFixed(1);
     telEl.gopsBar.style.width = (TEL.gops/GOPS_PEAK*100).toFixed(0)+"%";
     telEl.ddr.textContent = TEL.ddr.toFixed(1);
-    telEl.ddrBar.style.width = Math.min(100, TEL.ddr/DDR_PEAK*100).toFixed(0)+"%";
-    telEl.cyc.textContent = bookmark==="core" ? ("cycle "+TEL.cyc+(TEL.cyc>51?" · steady":"")) : "cycle —";
-    var x = (TEL.ddr/DDR_CEIL);
+    telEl.ddrBar.style.width = Math.min(100, TEL.ddr/DDR_CEIL*100).toFixed(0)+"%";
+    telEl.cyc.textContent = bookmark==="core" ? ("cycle "+TEL.cyc+(TEL.cyc>35?" · steady":"")) : "cycle —";
     telEl.ddrCap.innerHTML = TEL.ddr>0.1
-      ? "<b>"+x.toFixed(1)+"× the 32-bit DDR3 ceiling</b> — tiles staged in 99×RAMB36"
-      : "<b>32-bit DDR3 ≈ 4.3 GB/s</b> — tiles staged in 99×RAMB36";
+      ? "<b>"+Math.round(TEL.ddr/DDR_CEIL*100)+"% of the 32-bit DDR3 ceiling</b> — 16-lane config stays memory-bound-free"
+      : "<b>32-bit DDR3 ≈ 4.3 GB/s</b> — peak stream demand 3.6 GB/s fits under it";
   }
 }
 
