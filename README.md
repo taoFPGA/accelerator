@@ -1,179 +1,133 @@
-# 🔧 Transformer_FPGA
-### FPGA-Based Hardware Accelerator for Transformer Models
+# taoFPGA
 
-> **Project #309** | Bar-Ilan University | Computer Engineering – Hardware and Chip Design Track
+### An FPGA hardware accelerator for a Transformer block
 
----
+> **Project #309** · Bar-Ilan University · Computer Engineering — Hardware and Chip Design track
 
-## 👥 Team
-
-| Role | Name | ID | Contact |
-|------|------|----|---------|
-| Student | Eliran Turgeman | 316372002 | — |
-| Student | Shay Rask | 314951658 | — |
-| Supervisor | David Freud | — | david.freud@mail.huji.ac.il |
-| Academic Authority | Dr. Leonid Yavits | — | Leonid.yavits@biu.ac.il |
+taoFPGA implements one Transformer building block — a fused
+**matrix-multiply → softmax → GELU** pipeline — as int8 streaming RTL on a
+Xilinx Zynq-7000, driven from the ARM PS over AXI. It was designed,
+verified, synthesized, placed & routed, and run on real silicon
+(PYNQ-Z1/Z2, `xc7z020clg400-1`, 100 MHz).
 
 ---
 
-## 📌 Project Overview
+## Team
 
-Transformer models are the current state-of-the-art in both **Natural Language Processing (NLP)** and **Computer Vision** (Vision Transformers – ViT). Their high computational complexity and memory requirements create significant bottlenecks in real-time, low-latency, and energy-constrained environments — challenges that become critical when targeting **edge devices**.
-
-This project designs, implements, and evaluates a complete **Hardware Accelerator** for a selected Transformer model, deployed on an **FPGA platform** using AMD/Xilinx Vivado.
-
-### Key Performance Targets vs. CPU/GPU Baselines
-
-| Metric | Goal |
-|--------|------|
-| ⚡ Latency | Reduced inference time per sample |
-| 📈 Throughput | Higher inference samples per second |
-| 🔋 Energy Efficiency | Lower power consumption per inference |
+| Role | Name | Contact |
+|------|------|---------|
+| Student | Eliran Turgeman | — |
+| Student | Shay Rask | — |
+| Supervisor | David Freud | david.freud@mail.huji.ac.il |
+| Academic authority | Dr. Leonid Yavits | Leonid.yavits@biu.ac.il |
 
 ---
 
-## 📦 Project Deliverables
+## Results
 
-1. **Functional Hardware Prototype** — A complete bitstream deployed on FPGA, capable of executing inference for a Transformer component (e.g., Attention block or full compact model).
-2. **Comprehensive Final Report** — Full documentation covering background, architecture decisions, implementation stages, testing, and performance evaluation.
-3. **Midterm & Final Presentations** — Two structured presentations covering progress, architectural decisions, performance findings, and conclusions.
-4. **Micro-Architecture Documentation** — Block diagrams, PE descriptions, memory hierarchy, dataflow methods (Memory Tiling, Systolic Array), and methodology docs.
+| | Outcome |
+|---|---|
+| **Functional verification** | Full pipeline vs. a chained software golden model at real workload scale (200×96×160): **0 / 32,000 output elements outside tolerance**. Every stage also verified standalone. |
+| **Timing (post-route, full SoC)** | Meets 100 MHz with **WNS +0.293 ns**; 0 failing endpoints. |
+| **Resources (post-route)** | After the DSP-inference fix: **205 / 220 DSP48E1 (93 %)**, LUT **29 %**, BRAM comfortably within budget — the design is DSP-bound, not LUT-bound. |
+| **Hardware bring-up** | Bitstream + hardware handoff generated ([`exports/`](exports/)) and executed on a PYNQ-Z2. |
+| **ViT kernel benchmark** | On the fused matmul+softmax+GELU op at ViT-Tiny shapes: **70–98× faster** than the board's ARM CPU running the same op. Scoped as a kernel-level number, *not* an end-to-end ViT-inference claim — see [`apps/vit/vit_benchmark.py`](apps/vit/vit_benchmark.py). |
+
+The full story — architecture decisions, every simulation/synthesis run, the
+bugs found and fixed — is in [`report/`](report/) (see **Documentation**
+below).
 
 ---
 
-## 📁 Directory Structure
+## Repository layout
 
 ```
-Transformer_FPGA/
+taoFPGA/
+├── sourcecode/     RTL — see sourcecode/README.md for the module map
+│   ├── core/       compute: systolic MAC array, softmax & GELU math, AXI IP wrappers
+│   ├── top/        integration: the 3 stages wired together + stream adapters + AXI
+│   ├── tb/         SystemVerilog testbenches (per-stage + full pipeline)
+│   └── sim/        Xcelium automation (Makefile, PBS wrapper, SimVision preset)
 │
-├── apps/               # High-level models (Python / PyTorch / C++)
-│                       # Golden Model verification and weight extraction
+├── apps/           software: bare-metal Zynq self-test (C++), PYNQ driver (MM.py),
+│                   pure-NumPy ViT-Tiny + kernel benchmark (vit/)
 │
-├── dbs/                # Database files and Design Checkpoints (.dcp)
-│                       # Intermediate snapshots of synthesized/routed design
+├── scripts/        Vivado Tcl flow: synth / synth_soc / impl / bitgen / prj
 │
-├── exports/            # Final deliverables
-│                       # Bitstreams (.bit), Hardware handoff (.xsa), log archives
+├── dbs/            intentional design checkpoints (.dcp)
+├── exports/        final deliverables: design.bit / design.xsa / design.hwh
+├── reports/        synthesis / implementation / simulation report artifacts (*.rpt)
+├── inputs/  mem_gen/  libraries/    placeholder dirs for the intended
+│                   constraints / weight-conversion / vendor-IP workflow
+│                   (the current OOC + PS7-clock flow needs none of them)
 │
-├── inputs/             # Design inputs and constraints
-│                       # Xilinx Design Constraints (.xdc), clock definitions, pin mapping
+├── report/         the written deliverables and everything that builds them
+│                   (Project Book, IEEE paper, presentations — .docx/.pdf/.pptx)
 │
-├── libraries/          # Vendor IPs and external primitives
-│                       # Xilinx/Intel IP cores (e.g., Floating Point units, AXI interconnects)
-│
-├── mem_gen/            # Weight conversion scripts and tools
-│                       # Converts PyTorch weights to fixed-point/hex (.coe, .mem)
-│
-├── reports/            # Analysis outputs after implementation
-│                       # Timing (WNS), Power, Resource Utilization (LUT, FF, BRAM, DSP)
-│
-├── scripts/            # Automation scripts for the Vivado build flow
-│                       # Tcl scripts for Synthesis, Implementation, Bitstream generation
-│
-├── sourcecode/         # All HDL source files
-│   ├── core/           # Transformer modules: Attention, MLP, LayerNorm, Softmax
-│   ├── hls/            # C/C++ source for Vitis HLS modules (optional)
-│   ├── top/            # Top-level wrapper connecting accelerator to SoC bus (AXI/AHB)
-│   └── tb/             # Testbenches and simulation environments
-│
-├── workspace/          # Local EDA tool runtime directory (gitignored)
-│
-├── .gitignore
-├── README.md
-└── setup.sh            # Sources EDA tool paths and environment variables
+├── setup.sh        sources the EDA toolchain, auto-detects the Vivado version
+├── LICENSE         Apache-2.0
+└── NOTICE
 ```
 
 ---
 
-## 🚀 Getting Started
+## Build & run
 
-```bash
-# 1. Source the environment
-source setup.sh
+```sh
+source setup.sh          # put Vivado / Xcelium on PATH
 
-# 2. Generate weights from the golden model
-cd apps/
-python export_weights.py --model transformer_base --output ../mem_gen/weights/
+# --- RTL simulation (Xcelium) --- from sourcecode/sim/
+make run_gelu            # light  — GELU lane vs. real-valued reference
+make run_softmax         # light  — Softmax vs. numerically-stable reference
+make run_mm              # heavy  — MM_ultra vs. integer matmul reference
+make run_transformer     # heavy  — full pipeline vs. chained golden model
+#   heavy targets: submit through sim/run_xrun.pbs, the login node is shared.
+#   reports land in reports/sim/*.rpt
 
-# 3. Convert weights to FPGA memory format
-cd ../mem_gen/
-python float_to_fixed.py --input weights/ --output ../inputs/mem/
+# --- Vivado flow --- from scripts/
+vivado -mode batch -source synth.tcl       # OOC synthesis, transformer_block_top
+vivado -mode batch -source synth_soc.tcl   # full SoC synthesis
+vivado -mode batch -source impl.tcl        # place & route + signoff reports
+vivado -mode batch -source bitgen.tcl      # -> exports/design.bit, design.xsa
 
-# 4. Run RTL simulation
-vivado -mode batch -source scripts/sim.tcl
-
-# 5. Run the full implementation flow
-vivado -mode batch -source scripts/synth.tcl
-vivado -mode batch -source scripts/impl.tcl
-vivado -mode batch -source scripts/bitgen.tcl
-
-# 6. Check results
-ls reports/    # Timing, power, and utilization summaries
-ls exports/    # Final .bit and .xsa files
+# --- ViT kernel benchmark --- on the board, from apps/vit/
+python export_vit_weights.py   # dev machine only: fetch pretrained timm weights
+python vit_benchmark.py        # NumPy ViT-Tiny baseline + measured kernel speedup
 ```
 
----
-
-## 🔄 Build Flow
-
-```
-PyTorch Golden Model (apps/)
-         │
-         ▼
-Weight Extraction ──► Fixed-Point Conversion (mem_gen/)
-         │
-         ▼
-RTL Design (sourcecode/core/, top/)
-         │
-         ▼
-Simulation & Verification (sourcecode/tb/) ◄── vs. Golden Model
-         │
-         ▼
-Synthesis (scripts/synth.tcl) ──────────────► reports/synth_utilization.rpt
-         │
-         ▼
-Implementation P&R (scripts/impl.tcl) ──────► reports/timing_summary.rpt
-         │                                     reports/power_analysis.rpt
-         ▼
-Bitstream Generation (scripts/bitgen.tcl) ──► exports/design.bit
-         │                                     exports/design.xsa
-         ▼
-FPGA Programming & Hardware Validation
-```
+The tool versions used: Vivado 2023.x/2024.x, Xcelium 23.09, Python 3.9+.
 
 ---
 
-## 🗓️ Work Plan & Milestones
+## Documentation
 
-| # | Phase | Description | Target | Owner |
-|---|-------|-------------|--------|-------|
-| 1 | Literature Review | Transformer architectures, quantization, FPGA acceleration | 12/2025 | Eliran |
-| 2 | Architecture Selection | Model selection, quantization strategy, block-level design | 01/2026 | Shay |
-| 3 | POC Implementation | First accelerator component in HLS/Verilog + verification | 02/2026 | Eliran |
-| ⭐ | **Midterm Presentation** | | **02/2026** | **Both** |
-| 4 | Full Implementation | All PEs completed, full system integration | 04/2026 | Shay |
-| 5 | Performance Testing | FPGA deployment, inference tests, Latency/Throughput measurement | 05/2026 | Eliran |
-| 6 | Results & Final Report | CPU/GPU comparison, analysis, report writing | 06/2026 | Both |
-| ⭐ | **Final Presentation & Report** | | **06/2026** | **Both** |
+| Document | File |
+|----------|------|
+| Bar-Ilan final project book | [`report/taoFPGA_Project_Book.pdf`](report/taoFPGA_Project_Book.pdf) |
+| IEEE-format paper | [`report/taoFPGA_IEEE_paper.pdf`](report/taoFPGA_IEEE_paper.pdf) |
+| Final presentation | [`report/taoFPGA_Final_Presentation.pdf`](report/taoFPGA_Final_Presentation.pdf) |
+| First (midterm) report | [`report/First_Project_Report_Group_309.pdf`](report/First_Project_Report_Group_309.pdf) |
+| RTL guide (pipeline diagram, module map, fixed-point notation) | [`sourcecode/README.md`](sourcecode/README.md) |
+| Engineering log — every run, bug, and decision | [`report/project_story.md`](report/project_story.md), [`report/simulation_data.md`](report/simulation_data.md), [`report/synthesis_data.md`](report/synthesis_data.md) |
 
----
-
-## 🛠️ Tools & Requirements
-
-| Tool | Version | Purpose |
-|------|---------|---------|
-| Vivado | 2023.x / 2024.x | Synthesis, Implementation, Bitstream |
-| Vitis HLS | optional | HLS module development |
-| Python | 3.9+ | Golden model and weight conversion |
-| PyTorch | 2.x | Transformer golden model |
-| Verilog / VHDL | — | RTL implementation language |
+Every RTL and application source file carries a header comment explaining
+what it does and how it fits the pipeline.
 
 ---
 
-## 📚 References
+## License
 
-1. Vaswani et al. (2017). **"Attention Is All You Need."** *NeurIPS.*
-2. Zhu, Li, Chen & Ma (2023). **"High-Performance FPGA Acceleration for Transformer-Based Models: A Survey."** *IEEE Transactions on VLSI Systems.*
-3. Li, Chen, Cheng & Huang (2022). **"ME-ViT: A Single-Load Memory-Efficient FPGA Accelerator for Vision Transformers."** *ACM/IEEE ISLPED.*
-4. Liu & Sun (2021). **"FTRANS: Energy-Efficient Acceleration of Transformers using FPGA."** *ACM/SIGDA FPGA Symposium.*
-5. Cai, Zhang & Chen (2020). **"A High-Throughput and Energy-Efficient FPGA-Based Transformer Accelerator."** *IEEE IPDPS.*
+Apache License 2.0 — see [`LICENSE`](LICENSE) and [`NOTICE`](NOTICE).
+Bundled third-party reference data (ImageNet class list, one sample image,
+the `timm` ViT-Tiny architecture) is identified in `NOTICE`; pretrained
+weights are fetched at setup time and are not redistributed here.
+
+---
+
+## References
+
+1. Vaswani et al. (2017). *Attention Is All You Need.* NeurIPS.
+2. Zhu, Li, Chen & Ma (2023). *High-Performance FPGA Acceleration for Transformer-Based Models: A Survey.* IEEE TVLSI.
+3. Li, Chen, Cheng & Huang (2022). *ME-ViT: A Single-Load Memory-Efficient FPGA Accelerator for Vision Transformers.* ACM/IEEE ISLPED.
+4. Liu & Sun (2021). *FTRANS: Energy-Efficient Acceleration of Transformers using FPGA.* ACM/SIGDA FPGA.
+5. Cai, Zhang & Chen (2020). *A High-Throughput and Energy-Efficient FPGA-Based Transformer Accelerator.* IEEE IPDPS.
