@@ -34,8 +34,8 @@ verified, synthesized, placed & routed, and run on real silicon
 | **ViT kernel benchmark** | On the fused matmul+softmax+GELU op at ViT-Tiny shapes: **70–98× faster** than the board's ARM CPU running the same op. Scoped as a kernel-level number, *not* an end-to-end ViT-inference claim — see [`apps/vit/vit_benchmark.py`](apps/vit/vit_benchmark.py). |
 
 The full story — architecture decisions, every simulation/synthesis run, the
-bugs found and fixed — is in [`report/`](report/) (see **Documentation**
-below).
+bugs found and fixed — is written up in the project book and paper (see
+**Documentation** below).
 
 ---
 
@@ -61,8 +61,8 @@ taoFPGA/
 │                   constraints / weight-conversion / vendor-IP workflow
 │                   (the current OOC + PS7-clock flow needs none of them)
 │
-├── report/         the written deliverables and everything that builds them
-│                   (Project Book, IEEE paper, presentations — .docx/.pdf/.pptx)
+├── report/         the finished written deliverables (project book, final
+│                   presentation, first report) as PDF + the overview video
 │
 ├── setup.sh        sources the EDA toolchain, auto-detects the Vivado version
 ├── LICENSE         Apache-2.0
@@ -104,11 +104,10 @@ The tool versions used: Vivado 2023.x/2024.x, Xcelium 23.09, Python 3.9+.
 | Document | File |
 |----------|------|
 | Bar-Ilan final project book | [`report/taoFPGA_Project_Book.pdf`](report/taoFPGA_Project_Book.pdf) |
-| IEEE-format paper | [`report/taoFPGA_IEEE_paper.pdf`](report/taoFPGA_IEEE_paper.pdf) |
 | Final presentation | [`report/taoFPGA_Final_Presentation.pdf`](report/taoFPGA_Final_Presentation.pdf) |
 | First (midterm) report | [`report/First_Project_Report_Group_309.pdf`](report/First_Project_Report_Group_309.pdf) |
+| Overview video (3B1B-style, 1080p60) | [`report/TaoFPGAOverview.mp4`](report/TaoFPGAOverview.mp4) |
 | RTL guide (pipeline diagram, module map, fixed-point notation) | [`sourcecode/README.md`](sourcecode/README.md) |
-| Engineering log — every run, bug, and decision | [`report/project_story.md`](report/project_story.md), [`report/simulation_data.md`](report/simulation_data.md), [`report/synthesis_data.md`](report/synthesis_data.md) |
 
 Every RTL and application source file carries a header comment explaining
 what it does and how it fits the pipeline.

@@ -3,7 +3,7 @@
 This is the hardware. It implements one Transformer building block —
 **MatMul → Softmax → GELU** — as a single streaming pipeline that a Zynq PS
 drives over AXI. The written design rationale lives in
-[`../report/`](../report/) (Project Book / IEEE paper); this file is the map
+[`../report/`](../report/) (Project Book / paper); this file is the map
 for reading the code.
 
 ## Pipeline at a glance
