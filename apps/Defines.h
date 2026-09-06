@@ -1,3 +1,18 @@
+// ===========================================================================
+// Defines.h -- address map + sizing constants for the bare-metal MatMul app
+//
+// MM_ADDR / *_ADDR   : the accelerator's AXI-Lite control registers, offset
+//                      from XPAR_TRANSFORMER_BLOCK_AXI_TOP_0_BASEADDR
+//                      (0x00 shift, 0x04 feature length, 0x08 F-width block
+//                      count, 0x0C W-width block count).
+// WEIGHT/FEATURE/RESULT_* : per-channel AXI-DMA register addresses, built
+//                      from the three axi_dma cores' base addresses and the
+//                      standard Xilinx XAXIDMA_* offsets.
+// DATA_TYPE = s8, MAX_LIMIT/MIN_LIMIT = int8 saturation bounds.
+// A_SIZE (16) must match the RTL's A_size; the *_block_num / *_width values
+// are the compile-time capacity limits of this SDK app (not the RTL).
+// XPAR_* names come from the exported hardware's xparameters.h.
+// ===========================================================================
 #ifndef SRC_DEFINES_H_
 #define SRC_DEFINES_H_
 #include "xparameters.h"

@@ -1,4 +1,21 @@
 `timescale 1ns / 1ps
+// ===========================================================================
+// Softmax_top_tb.sv -- unit testbench for the Softmax stage (Softmax_control.v)
+//
+// DUT   : Softmax_control (which wraps Softmax.v with the 3-pass row replay).
+// Config: length = 197 (a ViT-Tiny attention row), scale_in = 6,
+//         scale_out = 7.
+// Stimulus: feeds rows of int8 data one element/cycle, honouring
+//         top_ready_in backpressure while the row buffer fills.
+// Check : the normalized int8 stream out is compared against a
+//         numerically-stable software softmax reference (subtract row max,
+//         exp, divide by sum), re-quantized to scale_out -- the same
+//         reference used as Softmax_task in transformer_block_tb.sv and
+//         softmax_ref() in apps/golden_model.py.
+//
+// Run   : make run_softmax      (light target -- ok to run interactively)
+// Report: reports/sim/sim_softmax_top_tb.rpt
+// ===========================================================================
 `define length 197
 `define scale_in 6
 `define scale_out 7
