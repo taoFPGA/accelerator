@@ -401,6 +401,7 @@ pkMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
 pkMesh.count = 0; pkMesh.frustumCulled = false;
 scene.add(pkMesh);
 var _M=new THREE.Matrix4(), _Q=new THREE.Quaternion(), _S=new THREE.Vector3(), _P=new THREE.Vector3(), _C=new THREE.Color();
+var WAVE_LIT = new THREE.Color(0x5fd3bd);   // compute-wavefront highlight (not near-white)
 if(RM){ streamsRT.forEach(function(s){ s.pk=[0.2,0.5,0.8]; }); }
 
 /* ======================================================================
@@ -428,7 +429,9 @@ var flowW, flowA, flowS, wf = {cycle:0, frac:0};
     peIsDsp.push(row);
   }
   var g = new THREE.BoxGeometry(cell*0.72, 1, cell*0.72);
-  var m = new THREE.MeshStandardMaterial({roughness:0.42, metalness:0.35});
+  // matte, non-metal, low env pickup so the cubes read as solid silicon and
+  // never trip the bloom pass -- only the dataflow pulses glow
+  var m = new THREE.MeshStandardMaterial({roughness:0.92, metalness:0.0, envMapIntensity:0.28});
   peMesh = new THREE.InstancedMesh(g, m, GN*ACC.rows);
   peMesh.castShadow = true;
   var d=new THREE.Object3D(), idx=0;
@@ -437,7 +440,7 @@ var flowW, flowA, flowS, wf = {cycle:0, frac:0};
     var x=(c2-(GN-1)/2)*cell, z=(r2-(ACC.rows-1)/2)*cell, h=dsp?0.6:0.16;
     d.position.set(x, h/2, z); d.scale.set(1,h,1); d.updateMatrix();
     peMesh.setMatrixAt(idx, d.matrix);
-    var base = dsp ? new THREE.Color(KCOL.compute) : new THREE.Color(0x1c2732);
+    var base = dsp ? new THREE.Color(0x1f5a4e) : new THREE.Color(0x141b24);
     peBase.push(base); peMesh.setColorAt(idx, base); idx++;
   }
   peMesh.instanceColor.needsUpdate = true;
@@ -451,8 +454,9 @@ var flowW, flowA, flowS, wf = {cycle:0, frac:0};
   function bram(count, per, zc, color, id){
     var grp=new THREE.Group(); grp.userData={pick:"pe", id:id};
     var rows=Math.ceil(count/per), sw=AW/per*0.84, sh=0.4, sd=0.44;
-    var mm=new THREE.MeshStandardMaterial({color:color, roughness:0.4, metalness:0.2,
-      emissive:color, emissiveIntensity:0.14});
+    var mm=new THREE.MeshStandardMaterial({color:color.clone().multiplyScalar(0.45),
+      roughness:0.75, metalness:0.0, envMapIntensity:0.4,
+      emissive:color, emissiveIntensity:0.05});
     for(var i=0;i<count;i++){
       var cx=i%per, cz=Math.floor(i/per);
       var b=new THREE.Mesh(new THREE.BoxGeometry(sw,sh,sd), mm);
@@ -511,7 +515,9 @@ if(USE_POST){
   try{
     composer = new THREE.EffectComposer(renderer);
     composer.addPass(new THREE.RenderPass(scene, camera));
-    bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight), 0.62, 0.7, 0.72);
+    // threshold 0.82: only the emissive dataflow pulses (toneMapped:false, near-white
+    // heads) clear it -- solid geometry never blooms
+    bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight), 0.5, 0.6, 0.82);
     composer.addPass(bloomPass);
     if(THREE.SMAAPass){
       smaaPass = new THREE.SMAAPass(innerWidth*DPR, innerHeight*DPR);
@@ -968,14 +974,15 @@ function advancePE(dt){
     d.position.set(x, 0.8 + v.t*0.5, z); d.scale.set(1,1,1); d.updateMatrix(); S.im.setMatrixAt(sc++,d.matrix); });
   S.im.count=sc; S.im.instanceMatrix.needsUpdate=true;
 
-  // diagonal compute glow on DSP PEs
+  // diagonal compute wavefront: a moderate teal lift on the active DSP PEs --
+  // stays well below the bloom threshold, so the cubes brighten without glare
   for(var id=0; id<peBase.length; id++){
     var rr2=Math.floor(id/GN), cc2=id%GN;
     var base=peBase[id];
     if(peIsDsp[rr2][cc2]){
       var dist=Math.abs((rr2+cc2) - band);
       var g = dist<2.4 ? (1-dist/2.4) : 0;
-      _C.copy(base).lerp(new THREE.Color(KCOL.signal), g*0.85);
+      _C.copy(base).lerp(WAVE_LIT, g*0.6);
       peMesh.setColorAt(id,_C);
     }
   }
