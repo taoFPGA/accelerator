@@ -62,7 +62,7 @@
   #zoomCrumb button:hover{color:var(--ink);background:#ffffff12}
   #zoomCrumb b{color:var(--ink);font-weight:600}
   #zoomCrumb .sep{color:var(--ink-faint)}
-  #app.zoomed #left{top:100px}
+  #app.zoomed #left{display:none}   /* while zoomed, the breadcrumb + Esc are the navigation */
 
   /* ---------- left controls ---------- */
   #left{position:absolute;left:18px;top:74px;z-index:20;width:216px;padding:14px;display:flex;flex-direction:column;gap:14px}

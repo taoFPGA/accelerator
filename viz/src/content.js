@@ -18,7 +18,7 @@ var STAGES = [
     html:"<b>MM_out_buffer → LayerNorm → Softmax → GELU → S2MM DMA → DDR.</b> The result wavefront leaves the array's south edge still diagonally skewed; <b>37.5 RAMB36-equiv</b> in MM_out_buffer absorb it and un-skew it into dense rows for the post-MatMul stages. The final GELU output is a <span class='mono'>32-bit</span> stream (4 lanes × 8-bit); a width converter matches it to the <span class='mono'>S2MM</span> DMA, which writes to DDR with AXI back-pressure — if the HP port stalls, <span class='mono'>tready</span> deasserts and the drain buffer holds.",
     dia:"drain" },
   { s:"Stage 4", t:"Post-MatMul pipeline",
-    view:"logic", cam:[ 12, 6, 12 ], tgt:[ 7, 0.6, 0 ], ghost:true,
+    view:"phases",
     emph:["mm"],
     html:"<b>The full transformer block, on chip.</b> <span class='mono'>transformer_block_top.v</span> wires three streaming stages onto the MatMul output. <b>axis_downsizer</b> serialises each 128-bit beat into 16 scalars and — being single-buffered — backpressures MM_ultra for ~16 cycles per beat, so <i>this bridge</i>, not the PE array, sets the sustained throughput. <b>Softmax_control</b> (Exp_module + AdderS + right_shifter) normalises each score row with no output backpressure, so <b>axis_upsizer_fifo</b> (depth 512) must buffer it before <b>EightGelus</b> applies GELU on 4 lanes. All on the same <span class='mono'>clk_fpga_0</span> — one clock, zero CDC. Placed &amp; routed footprint: downsizer <span class='mono'>133 LUT</span>, Softmax <span class='mono'>630 LUT / 4 DSP</span>, upsizer FIFO <span class='mono'>198 LUT</span>, GELU <span class='mono'>1.4k LUT / 4 DSP</span>.",
     dia:"future" }

@@ -315,48 +315,9 @@ function lanePos(l){
   });
 })();
 
-/* ---------- post-MatMul pipeline: downsizer -> Softmax -> upsizer -> GELU
-   (real, placed & routed in this bitstream) ---------- */
-var gGhost = new THREE.Group(); gGhost.visible = false; gLogic.add(gGhost);
-var ghostNodes = {}, ghostCurves = [];
-(function pipe(){
-  var startX = lanePos(N.mm.lane).x;   // continues east off the accelerator
-  var pts = [ new THREE.Vector3(startX, 0.55, 0) ];
-  GHOST.order.forEach(function(id, i){
-    var g = GHOST[id];
-    var x = startX + 3.4 + i*2.5;
-    var s = [1.5, 0.95, 1.5];
-    var col = kcol(g.kind);
-    var mat = new THREE.MeshStandardMaterial({ color:0x11151d, roughness:0.5, metalness:0.3,
-      emissive:col, emissiveIntensity:0.16 });
-    var mesh = new THREE.Mesh(new THREE.BoxGeometry(s[0],s[1],s[2]), mat);
-    mesh.position.set(x, 0.55, 0);
-    mesh.castShadow = true;
-    mesh.userData = {pick:"ghost", id:id};
-    mesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(mesh.geometry),
-      new THREE.LineBasicMaterial({color:col, transparent:true, opacity:0.6})));
-    gGhost.add(mesh); ghostNodes[id]=mesh; pickables.push(mesh);
-    gGhost.add(textSprite(g.name, 0.4, "#dfe6f0", x, 0.55 + s[1]/2 + 0.4, 0, true));
-    pts.push(new THREE.Vector3(x, 0.55, 0));
-  });
-  gGhost.add(textSprite("MatMul → LayerNorm → Softmax → GELU  ·  one 100 MHz domain", 0.36, "#9aa4b2",
-    startX + 3.4 + 1.5*2.5, 1.9, 0, true));
-  for(var i=0;i<pts.length-1;i++){
-    var a=pts[i], b=pts[i+1];
-    var m=a.clone().add(b).multiplyScalar(0.5); m.y += 0.7;
-    var c=new THREE.CatmullRomCurve3([a,m,b]);
-    ghostCurves.push(c);
-    var tube=new THREE.Mesh(new THREE.TubeGeometry(c,30,0.028,6,false),
-      new THREE.MeshBasicMaterial({color:KCOL.stream, transparent:true, opacity:0.4}));
-    gGhost.add(tube);
-  }
-})();
-var ghostPk = new THREE.InstancedMesh(
-  new THREE.IcosahedronGeometry(0.05,0),
-  new THREE.MeshBasicMaterial({color:KCOL.signal, toneMapped:false, transparent:true, opacity:0.95}),
-  ghostCurves.length*3);
-ghostPk.frustumCulled=false; ghostPk.count=0; gGhost.add(ghostPk);
-var ghostT = 0;
+/* The post-MatMul pipeline (downsizer -> Softmax -> upsizer -> GELU) is no
+   longer drawn inline in the logical view -- it is the drill-down Level 1
+   (double-click the accelerator). See the ACCELERATOR DRILL-DOWN section. */
 
 /* ---------- edges + illuminated pulses (shared between layers) ---------- */
 var curvesFloor = [], curvesLogic = [], streamsRT = [];
@@ -409,7 +370,7 @@ if(RM){ streamsRT.forEach(function(s){ s.pk=[0.2,0.5,0.8]; }); }
    ====================================================================== */
 var GN = ACC.cols, AW = 7.6, cell = AW/GN;
 var peMesh, peBase=[], peIsDsp=[], arrCenter=new THREE.Vector3();
-var flowW, flowA, flowS, wf = {cycle:0, frac:0};
+var flowA, flowS, wf = {cycle:0, frac:0};
 (function systolic(){
   var host = logicNodes.mm;
   arrCenter.copy(host.position);
@@ -503,14 +464,12 @@ var flowW, flowA, flowS, wf = {cycle:0, frac:0};
   gArray.add(textSprite("weights — loaded once, held stationary in every PE", 0.38, "#f0c89a", 0, 1.7, -half-1.6, true));
   gArray.add(textSprite("MM_in_buffer · 29×RAMB36", 0.42, "#f0c89a", -half-2.2, 1.1, 0, true));
   gArray.add(textSprite("MM_out_buffer · 37.5 RAMB36", 0.42, "#9fe9d6", 0, 1.1, half+2.4, true));
-  gArray.add(textSprite("PE_array — 16×16 weight-stationary systolic · one anti-diagonal = one output, in lock-step", 0.4, "#aab4c2", 0, 2.5, 0, true));
 
   function flow(n, geo, color){
     var im=new THREE.InstancedMesh(geo, new THREE.MeshBasicMaterial({color:color, toneMapped:false}), n);
     im.count=0; im.instanceMatrix.setUsage(THREE.DynamicDrawUsage); im.frustumCulled=false;
     gArray.add(im); return {im:im, list:[], acc:0};
   }
-  flowW = flow(1, new THREE.BoxGeometry(0.01,0.01,0.01), 0x000000);      // unused (weights are stationary)
   flowA = flow(ACC.rows*4, new THREE.BoxGeometry(cell*0.5,cell*0.26,cell*0.26), 0xbcd2ff);
   flowS = flow(GN*4, new THREE.OctahedronGeometry(cell*0.22,0), KCOL.signal);
 
@@ -605,15 +564,15 @@ function setLayer(l, fly){
   layer = l;
   document.getElementById("layPhys").setAttribute("aria-pressed", l==="phys");
   document.getElementById("layLogic").setAttribute("aria-pressed", l==="logic");
-  gFloor.visible = (l==="phys");
+  gFloor.visible = (l==="phys" && bookmark!=="board");   // board view = package only
   gBoard.visible = (l==="phys" && bookmark==="board");
   gLogic.visible = (l==="logic");
-  gGhost.visible = (l==="logic" && ghostVisible);
   applyIsolate();
   if(fly){
     if(l==="logic" && bookmark!=="core") flyTo([0.5,10,15.5],[0.5,0.3,-0.2],1.2);
     else if(l==="phys") flyTo(VIEWS[bookmark==="board"?"board":"floor"].pos, VIEWS[bookmark==="board"?"board":"floor"].tgt, 1.2);
   }
+  if(typeof syncChrome==="function") syncChrome();
 }
 var VIEWS = {
   board: { pos:[0,13,20],   tgt:[0,-0.6,0], layer:"phys", showBoard:true },
@@ -798,6 +757,9 @@ canvas.addEventListener("pointerdown", function(e){ downXY=[e.clientX,e.clientY]
 var downXY=[0,0];
 
 /* resolve what's under the cursor -> {kind, id?, phase?, pe?[r,c]} or null */
+function isVisibleInScene(o){
+  var p=o; while(p){ if(p.visible===false) return false; p=p.parent; } return true;
+}
 function pickAt(e){
   var r=canvas.getBoundingClientRect();
   mouse.x=((e.clientX-r.left)/r.width)*2-1; mouse.y=-((e.clientY-r.top)/r.height)*2+1;
@@ -806,6 +768,7 @@ function pickAt(e){
   for(var i=0;i<hits.length;i++){
     var o=hits[i].object;
     if(o.userData.noPick) continue;
+    if(!isVisibleInScene(o)) continue;   // r128 Raycaster does not skip invisible
     if(o.userData.pick==="pe" && o===peMesh && hits[i].instanceId!=null){
       var id=hits[i].instanceId; return {kind:"pe", pe:[Math.floor(id/GN), id%GN]};
     }
@@ -827,13 +790,9 @@ function doInspect(k){
 }
 function doDrill(k){
   if(!k) return;
-  if(k.kind==="zphase"){ enterZoom(k.phase); return; }
-  if(zoom===""){
-    if((k.kind==="soc" && k.id==="mm") || k.kind==="pe" ||
-       (k.kind==="ghost" && {downsizer:1,softmax:1,upsizer:1,gelu:1}[k.id])){
-      enterZoom("phases");
-    }
-  }
+  if(k.kind==="zphase"){ enterZoom(k.phase); return; }   // Level 1 -> Level 2
+  // Level 0 -> Level 1: only the accelerator block dives in
+  if(zoom==="" && k.kind==="soc" && k.id==="mm"){ enterZoom("phases"); }
 }
 
 /* single click = inspect (deferred, so a double-click can pre-empt it);
@@ -962,7 +921,7 @@ var ZCAM = {
 };
 function enterZoom(z){
   zoom = z;
-  gFloor.visible = false; gBoard.visible = false; gLogic.visible = false; gGhost.visible = false;
+  gFloor.visible = false; gBoard.visible = false; gLogic.visible = false;
   var mech = (z==="softmax" || z==="gelu" || z==="phases");
   gZoom.visible = mech;
   zPh.visible = z==="phases"; zSm.visible = z==="softmax"; zGl.visible = z==="gelu";
@@ -987,6 +946,7 @@ function enterZoom(z){
     return (i? "<span class='sep'>›</span>" : "") +
       (last ? "<b>"+seg[1]+"</b>" : "<button data-z='"+seg[0]+"'>"+seg[1]+"</button>");
   }).join("");
+  syncChrome();
 }
 function exitZoom(){
   zoom = "";
@@ -1001,9 +961,17 @@ function zoomUp(){
   if(zoom==="mm" || zoom==="softmax" || zoom==="gelu") enterZoom("phases");
   else exitZoom();
 }
+/* show only the chrome that serves the current view */
+function syncChrome(){
+  var telem = document.getElementById("telem");
+  var isBoard = (zoom==="" && layer==="phys" && bookmark==="board");
+  telem.hidden = isBoard || zoom==="softmax" || zoom==="gelu";
+}
 document.getElementById("zoomCrumb").addEventListener("click", function(e){
   var b = e.target.closest && e.target.closest("button[data-z]");
   if(!b) return;
+  tourOn = false;                       // breadcrumb navigation leaves the guided tour
+  document.getElementById("tour").classList.remove("open");
   var z = b.getAttribute("data-z");
   if(z==="") exitZoom(); else enterZoom(z);
 });
@@ -1039,13 +1007,9 @@ STAGES.forEach(function(st,i){
 function enterStage(i){
   stageIx = (i+STAGES.length)%STAGES.length;
   tourOn = true;
-  document.getElementById("tour").classList.add("open");
   var st = STAGES[stageIx];
-  [].forEach.call(stepsEl.children,function(c,ci){ c.setAttribute("aria-current", ci===stageIx); });
-  document.getElementById("explTxt").innerHTML = st.html;
-  drawDia(st.dia);
-  if(st.ghost){ ghostVisible = true; ghostSw.setAttribute("aria-pressed", "true"); }
   if(st.view==="core"){ enterZoom("mm"); }
+  else if(st.view==="phases"){ enterZoom("phases"); }
   else {
     clearZoom();
     bookmark = "__tour";
@@ -1053,9 +1017,13 @@ function enterStage(i){
     logicNodes.mm.visible = true;
     gArray.visible = false;
     setLayer("logic");
-    gGhost.visible = ghostVisible && layer==="logic";
   }
-  if(st.cam){ flyTo(st.cam, st.tgt, 1.4); }
+  // re-open the narration panel AFTER any enterZoom (which collapses it)
+  document.getElementById("tour").classList.add("open");
+  [].forEach.call(stepsEl.children,function(c,ci){ c.setAttribute("aria-current", ci===stageIx); });
+  document.getElementById("explTxt").innerHTML = st.html;
+  drawDia(st.dia);
+  if(st.cam && st.view!=="phases"){ flyTo(st.cam, st.tgt, 1.4); }
   // emphasis
   var em={}; st.emph.forEach(function(x){ em[x]=1; });
   Object.keys(logicNodes).forEach(function(k){
@@ -1111,7 +1079,7 @@ document.getElementById("tNext").addEventListener("click", function(){ enterStag
 /* ======================================================================
    TRANSPORT
    ====================================================================== */
-var playing = !RM, speed = 1, flowVisible = true, ghostVisible = false;
+var playing = !RM, speed = 1, flowVisible = true;
 var tPlay=document.getElementById("tPlay");
 function setPlaying(p){ playing=p; tPlay.textContent = p?"❚❚":"▶"; tPlay.setAttribute("aria-label", p?"Pause dataflow":"Play dataflow"); }
 tPlay.addEventListener("click", function(){ setPlaying(!playing); });
@@ -1139,15 +1107,6 @@ isoSw.addEventListener("keydown", function(e){ if(e.key==="Enter"||e.key===" "){
 var flowSw=document.getElementById("flowSw");
 flowSw.addEventListener("click", function(){ flowVisible=!flowVisible; flowSw.setAttribute("aria-pressed",flowVisible);
   pkMesh.visible=flowVisible; });
-var ghostSw=document.getElementById("ghostSw");
-function setGhost(on){
-  ghostVisible = on;
-  ghostSw.setAttribute("aria-pressed", on);
-  gGhost.visible = on && layer==="logic";
-  if(on && layer!=="logic"){ setLayer("logic", true); gGhost.visible = true; }
-}
-ghostSw.addEventListener("click", function(){ setGhost(!ghostVisible); });
-ghostSw.addEventListener("keydown", function(e){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); setGhost(!ghostVisible); } });
 
 document.addEventListener("keydown", function(e){
   if(e.target.tagName==="INPUT") return;
@@ -1244,22 +1203,6 @@ function advancePE(dt){
   peMesh.instanceColor.needsUpdate=true;
 }
 
-/* ---- ghost (transformer extension) pulses ---- */
-function updateGhost(dt){
-  if(!gGhost.visible){ return; }
-  if(playing && !RM) ghostT += dt*speed*0.35;
-  var n=0, d=new THREE.Object3D();
-  for(var i=0;i<ghostCurves.length;i++){
-    for(var k=0;k<2;k++){
-      var t=(ghostT*0.6 + i*0.25 + k*0.5) % 1;
-      ghostCurves[i].getPointAt(Math.min(0.999,Math.max(0.001,t)), _P);
-      d.position.copy(_P); d.updateMatrix();
-      ghostPk.setMatrixAt(n++, d.matrix);
-    }
-  }
-  ghostPk.count = n;
-  ghostPk.instanceMatrix.needsUpdate = true;
-}
 
 /* ---- live telemetry model ---- */
 var TEL = { gops:0, ddr:0, cyc:0, duty:0 };
@@ -1317,7 +1260,6 @@ function loop(){
 
   if(flowVisible) advanceSoc(dt);
   advancePE(dt);
-  updateGhost(dt);
   updateZoom(dt);
   updateTelem(dt);
 
