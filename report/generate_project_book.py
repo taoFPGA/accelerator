@@ -725,15 +725,32 @@ paragraphs[23].text = ""  # was: "[TO CONFIRM -- confirm the supervisor/mentor r
 paragraphs[30].text = ""  # was: leftover template instructional sentence
 paragraphs[39].text = ""  # was: "[TO CONFIRM -- add any additional personal acknowledgments here]"
 
+# Blank spacer paragraphs push "Submitted as part of..." onto its own
+# near-empty page purely by page-1 content height -- no explicit page
+# break is involved. Trimming the 3 spacers right before it (23-25) alone
+# wasn't enough (confirmed by rendering: no change to the break point), so
+# also thin the two larger blank runs earlier on the page: after the logo
+# (paragraphs 1-5, kept down to 2 for minimal post-logo breathing room)
+# and after the authors block (16-18, kept down to 1).
+for p in (paragraphs[25], paragraphs[24], paragraphs[23],
+          paragraphs[18], paragraphs[17],
+          paragraphs[5], paragraphs[4], paragraphs[3]):
+    p._p.getparent().remove(p._p)
+
 # The base template has two manual page breaks (paragraph 29, right after
 # "Project number: 309", and paragraph 33, right before "ABSTRACT") with
 # only blank filler paragraphs between them -- that combination renders as
-# a fully blank page. Removing the first break lets the blank fillers
-# collapse into normal paragraph spacing while the second break still
-# gives the Abstract its own fresh page.
-for br in paragraphs[29]._p.findall(".//" + qn("w:br")):
-    if br.get(qn("w:type")) == "page":
-        br.getparent().remove(br)
+# a fully blank page. Both are removed: with the title-page trim above,
+# "Project number: 309" now lands partway down page 1, so a forced break
+# right after it would just recreate the same blank-page problem one
+# paragraph later. Letting Abstract flow naturally means it starts on
+# page 1 if it fits, or wraps to page 2 with no wasted space if it
+# doesn't -- confirmed by rendering that it does not fit, so Abstract
+# still gets a full page 2, just via natural overflow, not a forced break.
+for idx in (29, 33):
+    for br in paragraphs[idx]._p.findall(".//" + qn("w:br")):
+        if br.get(qn("w:type")) == "page":
+            br.getparent().remove(br)
 
 # ---- Replace the Abstract with the verified IEEE paper's own abstract ----
 # paragraphs[34] = "ABSTRACT" heading (kept as-is); paragraphs[35] = body text.
@@ -822,50 +839,50 @@ for sdt in body.findall(qn("w:sdt")):
 # IEEE body is edited later, regenerate once with placeholder numbers,
 # re-read the real page numbers off the PDF, and update this table again.
 toc_heading(doc, "Table of Contents")
-toc_line(doc, "Abstract", 3)
-toc_line(doc, "Acknowledgments", 3)
+toc_line(doc, "Abstract", 2)
+toc_line(doc, "Acknowledgments", 2)
 TOC_ENTRIES = [
-    ("Preliminaries", 0, 6),
-    ("A. Transformer Self-Attention", 1, 6),
-    ("B. Fixed-Point (INT8) Quantization", 1, 6),
-    ("C. Systolic Arrays for Matrix Multiplication", 1, 6),
-    ("I. Introduction & Motivation", 0, 6),
-    ("A. The Edge AI Compute Dilemma", 1, 6),
-    ("B. Design Intent & Methodology", 1, 6),
-    ("C. Key Contributions & Paper Outline", 1, 7),
-    ("II. Core Hardware Architecture & Mathematical Formulation", 0, 7),
-    ("A. Systolic Matrix Multiplication Core", 1, 7),
-    ("B. Fixed-Point Non-Linear Arithmetic Engines", 1, 8),
-    ("C. Numerical Quantization Strategy", 1, 9),
-    ("III. RTL Verification & Behavioral Simulation (Cadence Xcelium)", 0, 9),
-    ("A. Testbench Architecture & Golden Reference Model", 1, 9),
-    ("B. Simulation Results & Numerical Precision Verification", 1, 9),
-    ("C. Pre-Silicon Logic Debugging", 1, 9),
-    ("IV. SoC Integration & Hardware Platform Design (PYNQ-Z2 / Zynq-7020)", 0, 9),
-    ("A. SoC Architecture", 1, 9),
-    ("B. Physical Adaptations for Board Deployment", 1, 10),
-    ("C. Software Infrastructure for Hardware Bring-Up", 1, 11),
-    ("V. Physical Implementation, P&R, and Sign-Off Optimizations", 0, 11),
-    ("A. Baseline Physical Sign-Off", 1, 11),
-    ("B. The DSP Inference Gap & Attribute Resolution", 1, 11),
-    ("C. Physical Congestion vs. Timing Trade-Off", 1, 11),
-    ("D. Bitstream & Hardware Platform Sign-Off", 1, 12),
-    ("VI. Experimental Evaluation & Hardware Bring-Up", 0, 12),
-    ("A. Benchmarking Methodology", 1, 12),
-    ("B. Performance Metrics & Acceleration", 1, 12),
-    ("C. Physical Silicon Verification", 1, 13),
-    ("D. Workload Characterization vs. ViT Networks", 1, 13),
-    ("E. Hardware Bring-Up Observations & Edge Cases", 1, 13),
-    ("F. Comparative Analysis with Prior FPGA Transformer Accelerators", 1, 14),
-    ("VII. Engineering Discussion, Bottlenecks & Future Work", 0, 14),
-    ("A. DMA Buffer Boundary Constraints", 1, 14),
-    ("B. Serial Softmax Throughput Bottleneck", 1, 14),
-    ("C. Architectural Roadmap", 1, 14),
-    ("VIII. Conclusion", 0, 15),
-    ("References", 0, 15),
-    ("Appendix A: Engineering Problems Encountered and Their Solutions", 0, 16),
+    ("Preliminaries", 0, 5),
+    ("A. Transformer Self-Attention", 1, 5),
+    ("B. Fixed-Point (INT8) Quantization", 1, 5),
+    ("C. Systolic Arrays for Matrix Multiplication", 1, 5),
+    ("I. Introduction & Motivation", 0, 5),
+    ("A. The Edge AI Compute Dilemma", 1, 5),
+    ("B. Design Intent & Methodology", 1, 5),
+    ("C. Key Contributions & Paper Outline", 1, 6),
+    ("II. Core Hardware Architecture & Mathematical Formulation", 0, 6),
+    ("A. Systolic Matrix Multiplication Core", 1, 6),
+    ("B. Fixed-Point Non-Linear Arithmetic Engines", 1, 7),
+    ("C. Numerical Quantization Strategy", 1, 8),
+    ("III. RTL Verification & Behavioral Simulation (Cadence Xcelium)", 0, 8),
+    ("A. Testbench Architecture & Golden Reference Model", 1, 8),
+    ("B. Simulation Results & Numerical Precision Verification", 1, 8),
+    ("C. Pre-Silicon Logic Debugging", 1, 8),
+    ("IV. SoC Integration & Hardware Platform Design (PYNQ-Z2 / Zynq-7020)", 0, 8),
+    ("A. SoC Architecture", 1, 8),
+    ("B. Physical Adaptations for Board Deployment", 1, 9),
+    ("C. Software Infrastructure for Hardware Bring-Up", 1, 10),
+    ("V. Physical Implementation, P&R, and Sign-Off Optimizations", 0, 10),
+    ("A. Baseline Physical Sign-Off", 1, 10),
+    ("B. The DSP Inference Gap & Attribute Resolution", 1, 10),
+    ("C. Physical Congestion vs. Timing Trade-Off", 1, 10),
+    ("D. Bitstream & Hardware Platform Sign-Off", 1, 10),
+    ("VI. Experimental Evaluation & Hardware Bring-Up", 0, 11),
+    ("A. Benchmarking Methodology", 1, 11),
+    ("B. Performance Metrics & Acceleration", 1, 11),
+    ("C. Physical Silicon Verification", 1, 12),
+    ("D. Workload Characterization vs. ViT Networks", 1, 12),
+    ("E. Hardware Bring-Up Observations & Edge Cases", 1, 12),
+    ("F. Comparative Analysis with Prior FPGA Transformer Accelerators", 1, 13),
+    ("VII. Engineering Discussion, Bottlenecks & Future Work", 0, 13),
+    ("A. DMA Buffer Boundary Constraints", 1, 13),
+    ("B. Serial Softmax Throughput Bottleneck", 1, 13),
+    ("C. Architectural Roadmap", 1, 13),
+    ("VIII. Conclusion", 0, 14),
+    ("References", 0, 14),
+    ("Appendix A: Engineering Problems Encountered and Their Solutions", 0, 15),
 ]
-APPENDIX_A_PAGES = [16, 16, 17, 17, 17, 18, 18, 19, 19, 20, 20, 20, 21]
+APPENDIX_A_PAGES = [15, 15, 16, 16, 16, 17, 17, 18, 18, 19, 19, 19, 20]
 # A few appendix titles are too long to fit this indent level before the
 # dot-leader tab stop (confirmed by rendering: the full A.13 title runs
 # straight into its page number with no visible leader) -- shortened here
@@ -878,31 +895,31 @@ TOC_TITLE_OVERRIDES = {
 for entry, page in zip(APPENDIX_A_ENTRIES, APPENDIX_A_PAGES):
     toc_text = TOC_TITLE_OVERRIDES.get(entry["title"], entry["title"])
     TOC_ENTRIES.append((toc_text, 1, page))
-TOC_ENTRIES.append(("Appendix B: General Engineering Principles", 0, 22))
+TOC_ENTRIES.append(("Appendix B: General Engineering Principles", 0, 21))
 
 for text, level, page in TOC_ENTRIES:
     toc_line(doc, text, page, level=level, bold=(level == 0))
 
 toc_heading(doc, "List of Figures")
 LOF_ENTRIES = [
-    ("Fig. 1. One PE's internal datapath (stationary weight, INT8 multiply, systolic propagation).", 8),
-    ("Fig. 2. Softmax_control's 3-pass FSM and its per-pass equations.", 8),
-    ("Fig. 3. Illustrative AXI4-Stream handshake and 3-pass Softmax timing structure.", 9),
-    ("Fig. 4. Complete top-level SoC architecture.", 10),
-    ("Fig. 5. Latency, CPU vs. hardware, both benchmarked shapes.", 12),
-    ("Fig. 6. Throughput (GOP/s), CPU vs. hardware, both shapes.", 12),
-    ("Fig. 7. Measured hardware kernel speedup over CPU.", 13),
-    ("Fig. 8. Real ViT dataflows contrasted with taoFPGA's fixed fused pipeline.", 13),
+    ("Fig. 1. One PE's internal datapath (stationary weight, INT8 multiply, systolic propagation).", 7),
+    ("Fig. 2. Softmax_control's 3-pass FSM and its per-pass equations.", 7),
+    ("Fig. 3. Illustrative AXI4-Stream handshake and 3-pass Softmax timing structure.", 8),
+    ("Fig. 4. Complete top-level SoC architecture.", 9),
+    ("Fig. 5. Latency, CPU vs. hardware, both benchmarked shapes.", 11),
+    ("Fig. 6. Throughput (GOP/s), CPU vs. hardware, both shapes.", 11),
+    ("Fig. 7. Measured hardware kernel speedup over CPU.", 12),
+    ("Fig. 8. Real ViT dataflows contrasted with taoFPGA's fixed fused pipeline.", 12),
 ]
 for text, page in LOF_ENTRIES:
     toc_line(doc, text, page)
 
 toc_heading(doc, "List of Tables")
 LOT_ENTRIES = [
-    ("Table I. transformer_block_axi_top AXI4-Lite Register Map.", 10),
-    ("Table II. Post-Route Signoff Metrics, Before/After the DSP-Inference Fix.", 12),
-    ("Table III. Kernel Benchmark Results, PYNQ-Z2 vs. ARM Cortex-A9.", 13),
-    ("Table IV. Comparison with Literature FPGA Transformer Accelerators.", 14),
+    ("Table I. transformer_block_axi_top AXI4-Lite Register Map.", 9),
+    ("Table II. Post-Route Signoff Metrics, Before/After the DSP-Inference Fix.", 11),
+    ("Table III. Kernel Benchmark Results, PYNQ-Z2 vs. ARM Cortex-A9.", 12),
+    ("Table IV. Comparison with Literature FPGA Transformer Accelerators.", 13),
 ]
 for text, page in LOT_ENTRIES:
     toc_line(doc, text, page)
