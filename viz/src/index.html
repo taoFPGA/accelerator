@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>taoFPGA Dataflow</title>
+<meta name="description" content="Photoreal interactive 3D walkthrough of the taoFPGA transformer accelerator — Zynq-7020 floorplan, logical pipeline, and the 24x24 systolic array, from a routed Vivado checkpoint." />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="style.css" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" />
+</head>
+<body>
+<div id="app">
+  <canvas id="view"></canvas>
+
+  <div id="top">
+    <div class="brand">
+      <b>taoFPGA Dataflow</b>
+      <span>transformer matmul core · Zynq-7020</span>
+    </div>
+    <div class="facts">
+      <div class="fact"><span class="k">Part</span><span class="v mono">xc7z020clg400-1</span></div>
+      <div class="fact"><span class="k">Fabric clock</span><span class="v mono">clk_fpga_0 · 100.0 MHz</span></div>
+      <div class="fact"><span class="k">Domains</span><span class="v mono">1 · 0 CDC</span></div>
+      <div class="fact"><span class="k">Checkpoint</span><span class="v mono">post-route</span></div>
+    </div>
+    <div class="spacer"></div>
+    <div class="util">
+      <div class="chip"><span>DSP</span><span class="bar"><i style="width:100%"></i></span><b class="mono">220/220</b></div>
+      <div class="chip"><span>LUT</span><span class="bar"><i style="width:97%;background:var(--ctrl)"></i></span><b class="mono">51.5k/53.2k</b></div>
+      <div class="chip"><span>BRAM</span><span class="bar"><i style="width:86%;background:var(--hard)"></i></span><b class="mono">120/140</b></div>
+    </div>
+  </div>
+
+  <div id="left">
+    <div class="group glass" style="padding:12px">
+      <div class="eyebrow lbl">Camera bookmarks</div>
+      <div class="stack">
+        <button class="btn" data-view="board"   aria-pressed="false"><span class="num mono">01</span>Board &amp; package</button>
+        <button class="btn" data-view="floor"   aria-pressed="true"><span class="num mono">02</span>Silicon floorplan</button>
+        <button class="btn" data-view="core"    aria-pressed="false"><span class="num mono">03</span>Systolic compute core</button>
+      </div>
+    </div>
+    <div class="group glass" style="padding:12px">
+      <div class="eyebrow lbl">Layer</div>
+      <div class="seg" role="group" aria-label="Layer">
+        <button id="layPhys" aria-pressed="true">Physical</button>
+        <button id="layLogic" aria-pressed="false">Logical</button>
+      </div>
+      <div class="toggle" style="margin-top:12px">
+        <span>Isolate data path</span>
+        <div class="sw" id="isoSw" role="button" aria-pressed="false" tabindex="0" aria-label="Isolate critical data path"></div>
+      </div>
+      <div class="toggle" style="margin-top:9px">
+        <span>Dataflow pulses</span>
+        <div class="sw" id="flowSw" role="button" aria-pressed="true" tabindex="0" aria-label="Toggle dataflow pulses"></div>
+      </div>
+      <div class="toggle" style="margin-top:9px">
+        <span>Transformer ext. <span class="mono" style="color:var(--ink-faint);font-size:10px">RTL</span></span>
+        <div class="sw" id="ghostSw" role="button" aria-pressed="false" tabindex="0" aria-label="Show Softmax and GELU transformer extension (RTL only)"></div>
+      </div>
+    </div>
+  </div>
+
+  <aside id="insp" class="glass" aria-live="polite">
+    <div class="hd">
+      <div class="tag mono" id="iTag">module</div>
+      <h2 id="iName">—</h2>
+      <div class="path mono" id="iPath">—</div>
+    </div>
+    <div class="bd">
+      <div class="kv"><span>Reference</span><b class="mono" id="iRef">—</b></div>
+      <div class="kv"><span>Primary clock</span><b class="mono" id="iClk">clk_fpga_0 · 100 MHz</b></div>
+      <div class="kv"><span>Registered outputs</span><b class="mono" id="iReg">—</b></div>
+      <div class="foot mono">
+        <div><div class="l">LUT</div><div class="n" id="iLut">—</div></div>
+        <div><div class="l">FF</div><div class="n" id="iFf">—</div></div>
+        <div><div class="l">DSP48</div><div class="n" id="iDsp">—</div></div>
+        <div><div class="l">BRAM36</div><div class="n" id="iBram">—</div></div>
+      </div>
+      <div class="cr" id="iCrWrap">
+        <div class="cap"><span>Clock-region load</span><span class="mono" id="iCrTot"></span></div>
+        <div class="crgrid" id="iCr"></div>
+      </div>
+      <div class="note" id="iNote"></div>
+      <div class="tim" id="iTim" hidden></div>
+    </div>
+  </aside>
+
+  <div id="tour" class="glass">
+    <div class="row1">
+      <div class="steps" id="steps"></div>
+      <div class="transport">
+        <button id="tPrev" aria-label="Previous stage">◀</button>
+        <button id="tPlay" aria-label="Play dataflow">❚❚</button>
+        <button id="tStep" aria-label="Step one cycle">⏭</button>
+        <button id="tNext" aria-label="Next stage">▶</button>
+        <input id="tSpeed" type="range" min="0" max="3" step="0.05" value="1" aria-label="Dataflow speed" />
+        <span class="rate mono" id="tRate">1.0×</span>
+        <button id="tourToggle" aria-label="Toggle explanation">ℹ</button>
+      </div>
+    </div>
+    <div class="expl" id="expl">
+      <div class="txt" id="explTxt"></div>
+      <div class="dia" id="explDia"></div>
+    </div>
+  </div>
+
+  <div id="telem" class="glass">
+    <div class="hdr"><span class="eyebrow">Live telemetry</span><span class="cyc mono" id="tCyc">cycle 0</span></div>
+    <div class="row">
+      <div class="cellu">
+        <div class="lab">Compute</div>
+        <div class="big mono"><span id="tGops">0.0</span> <small>/ 44 GOP/s</small></div>
+        <div class="meter"><i id="tGopsBar"></i></div>
+      </div>
+    </div>
+    <div class="row" style="margin-top:11px">
+      <div class="cellu">
+        <div class="lab">DDR demand</div>
+        <div class="big mono"><span id="tDdr">0.0</span> <small>GB/s</small></div>
+        <div class="meter ddr"><i id="tDdrBar"></i></div>
+        <div class="cap" id="tDdrCap"><b>32-bit DDR3 ≈ 4.3 GB/s</b> — tiles staged in 99×RAMB36</div>
+      </div>
+    </div>
+    <div class="leg">
+      <div><i style="background:var(--stream)"></i>AXI4-Stream</div>
+      <div><i style="background:var(--ctrl)"></i>AXI4 / ctrl</div>
+      <div><i style="background:var(--compute)"></i>DSP48 MAC</div>
+      <div><i style="background:var(--hard)"></i>PS7 hard</div>
+    </div>
+  </div>
+
+  <div id="hint">drag to orbit · scroll to zoom · click any block to inspect</div>
+  <div id="boot"><div class="l">compiling scene · <b>routed netlist</b></div></div>
+  <div id="err"></div>
+</div>
+
+  <script>
+  window.__taofpgaBooted = false;
+  window.addEventListener("error", function(e){
+    if(window.__taofpgaBooted) return;
+    var b=document.getElementById("boot"), er=document.getElementById("err");
+    if(b) b.style.display="none";
+    if(er){ er.style.display="block";
+      er.innerHTML = "Couldn't start the 3D scene.<br><span class='mono' style='font-size:11px'>"+
+        ((e && e.message) || "load error")+"</span><br><br>Needs a Chromium/Firefox browser with WebGL2.";
+    }
+  });
+  </script>
+
+  <script src="lib/three.min.js"></script>
+  <script src="lib/CopyShader.js"></script>
+  <script src="lib/LuminosityHighPassShader.js"></script>
+  <script src="lib/SMAAShader.js"></script>
+  <script src="lib/OrbitControls.js"></script>
+  <script src="lib/RoomEnvironment.js"></script>
+  <script src="lib/EffectComposer.js"></script>
+  <script src="lib/RenderPass.js"></script>
+  <script src="lib/ShaderPass.js"></script>
+  <script src="lib/UnrealBloomPass.js"></script>
+  <script src="lib/SMAAPass.js"></script>
+  <script src="data.js"></script>
+  <script src="content.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

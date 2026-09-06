@@ -1,0 +1,53 @@
+name: build-viz
+
+# Repackage viz/src/ into the single-file viz/taofpga_dataflow.html.
+#  - on pull requests: fail if the committed bundle is stale
+#  - on push to master: rebuild and commit the bundle back if it changed
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "viz/src/**"
+      - "viz/build.py"
+      - ".github/workflows/build-viz.yml"
+  pull_request:
+    paths:
+      - "viz/src/**"
+      - "viz/build.py"
+
+jobs:
+  check:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Verify the bundle is up to date
+        run: python viz/build.py --check
+
+  build-and-commit:
+    if: github.event_name == 'push' && github.repository == 'taoFPGA/accelerator'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Rebuild bundle
+        run: python viz/build.py
+      - name: Commit if changed
+        run: |
+          if [ -n "$(git status --porcelain viz/taofpga_dataflow.html)" ]; then
+            git config user.name  "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add viz/taofpga_dataflow.html
+            git commit -m "viz: rebuild bundle from src/ [skip ci]"
+            git push
+          else
+            echo "bundle already current"
+          fi
