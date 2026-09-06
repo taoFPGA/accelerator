@@ -16,8 +16,8 @@ verified, synthesized, placed & routed, and run on real silicon
 
 | Role | Name | Contact |
 |------|------|---------|
-| Student | Eliran Turgeman | linkedin.com/in/elirantur1/ |
-| Student | Shay Rask | linkedin.com/in/shay-rask-a0a570228 |
+| Student | Eliran Turgeman | [LinkedIn](https://www.linkedin.com/in/elirantur1/) |
+| Student | Shay Rask | [LinkedIn](https://www.linkedin.com/in/shay-rask-a0a570228) |
 | Supervisor | David Freud | david.freud@mail.huji.ac.il |
 | Academic authority | Dr. Leonid Yavits | Leonid.yavits@biu.ac.il |
 
