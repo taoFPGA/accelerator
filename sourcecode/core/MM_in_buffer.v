@@ -1,9 +1,29 @@
 `timescale 1ns / 1ps
+// ===========================================================================
+// MM_in_buffer.v -- whole-matrix input staging + tile dispatcher
+//
+// The outermost input stage of MM_ultra. It absorbs the entire feature
+// matrix and the entire weight matrix from the two AXI-Stream inputs into
+// two large BRAMs (in_F_array / in_W_array), then, tile by tile, streams the
+// right feature rows and weight block down to MM_buffer.v.
+//
+// FSM (`state`): IDLE -> IN_DATA (accepting in_F/in_W beats) -> CAL
+// (replaying tiles into MM_buffer) -> IDLE. `start` fires once both input
+// counts are satisfied (or MM_buffer signals a tile boundary) and there are
+// still output columns left (out_F_col_addr != F_width_block_num).
+//
+// Tile walk: out_F_col_addr selects the weight-width block (output column
+// group); out_F_row_addr walks the F_length feature rows within it;
+// out_F_addr = out_F_row_addr*F_width_block_num + out_F_col_addr reads the
+// feature BRAM. in_MM_buffer_*_last mark the last feature row / last weight
+// beat of the current tile. clogb2() is a local ceil-log2 for sizing the
+// address counters from the *_Block_num parameters.
+// ===========================================================================
 `define IDLE 2'b00
 `define IN_DATA 2'b01
 `define CAL 2'b11
-// reg [A_size * data_width - 1:0] in_F_array [Feature_Width_Block_num * Feature_Length : 0];
-// reg [A_size * data_width - 1:0] in_W_array [A_size * Weight_Width_Block_num * Feature_Width_Block_num : 0];
+// (sizing note) in_F_array holds F_width_block_num*F_length feature beats;
+// in_W_array holds A_size*W_width_block_num*F_width_block_num weight beats.
 module MM_in_buffer
 #(
     parameter integer                               A_size = 24,

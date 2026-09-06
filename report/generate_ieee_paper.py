@@ -814,7 +814,13 @@ def build_ieee_body(doc):
         ["0x10", "softmax_scale_in", "4, signed", "RW", "Softmax input fixed-point scale"],
         ["0x14", "softmax_scale_out", "4", "RW", "Softmax output scale (= gelu_scale, App. A.3)"],
         ["0x18", "gelu_scale", "4", "RW", "GELU input/output fixed-point scale"],
-        ["0x1C", "status", "1", "RO", "bit0 = softmax_to_gelu_fifo_overflow (live, not latched)"],
+        ["0x1C", "status", "1", "RO",
+         # A zero-width space after each underscore gives Word a clean
+         # break point in this identifier -- at ~29 characters it doesn't
+         # fit the Description column on one line at any reasonable width,
+         # and without this it wraps mid-syllable at an arbitrary character
+         # instead of at a word-part boundary.
+         "bit0 = softmax_​to_​gelu_​fifo_​overflow (live, not latched)"],
     ]
     regmap_tbl = add_table(doc, regmap_table[0], regmap_table[1:],
               "TABLE I. transformer_block_axi_top AXI4-LITE REGISTER MAP",
@@ -826,7 +832,7 @@ def build_ieee_body(doc):
     # room to Register/Description -- confirmed by rendering. Fix explicit
     # column widths (in a narrow ~3.5in two-column layout) instead.
     regmap_tbl.autofit = False
-    regmap_widths = [Inches(0.45), Inches(1.15), Inches(0.55), Inches(0.35), Inches(1.05)]
+    regmap_widths = [Inches(0.45), Inches(1.10), Inches(0.40), Inches(0.30), Inches(1.30)]
     for col, w in zip(regmap_tbl.columns, regmap_widths):
         col.width = w
         for cell in col.cells:
@@ -972,20 +978,18 @@ def build_ieee_body(doc):
 
     heading2(doc, "B", "Performance Metrics & Acceleration")
     body_para(doc,
-        "The hardware kernel achieved 2.487 GOP/s and 3.795 GOP/s on the two "
-        "benchmarked shapes respectively, against 0.036 and 0.039 GOP/s on "
-        "the CPU — measured speedups of 70.02× and 97.73× for the "
-        "identical operation. At the 3.795 GOP/s peak (192×320, MLP-shaped "
-        "kernel), against the post-route signoff power figures of Table II "
-        "(1.687 W total on-chip, 1.538 W dynamic), the design achieves a "
-        "total energy efficiency of 2.25 GOPS/W and a dynamic energy "
-        "efficiency of 2.47 GOPS/W. These efficiency figures combine a "
-        "live-measured kernel throughput with Vivado's post-route, "
+        "The hardware kernel delivers a 70.02×–97.73× speedup over the CPU "
+        "baseline across both benchmarked shapes, detailed latency-by-shape "
+        "in Table III and visualized in Figs. 5–7. At its 3.795 GOP/s peak "
+        "(192×320, MLP-shaped kernel), against the post-route signoff power "
+        "figures of Table II (1.687 W total on-chip, 1.538 W dynamic), the "
+        "design achieves a total energy efficiency of 2.25 GOPS/W and a "
+        "dynamic energy efficiency of 2.47 GOPS/W. These efficiency figures "
+        "combine a live-measured kernel throughput with Vivado's post-route, "
         "activity-based power estimate for the full SoC design — not a "
         "physically instrumented power reading synchronized to the benchmark "
         "run itself — and should be read as a signoff-grade estimate "
-        "accordingly. Figs. 5–7 present latency, throughput, and "
-        "speedup for both shapes.")
+        "accordingly.")
 
     figure(doc, os.path.join(FIGURES, "latency_comparison.png"),
            "Fig. 5. Latency, CPU vs. hardware, both benchmarked shapes.")
@@ -1070,7 +1074,7 @@ def build_ieee_body(doc):
         "datapath, each running its target device's DSP budget close to "
         "saturation.")
     compare_table = [
-        ["Design", "Target FPGA (total DSPs)", "Precision", "DSP utilization", "Reported efficiency"],
+        ["Design", "Target FPGA (total DSPs)", "Precision", "DSP Util.", "Reported efficiency"],
         ["taoFPGA (this work)", "Zynq-7020 (220)", "INT8",
          "205 / 220 (93.2%)", "2.25 GOPS/W total; 70.0×–97.7× vs. on-chip ARM Cortex-A9"],
         ["ME-ViT [3]", "Alveo U200 (5,867)", "not stated in source",
@@ -1078,11 +1082,25 @@ def build_ieee_body(doc):
         ["FTRANS [4]", "VCU118 (6,840)", "16-bit fixed-point + BCM compression",
          "5,647–6,531 / 6,840 (82.6–95.5%)", "81×/8.80×/2.44× energy efficiency vs. CPU/GPU/Jetson TX2"],
     ]
-    add_table(doc, compare_table[0], compare_table[1:],
+    compare_tbl = add_table(doc, compare_table[0], compare_table[1:],
               "TABLE IV. COMPARISON WITH LITERATURE FPGA TRANSFORMER ACCELERATORS",
               col_align=[WD_ALIGN_PARAGRAPH.LEFT, WD_ALIGN_PARAGRAPH.CENTER,
                          WD_ALIGN_PARAGRAPH.LEFT, WD_ALIGN_PARAGRAPH.CENTER,
                          WD_ALIGN_PARAGRAPH.LEFT])
+    # Default AutoFit starved "DSP utilization" and the Precision column's
+    # "compression" down to single-letter orphan wraps ("utilizatio/n",
+    # "compressio/n") -- confirmed by rendering, three times over: each
+    # width fix that widened Precision/DSP Util. far enough then starved
+    # Design too far the other way ("Desig/n", "taoFP/GA", "FTR/ANS").
+    # These five widths were sized against each column's actual longest
+    # unbreakable token (e.g. "(82.6-95.5%)", "compression", "taoFPGA"),
+    # not guessed, and re-verified by rendering after this change.
+    compare_tbl.autofit = False
+    compare_widths = [Inches(0.62), Inches(0.60), Inches(0.75), Inches(0.65), Inches(0.88)]
+    for col, w in zip(compare_tbl.columns, compare_widths):
+        col.width = w
+        for cell in col.cells:
+            cell.width = w
     body_para(doc,
         "A direct throughput or GOPS/W ranking across all three would "
         "misrepresent the comparison: ME-ViT and FTRANS target "

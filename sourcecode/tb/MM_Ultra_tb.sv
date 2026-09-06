@@ -1,4 +1,23 @@
 `timescale 1ns / 1ns
+// ===========================================================================
+// MM_Ultra_tb.sv -- unit testbench for the MatMul core (MM_ultra.v)
+//
+// DUT   : MM_ultra (A_size=16, data_width=8, shift=9), standalone -- no
+//         Softmax/GELU, no AXI wrapper.
+// Stimulus: random int8 IN_ROWS_NUM x IN_COLS_NUM feature matrix and
+//         IN_COLS_NUM x OUT_COLS_NUM weight matrix, streamed in over the two
+//         input interfaces with the tiling/blocking MM_ultra expects
+//         (IN_COLS_NUM and OUT_COLS_NUM must be multiples of A_size).
+// Check : every int8 output element is compared against MM_soft() below, the
+//         software reference -- integer dot product, then round-half-up
+//         arithmetic right shift by `scale`, then saturate to [-128,127].
+//         MM_soft is the exact same reference ported to Python in
+//         apps/golden_model.py (mm_soft) and reused in transformer_block_tb.
+//
+// Run   : make run_mm      (from sourcecode/sim/ -- heavy, prefer the batch
+//                           scheduler; see sourcecode/sim/Makefile)
+// Report: reports/sim/sim_mm_ultra_tb.rpt
+// ===========================================================================
 
 `define A_size 16
 `define DATA_WIDTH 8

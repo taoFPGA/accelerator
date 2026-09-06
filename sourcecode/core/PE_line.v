@@ -1,5 +1,16 @@
 `timescale 1ns / 1ps
-
+// ===========================================================================
+// PE_line.v -- one horizontal row of the systolic array
+//
+// Chains `array_n` PE.v cells left-to-right. The activation `x` enters at
+// column 0 and is passed cell-to-cell (each PE registers it one cycle, so
+// the row also acts as a shift register for `x`). Every cell has its own
+// weight lane from `w_packed` and its own partial-sum lane in/out of
+// `psum_*_packed`. Purely structural: the packed<->array glue below just
+// slices the flat buses into per-column signals. USE_DSP is forwarded
+// unchanged to every PE in the row (see PE_array.v for the row-by-row
+// DSP/LUT split). PE_array.v stacks `array_m` of these rows vertically.
+// ===========================================================================
 module PE_line
 #(
     parameter array_m = 4,

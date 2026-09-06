@@ -1,6 +1,16 @@
 
 `timescale 1 ns / 1 ps
-
+// ===========================================================================
+// Gelus_axi.v -- AXI4-Lite + AXI4-Stream wrapper around EightGelus.v
+//
+// Standalone IP wrapper for the GELU stage. Body is the stock Xilinx
+// AXI4-Lite slave template; only the port list and the "Add user logic here"
+// block at the bottom are project code.
+//
+// AXI4-Lite register map (addr[3:2] selects 4 regs; only reg0 used):
+//   0  scale  (RW) -- shared Q-point for all num_gelu GELU lanes
+// Stream: s_axis (num_gelu*8-bit, with tkeep) -> GELU -> m_axis.
+// ===========================================================================
 	module Gelus_axi #
 	(
 		// Users to add parameters here

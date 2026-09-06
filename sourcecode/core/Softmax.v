@@ -1,21 +1,44 @@
 `timescale 1ns / 1ps
-
+// ===========================================================================
+// Softmax.v -- streaming numerically-stable softmax datapath
+//
+// Normalizes each length-`length` row of int8 data to a softmax
+// distribution, one element per cycle in and one per cycle out. Wrapped by
+// Softmax_control.v (which owns the row buffering and replay); this block is
+// the pure arithmetic pipeline.
+//
+// Each row is walked THREE times (Softmax_control replays it), tracked by
+// `cnt` and decoded into `stage` via the length / lengthX2 / lengthX3
+// bounds:
+//   stage 1  -- find the row maximum (data_in_max), running max.
+//   stage 2  -- for each element compute e^(x - max) with Exp_module and
+//               accumulate e_sum. (x - max is scaled up by scale_in into
+//               S9Q10 before Exp_module.)
+//   stage 3  -- compute the final value  e^( (x - max) - ln(e_sum) )  with a
+//               second Exp_module, using ln(e_sum) from Ln_module, then
+//               requantize to int8 per `scale_out` (the big case block picks
+//               the output bit-field and saturates to 0x7F).
+// e_sum is clamped to >= 1.0 (256 in Q8) so Ln_module only ever sees x >= 1.
+// The many *_delayN ladders align max / stage / scale_out / valid with the
+// multi-cycle Exp/Ln latencies. valid_out/out_last are asserted only during
+// the stage-3 pass. scale_in range -1..10, scale_out 7..14.
+// ===========================================================================
 module Softmax(
     input                   clk,
     input                   rst_n,
-    
-    input [9:0]             length_input,
-    input [10:0]            lengthX2,
-    input [11:0]            lengthX3,
+
+    input [9:0]             length_input,  // row length N
+    input [10:0]            lengthX2,       // 2N (precomputed by control)
+    input [11:0]            lengthX3,       // 3N -- one full 3-pass cycle
     input signed [4:0]      scale_in,//scale_in and scale_out must be kept during the valid_in, min =-1, max =10
     input [3:0]             scale_out,//min = 7,max  = 14
     input signed [7:0]      data_in,
     input                   valid_in,
-    
-    output reg [7:0]        data_out,
+
+    output reg [7:0]        data_out,       // softmax probability, int8
     // output reg [15:0]       data_out,
     output                  valid_out,
-    output                  out_last
+    output                  out_last        // last element of a row
 );
 
 

@@ -1,5 +1,20 @@
 `timescale 1ns / 1ps
-
+// ===========================================================================
+// gelu_tb.sv -- unit testbench for one GELU lane (gelu.v)
+//
+// DUT   : gelu (single int8 lane, 8-cycle latency).
+// Stimulus: every 100 ns, a fresh random x = $random % 128 and random
+//         in_scale = {$random} % 12 (the Q-point).
+// Check : gelu_task() computes the exact tanh-approximation GELU in real
+//         arithmetic (same formula as PyTorch F.gelu(approximate='tanh') and
+//         apps/golden_model.py gelu_ref). Both DUT output and reference are
+//         de-quantized by 2^-in_scale and compared; a mismatch larger than
+//         one LSB (2^-in_scale) is printed. The x_soft / in_scale delay
+//         ladders line the reference up with the DUT's 8-cycle pipeline.
+//
+// Run   : make run_gelu      (light target -- ok to run interactively)
+// Report: reports/sim/sim_gelu_tb.rpt
+// ===========================================================================
 
 module gelu_tb();
 reg [3:0] in_scale;

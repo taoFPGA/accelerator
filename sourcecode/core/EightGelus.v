@@ -1,8 +1,22 @@
 `timescale 1ns / 1ps
-
+// ===========================================================================
+// EightGelus.v -- SIMD GELU stage (num_gelu lanes) with AXI-Stream framing
+//
+// Wraps `num_gelu` parallel gelu.v lanes so a whole num_gelu*8-bit beat is
+// GELU'd per cycle. This is the final activation stage of
+// transformer_block_top.v (fed by axis_upsizer_fifo.v after Softmax).
+//
+// It carries no state of its own beyond pipeline delay: in_ready is just
+// wired to out_ready (the gelu.v lanes cannot stall), and valid / last /
+// keep are pushed through 9-deep shift registers (valid_reg, last_reg,
+// keep_reg) to match the 8-cycle gelu.v latency plus the input register.
+// `scale` is the shared Q-point for every lane (from the AXI-Lite reg in
+// Gelus_axi.v / transformer_block_axi.v). The name is historical -- num_gelu
+// is a parameter, not fixed at 8.
+// ===========================================================================
 module EightGelus
 #(
-    parameter num_gelu  = 4
+    parameter num_gelu  = 4     // parallel GELU lanes (one 8-bit datum each)
 )
 (
     input clk,
