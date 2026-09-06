@@ -5,6 +5,10 @@ Transformer Accelerator on FPGA.
 
 Sources: report/taoFPGA_Project_Book.docx, report/First_Project_Report_Group_309.pdf,
 figures in report/figures/. Structure follows "Guidelines for Final Presentation.pdf".
+
+Output: report/taoFPGA_Final_Presentation.pptx (export to PDF separately).
+Run on the dev machine: `python generate_final_presentation.py`
+(needs python-pptx and Pillow).
 """
 import os
 import re
