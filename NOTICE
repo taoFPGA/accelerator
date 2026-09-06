@@ -1,0 +1,23 @@
+taoFPGA -- FPGA-Based Hardware Accelerator for Transformer Models
+Copyright 2026 Eliran Turgeman and Shay Rask
+
+This product was developed as Project #309 in the Computer Engineering
+(Hardware and Chip Design track) program at Bar-Ilan University, under the
+supervision of David Freud, with Dr. Leonid Yavits as the academic authority.
+
+Licensed under the Apache License, Version 2.0. See the LICENSE file.
+
+-------------------------------------------------------------------------------
+Third-party material bundled for reproducibility (not original project work):
+
+  * apps/vit/assets/imagenet_classes.txt
+      The ImageNet-1k class list. Public reference data.
+
+  * apps/vit/assets/sample_dog.jpg
+      A single sample photograph used only as demo input for the ViT
+      benchmark (apps/vit/vit_benchmark.py).
+
+  * The ViT-Tiny reference model reproduced in apps/vit/vit_numpy.py follows
+      the architecture of "vit_tiny_patch16_224" from the `timm` library;
+      pretrained weights are fetched by apps/vit/export_vit_weights.py at
+      setup time and are NOT redistributed in this repository.
