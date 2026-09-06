@@ -1,0 +1,21 @@
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
+---------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2025.2 (lin64) Build 6299465 Fri Nov 14 12:34:56 MST 2025
+| Date         : Sun Sep  6 12:59:41 2026
+| Host         : ip-10-70-154-191.il-central-1.compute.internal running 64-bit Rocky Linux release 8.10 (Green Obsidian)
+| Command      : report_clock_networks -file exports/arch_dump/clock_networks.rpt
+| Design       : design_1_wrapper
+| Device       : 7z020-clg400
+| Speed File   : -1  PRODUCTION 1.12 2019-11-22
+| Design State : Routed
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+Clock Networks Report
+
+
+Constrained Clocks
+-------------------
+
+Clock clk_fpga_0 (100MHz)(endpoints: 32901 clock, 0 nonclock)
+PS7/FCLKCLK[0] (design_1_i/processing_system7_0/inst/PS7_i)
+
