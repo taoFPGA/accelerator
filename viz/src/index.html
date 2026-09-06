@@ -17,6 +17,7 @@
     <div class="brand">
       <b>taoFPGA Dataflow</b>
       <span>MatMul + Softmax + GELU · Zynq-7020</span>
+      <span class="authors">Eliran Turgeman &amp; Shay Rask</span>
     </div>
     <div class="facts">
       <div class="fact"><span class="k">Part</span><span class="v mono">xc7z020clg400-1</span></div>
@@ -32,13 +33,18 @@
     </div>
   </div>
 
+  <div id="zoomBar" class="glass" hidden>
+    <button id="zoomUpBtn" aria-label="Back one level">◀</button>
+    <nav id="zoomCrumb" aria-label="Breadcrumb"></nav>
+  </div>
+
   <div id="left">
     <div class="group glass" style="padding:12px">
       <div class="eyebrow lbl">Camera bookmarks</div>
       <div class="stack">
         <button class="btn" data-view="board"   aria-pressed="false"><span class="num mono">01</span>Board &amp; package</button>
         <button class="btn" data-view="floor"   aria-pressed="true"><span class="num mono">02</span>Silicon floorplan</button>
-        <button class="btn" data-view="core"    aria-pressed="false"><span class="num mono">03</span>Systolic compute core</button>
+        <button class="btn" data-view="core"    aria-pressed="false"><span class="num mono">03</span>Dive into accelerator</button>
       </div>
     </div>
     <div class="group glass" style="padding:12px">
@@ -81,6 +87,10 @@
       <div class="cr" id="iCrWrap">
         <div class="cap"><span>Clock-region load</span><span class="mono" id="iCrTot"></span></div>
         <div class="crgrid" id="iCr"></div>
+      </div>
+      <div class="role" id="iRoleWrap" hidden>
+        <div class="rl">System role</div>
+        <div id="iRole"></div>
       </div>
       <div class="note" id="iNote"></div>
       <div class="tim" id="iTim" hidden></div>
@@ -131,7 +141,7 @@
     </div>
   </div>
 
-  <div id="hint">drag to orbit · scroll to zoom · click any block to inspect</div>
+  <div id="hint"><b>Click once</b> for details · <b>double-click</b> to dive inside · drag to orbit · scroll to zoom</div>
   <div id="boot"><div class="l">compiling scene · <b>routed netlist</b></div></div>
   <div id="err"></div>
 </div>

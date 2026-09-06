@@ -134,3 +134,30 @@ var GHOST = {
     note:"4 fully-pipelined GELU lanes (num_gelu = 4) on the MLP path. Known RTL hazard: valid/last shift registers advance every clock regardless of out_ready (no skid buffer) -- a downstream stall silently drops the in-flight beat. Safe only behind a buffered consumer." },
   ctx:"Whole accelerator (transformer_block_axi_top): 13.3k LUT · 8.5k FF · 205 DSP48E1 · 73 RAMB36, one 100 MHz domain, zero CDC."
 };
+
+/* ROLE -- the "system role" shown in the Inspector on a single click: what the
+   block is and why it is built this way in *this* pipeline. Keyed by block id
+   (N keys, ACC keys, GHOST order ids). */
+var ROLE = {
+  ps7:   "The host. The Cortex-A9 stages the weight and activation tensors in DDR3, programs the DMA descriptors and the accelerator CSRs, then polls for done. All fabric logic runs off its FCLKCLK[0] at 100 MHz — one clock domain end to end, so there is no CDC anywhere in the design.",
+  periph:"AXI4-Lite fan-out from the PS to every slave's register space. It only carries control traffic — start pulses, status, tile base pointers — so it is deliberately tiny (4-bit address, ~0.7k LUT). It is not on the data path.",
+  smc0:  "SmartConnect crossbar between a DMA read master and a PS high-performance (HP) memory port. The HP ports are the only route from the fabric into DDR3; each SmartConnect arbitrates one DMA onto one port.",
+  smc1:  "Second SmartConnect — same role as axi_smc, for the weight-stream DMA on a separate HP port so the two input feeds don't contend.",
+  smc2:  "Return-path SmartConnect: the S2MM (write) DMA back to DDR3 through an HP port. Sized a little larger because the write channel carries burst + response traffic.",
+  dma0:  "MM2S DMA — reads an activation tile from DDR3 and turns it into a 128-bit AXI4-Stream (16 lanes × 8-bit). Sustained demand is 1.6 GB/s per feed; the two input DMAs plus the result DMA total ~3.6 GB/s, which sits under the 32-bit DDR3-1066 ceiling of ~4.3 GB/s — so at 16 lanes the design is not memory-bound. Registered-output ratio is low (~28%) because it is mostly a datamover, not compute.",
+  dma1:  "Second MM2S DMA — the weight / second-matrix feed. Identical to axi_dma_0; kept on its own HP port and SmartConnect so weight and activation streams never block each other.",
+  dma2:  "S2MM DMA — drains the accelerator's 32-bit GELU output stream and writes it back to DDR3 with AXI back-pressure. If the HP write port stalls, tready deasserts and the on-chip drain buffer absorbs the slack.",
+  cv0:   "AXI4-Stream data-width converter. The DMA word and the accelerator's 128-bit ingress differ, so this rate-matches between them. Fully registered (reg ratio 1.0) — it is pure plumbing, ~14 LUT.",
+  cv1:   "Width converter for the second input feed — same role as axis_dwidth_converter_0.",
+  cv2:   "Width converter on the return path: matches the 32-bit GELU result stream to the S2MM DMA word.",
+  mm:    "The accelerator: a 16×16 weight-stationary systolic matrix-multiply feeding LayerNorm, Softmax and GELU as one back-to-back AXI-Stream pipeline, all on the single 100 MHz clock. It holds 205 of the device's 220 DSP48E1 — the systolic array itself wants 16×16 = 256 multipliers but only 192 fit, so the last 4 PE rows fall back to LUT-based MACs. Double-click to open the three phases.",
+
+  inbuf: "Operand tile RAM in front of the array — 29 × RAMB36, run as a ping-pong: while the systolic wavefront drains tile A the DMA fills tile B, so the array never waits on DDR latency. It is a bandwidth/latency decoupler, not a cache.",
+  array: "The compute core: 256 processing elements in a 16×16 grid. Weights are pre-loaded and held stationary in each PE; activations shift west→east one column per cycle, partial sums propagate north→south, and 348 SRL delay lines skew the inputs so every anti-diagonal computes one output index in lock-step. Rows 0–11 use a DSP48E1 per PE (3-cycle MACC); rows 12–15 are LUT MACs because the device is one DSP column short. First result ≈ 2·16 + 3 ≈ 35 cycles, then one result column per cycle → 205·2·100 MHz ≈ 41 GOP/s at full occupancy.",
+  outbuf:"Partial-sum accumulation + output tile RAM — 37.5 RAMB36-equivalent. It catches the diagonally-skewed result wavefront leaving the array's south edge and un-skews it back into dense rows for the LayerNorm / Softmax stage.",
+
+  downsizer:"Bridge from the wide MatMul beat to serial Softmax scalars: it unpacks each 128-bit beat into 16 sequential cycles and forwards a per-row 'last'. It is single-buffered, so it deasserts in_ready and backpressures MM_ultra for ~16 cycles per beat — meaning this bridge, not the PE array, sets the transformer pipeline's sustained throughput.",
+  softmax:"Finishes the self-attention score path: exp (Exp_module) → running row sum (AdderS) → divide/scale (right_shifter), one scalar in and one normalised scalar out every cycle. It has NO output backpressure path, which is why a FIFO has to sit immediately downstream.",
+  upsizer:"Skid/repack FIFO between Softmax and GELU (depth 512). It absorbs Softmax's unconditional one-scalar-per-cycle output and repacks it into 4-wide beats with tkeep for a partial final beat. It must be sized ≥ the softmax row length or in_overflow fires and samples are dropped — there is no flow-control path back into Softmax_control.",
+  gelu:  "MLP activation: num_gelu = 4 fully-pipelined GELU lanes (GELU ≈ x·σ(1.702·x), piecewise). Known RTL hazard: its valid/last shift registers advance every clock regardless of out_ready and there is no internal skid buffer, so a beat present when a downstream consumer stalls is silently lost — GELU is only safe behind a buffered consumer, which is why axis_upsizer_fifo precedes it."
+};

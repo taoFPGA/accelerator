@@ -5,7 +5,7 @@ var STAGES = [
   { s:"Stage 1", t:"Ingestion & staging",
     view:"logic", cam:[ -6, 5.5, 9 ], tgt:[ -3, 0.6, 0 ],
     emph:["dma0","dma1","cv0","cv1","mm"],
-    html:"<b>PS7 → AXI-DMA → MM_in_buffer.</b> The Cortex-A9 kicks two <span class='mono'>MM2S</span> DMA engines; each reads an operand tile from DDR through a SmartConnect HP port and emits an AXI4-Stream. A width converter matches it to the accelerator's <span class='mono'>128-bit</span> ingress — 16 lanes × 8-bit, one lane per array column. Tiles land in <b>29 × RAMB36</b> of MM_in_buffer as a ping-pong: the array drains tile A while a DMA fills tile B, so the systolic wavefront never stalls on DDR latency. Aggregate stream demand is <span class='mono'>3.6 GB/s</span> — comfortably under the PS 32-bit DDR3 ceiling (~4.3 GB/s), so this config is not memory-bound.",
+    html:"<b>PS7 → AXI-DMA → MM_in_buffer.</b> The Cortex-A9 kicks two <span class='mono'>MM2S</span> DMA engines; each reads an operand tile from DDR through a SmartConnect HP port and emits an AXI4-Stream. A width converter matches it to the accelerator's <span class='mono'>128-bit</span> ingress — 16 lanes × 8-bit, one lane per array column. Tiles land in <b>29 × RAMB36</b> of MM_in_buffer as a ping-pong: the array drains tile A while a DMA fills tile B, so the systolic wavefront never stalls on DDR latency. Aggregate stream demand is <span class='mono'>3.6 GB/s</span> — comfortably under the PS 32-bit DDR3 ceiling (~4.3 GB/s), so this config is not memory-bound. <i>Tip: single-click any block for its system role, double-click the accelerator to dive inside.</i>",
     dia:"ingest" },
   { s:"Stage 2", t:"Systolic MAC propagation",
     view:"core", cam:null, tgt:null,

@@ -414,7 +414,7 @@ var flowW, flowA, flowS, wf = {cycle:0, frac:0};
   var host = logicNodes.mm;
   arrCenter.copy(host.position);
   gArray.position.copy(arrCenter);
-  gLogic.add(gArray);
+  scene.add(gArray);   // top-level so the MM micro-view can isolate it fully
 
   // DSP distribution per line: real per-row DSP counts from the netlist,
   // spread evenly across the row (exact per-(i,j) placement isn't extracted).
@@ -448,38 +448,71 @@ var flowW, flowA, flowS, wf = {cycle:0, frac:0};
   gArray.add(peMesh); pickables.push(peMesh);
   gArray.add(new THREE.LineSegments(
     new THREE.EdgesGeometry(new THREE.BoxGeometry(AW+cell,0.02,AW+cell)),
-    new THREE.LineBasicMaterial({color:KCOL.compute, transparent:true, opacity:0.32})));
+    new THREE.LineBasicMaterial({color:KCOL.compute, transparent:true, opacity:0.28})));
 
-  // staging buffers
-  function bram(count, per, zc, color, id){
-    var grp=new THREE.Group(); grp.userData={pick:"pe", id:id};
-    var rows=Math.ceil(count/per), sw=AW/per*0.84, sh=0.4, sd=0.44;
-    var mm=new THREE.MeshStandardMaterial({color:color.clone().multiplyScalar(0.45),
-      roughness:0.75, metalness:0.0, envMapIntensity:0.4,
-      emissive:color, emissiveIntensity:0.05});
-    for(var i=0;i<count;i++){
-      var cx=i%per, cz=Math.floor(i/per);
-      var b=new THREE.Mesh(new THREE.BoxGeometry(sw,sh,sd), mm);
-      b.position.set((cx-(per-1)/2)*(AW/per), sh/2, zc + cz*(sd+0.12)*(zc<0?-1:1));
-      b.castShadow=true; grp.add(b);
-    }
-    return grp;
+  var half = AW/2;
+
+  // divider between the DSP48 rows (0-11) and the LUT-MAC rows (12-15)
+  var dspRows = 0; for(var rr=0;rr<ACC.rows;rr++) if(ACC.dspPerLine[rr]>0) dspRows++;
+  var divZ = (dspRows - ACC.rows/2)*cell;
+  var div = new THREE.Mesh(new THREE.BoxGeometry(AW+cell, 0.03, 0.05),
+    new THREE.MeshBasicMaterial({color:0xf0a755, toneMapped:false}));
+  div.position.set(0, 0.02, divZ); gArray.add(div);
+  gArray.add(textSprite("rows 0–"+(dspRows-1)+" · DSP48E1 MAC", 0.36, "#9fe9d6", half+2.3, 0.2, divZ-cell*3, true));
+  gArray.add(textSprite("rows "+dspRows+"–"+(ACC.rows-1)+" · LUT MAC", 0.36, "#8891a3", half+2.3, 0.2, divZ+cell*2.2, true));
+
+  // MM_in_buffer -- WEST edge, feeds activations east
+  var inb = new THREE.Group(); inb.userData={pick:"pe", id:"inbuf"};
+  var outb = new THREE.Group(); outb.userData={pick:"pe", id:"outbuf"};
+  var bmatIn = new THREE.MeshStandardMaterial({color:new THREE.Color(KCOL.stream).multiplyScalar(0.4),
+    roughness:0.75, metalness:0.0, envMapIntensity:0.4, emissive:KCOL.stream, emissiveIntensity:0.05});
+  var bmatOut = new THREE.MeshStandardMaterial({color:new THREE.Color(KCOL.compute).multiplyScalar(0.4),
+    roughness:0.75, metalness:0.0, envMapIntensity:0.4, emissive:KCOL.compute, emissiveIntensity:0.05});
+  var bs = new THREE.BoxGeometry(0.5, 0.4, cell*0.8);
+  for(var i=0;i<29;i++){
+    var col=i%2, row=Math.floor(i/2);
+    var b=new THREE.Mesh(bs, bmatIn);
+    b.position.set(-half-1.1 - col*0.6, 0.2, (row-7)*cell*1.02);
+    b.castShadow=true; inb.add(b);
   }
-  var inb = bram(29,15, -(AW/2)-1.0, new THREE.Color(KCOL.stream), "inbuf");
-  var outb = bram(38,19, (AW/2)+1.0, new THREE.Color(KCOL.compute), "outbuf");
+  var bs2 = new THREE.BoxGeometry(cell*0.8, 0.4, 0.5);
+  for(var j=0;j<38;j++){
+    var col2=j%19, row2=Math.floor(j/19);
+    var b2=new THREE.Mesh(bs2, bmatOut);
+    b2.position.set((col2-9)*cell*1.02, 0.2, half+1.1 + row2*0.6);
+    b2.castShadow=true; outb.add(b2);
+  }
   gArray.add(inb); gArray.add(outb); pickables.push(inb, outb);
-  gArray.add(textSprite("MM_in_buffer · 29×RAMB36", 0.5, "#f0c89a", 0, 1.1, -(AW/2)-2.1, true));
-  gArray.add(textSprite("MM_out_buffer · 37.5 RAMB36", 0.5, "#9fe9d6", 0, 1.1, (AW/2)+2.4, true));
-  gArray.add(textSprite("PE_array — weights ↓  activations →  Σ ↑   (idealized systolic schedule)", 0.44, "#aab4c2", 0, 2.4, 0, true));
+
+  // axis cues on the die plane
+  function arrow(x,z,rotY,label,col){
+    var g=new THREE.Group();
+    var shaft=new THREE.Mesh(new THREE.BoxGeometry(2.2,0.02,0.06),
+      new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:0.6,toneMapped:false}));
+    shaft.position.x=1.1;
+    var headM=new THREE.Mesh(new THREE.ConeGeometry(0.16,0.4,4),
+      new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:0.6,toneMapped:false}));
+    headM.rotation.z=-Math.PI/2; headM.position.x=2.3;
+    g.add(shaft); g.add(headM);
+    g.position.set(x,0.05,z); g.rotation.y=rotY;
+    gArray.add(g);
+    gArray.add(textSprite(label,0.4,col===0x9fe9d6?"#9fe9d6":"#bcd2ff",x + (rotY?0:1.1), 0.25, z + (rotY?1.1:0), true));
+  }
+  arrow(-half-0.6, 0,           0,       "activations →", 0xbcd2ff);
+  arrow(0,          -half-0.6,  -Math.PI/2, "Σ partial sums ↓", 0x9fe9d6);
+  gArray.add(textSprite("weights — loaded once, held stationary in every PE", 0.38, "#f0c89a", 0, 1.7, -half-1.6, true));
+  gArray.add(textSprite("MM_in_buffer · 29×RAMB36", 0.42, "#f0c89a", -half-2.2, 1.1, 0, true));
+  gArray.add(textSprite("MM_out_buffer · 37.5 RAMB36", 0.42, "#9fe9d6", 0, 1.1, half+2.4, true));
+  gArray.add(textSprite("PE_array — 16×16 weight-stationary systolic · one anti-diagonal = one output, in lock-step", 0.4, "#aab4c2", 0, 2.5, 0, true));
 
   function flow(n, geo, color){
     var im=new THREE.InstancedMesh(geo, new THREE.MeshBasicMaterial({color:color, toneMapped:false}), n);
     im.count=0; im.instanceMatrix.setUsage(THREE.DynamicDrawUsage); im.frustumCulled=false;
     gArray.add(im); return {im:im, list:[], acc:0};
   }
-  flowW = flow(GN*4, new THREE.BoxGeometry(cell*0.26,cell*0.26,cell*0.5), KCOL.stream);
+  flowW = flow(1, new THREE.BoxGeometry(0.01,0.01,0.01), 0x000000);      // unused (weights are stationary)
   flowA = flow(ACC.rows*4, new THREE.BoxGeometry(cell*0.5,cell*0.26,cell*0.26), 0xbcd2ff);
-  flowS = flow(GN*3, new THREE.OctahedronGeometry(cell*0.22,0), KCOL.signal);
+  flowS = flow(GN*4, new THREE.OctahedronGeometry(cell*0.22,0), KCOL.signal);
 
   gArray.visible = false;
 })();
@@ -588,6 +621,11 @@ var VIEWS = {
   core:  { pos:[0,6.5,11],   tgt:[0,0.6,0], layer:"logic", core:true }
 };
 function goBookmark(name){
+  if(name==="core"){                       // "Accelerator" bookmark -> drill-down
+    document.querySelectorAll("#left .btn[data-view]").forEach(function(b){ b.setAttribute("aria-pressed", b.dataset.view===name); });
+    enterZoom("phases");
+    return;
+  }
   bookmark = name;
   var v = VIEWS[name];
   document.querySelectorAll("#left .btn[data-view]").forEach(function(b){
@@ -629,9 +667,16 @@ var IEls = {
   tag:byId("iTag"), name:byId("iName"), path:byId("iPath"), ref:byId("iRef"),
   clk:byId("iClk"), reg:byId("iReg"), lut:byId("iLut"), ff:byId("iFf"),
   dsp:byId("iDsp"), bram:byId("iBram"), crWrap:byId("iCrWrap"), crTot:byId("iCrTot"),
-  cr:byId("iCr"), note:byId("iNote"), tim:byId("iTim")
+  cr:byId("iCr"), note:byId("iNote"), tim:byId("iTim"),
+  role:byId("iRole"), roleWrap:byId("iRoleWrap")
 };
 function byId(x){ return document.getElementById(x); }
+function setRole(id){
+  var txt = (typeof ROLE!=="undefined") && ROLE[id];
+  if(!txt){ IEls.roleWrap.hidden = true; return; }
+  IEls.roleWrap.hidden = false;
+  IEls.role.textContent = txt;
+}
 function setTim(label, rows){
   if(!label){ IEls.tim.hidden = true; return; }
   IEls.tim.hidden = false;
@@ -661,6 +706,7 @@ function inspectSoc(id){
   IEls.lut.textContent = kfmt(b.lut); IEls.ff.textContent = kfmt(b.ff);
   IEls.dsp.textContent = b.dsp; IEls.bram.textContent = kfmt(b.bram);
   renderCR(b.cr); IEls.note.textContent = b.note;
+  setRole(id);
   setTim(null);
   highlight("soc", id);
 }
@@ -673,6 +719,7 @@ function inspectAcc(id){
   IEls.lut.textContent = kfmt(b.lut); IEls.ff.textContent = kfmt(b.ff);
   IEls.dsp.textContent = b.dsp; IEls.bram.textContent = kfmt(b.bram);
   renderCR(b.cr); IEls.note.textContent = b.note;
+  setRole(id);
   if(id==="array"){
     setTim("Systolic timing @ 100 MHz", [
       ["MAC latency", "3 cyc (A/B→M→P)"],
@@ -694,6 +741,7 @@ function inspectPE(r,c){
   IEls.lut.textContent = dsp?"1":"70"; IEls.ff.textContent = dsp?"16":"37";
   IEls.dsp.textContent = dsp?"1":"0"; IEls.bram.textContent = "0";
   renderCR(null);
+  setRole("array");
   IEls.note.textContent = dsp
     ? "One 25×18 multiply-add per cycle. Weight held in the B register; activation passes A_in→A_out to column "+(c+1)+"; partial sum flows P→row "+(r+1)+"."
     : "The last 4 of the 16 PE rows get no DSP48E1 (the device is one DSP column short) — these fall back to LUT-based MAC.";
@@ -718,6 +766,7 @@ function inspectGhost(id){
   IEls.dsp.textContent = g.dsp; IEls.bram.textContent = kfmt(g.bram);
   renderCR(g.cr || null);
   IEls.note.textContent = g.note;
+  setRole(id);
   setTim(null);
 }
 function inspectPkg(){
@@ -729,6 +778,7 @@ function inspectPkg(){
   IEls.lut.textContent = kfmt(DEV.lut); IEls.ff.textContent = kfmt(DEV.ff);
   IEls.dsp.textContent = DEV.dsp; IEls.bram.textContent = DEV.bram;
   renderCR(N.mm.cr);
+  setRole(null);
   IEls.note.textContent = "Single-die SoC: dual Cortex-A9 PS + Artix-7 fabric (53 200 LUT, 106 400 FF, 220 DSP48E1, 140 BRAM36). This design uses 205 of the 220 DSPs — the 16×16 array is one DSP column short of full.";
   setTim(null);
 }
@@ -746,8 +796,9 @@ function highlight(kind, id){
 var ray = new THREE.Raycaster(), mouse = new THREE.Vector2();
 canvas.addEventListener("pointerdown", function(e){ downXY=[e.clientX,e.clientY]; });
 var downXY=[0,0];
-canvas.addEventListener("pointerup", function(e){
-  if(Math.abs(e.clientX-downXY[0])+Math.abs(e.clientY-downXY[1]) > 6) return;
+
+/* resolve what's under the cursor -> {kind, id?, phase?, pe?[r,c]} or null */
+function pickAt(e){
   var r=canvas.getBoundingClientRect();
   mouse.x=((e.clientX-r.left)/r.width)*2-1; mouse.y=-((e.clientY-r.top)/r.height)*2+1;
   ray.setFromCamera(mouse, camera);
@@ -755,21 +806,223 @@ canvas.addEventListener("pointerup", function(e){
   for(var i=0;i<hits.length;i++){
     var o=hits[i].object;
     if(o.userData.noPick) continue;
-    var u=o.userData;
-    if(u.pick==="pe" && o===peMesh && hits[i].instanceId!=null){
-      var id=hits[i].instanceId; inspectPE(Math.floor(id/GN), id%GN); return;
+    if(o.userData.pick==="pe" && o===peMesh && hits[i].instanceId!=null){
+      var id=hits[i].instanceId; return {kind:"pe", pe:[Math.floor(id/GN), id%GN]};
     }
-    // climb to a parent that carries pick data
-    var p=o;
-    while(p && !(p.userData && p.userData.pick)) p=p.parent;
+    var p=o; while(p && !(p.userData && p.userData.pick)) p=p.parent;
     if(!p) continue;
     var pu=p.userData;
-    if(pu.pick==="soc"){ inspectSoc(pu.id); return; }
-    if(pu.pick==="pe"){ if(pu.id) inspectAcc(pu.id); else inspectAcc("array"); return; }
-    if(pu.pick==="pkg"){ inspectPkg(); return; }
-    if(pu.pick==="ghost"){ inspectGhost(pu.id); return; }
+    return {kind:pu.pick, id:pu.id, phase:pu.phase};
   }
+  return null;
+}
+function doInspect(k){
+  if(!k) return;
+  if(k.kind==="pe" && k.pe){ inspectPE(k.pe[0], k.pe[1]); return; }
+  if(k.kind==="soc"){ inspectSoc(k.id); return; }
+  if(k.kind==="pe"){ inspectAcc(k.id || "array"); return; }
+  if(k.kind==="pkg"){ inspectPkg(); return; }
+  if(k.kind==="ghost"){ inspectGhost(k.id); return; }
+  if(k.kind==="zphase"){ if(k.phase==="mm") inspectAcc("array"); else inspectGhost(k.phase); return; }
+}
+function doDrill(k){
+  if(!k) return;
+  if(k.kind==="zphase"){ enterZoom(k.phase); return; }
+  if(zoom===""){
+    if((k.kind==="soc" && k.id==="mm") || k.kind==="pe" ||
+       (k.kind==="ghost" && {downsizer:1,softmax:1,upsizer:1,gelu:1}[k.id])){
+      enterZoom("phases");
+    }
+  }
+}
+
+/* single click = inspect (deferred, so a double-click can pre-empt it);
+   double click = drill down one hierarchy level */
+var clickTimer = null;
+canvas.addEventListener("pointerup", function(e){
+  if(Math.abs(e.clientX-downXY[0])+Math.abs(e.clientY-downXY[1]) > 6) return;
+  var k = pickAt(e);
+  if(clickTimer) clearTimeout(clickTimer);
+  clickTimer = setTimeout(function(){ clickTimer=null; doInspect(k); }, 230);
 });
+canvas.addEventListener("dblclick", function(e){
+  if(clickTimer){ clearTimeout(clickTimer); clickTimer=null; }
+  doDrill(pickAt(e));
+});
+document.addEventListener("keydown", function(e){
+  if(e.key==="Escape" && zoom!==""){ zoomUp(); }
+});
+
+/* ======================================================================
+   ACCELERATOR DRILL-DOWN  (double-click the transformer block)
+   transformer_block_axi_top  ->  MM_ultra | Softmax_control | EightGelus
+   ->  each phase opens its own mechanism view
+   ====================================================================== */
+var gZoom = new THREE.Group(); gZoom.visible = false; scene.add(gZoom);
+var zPh = new THREE.Group(), zSm = new THREE.Group(), zGl = new THREE.Group();
+gZoom.add(zPh); gZoom.add(zSm); gZoom.add(zGl);
+var zoom = "";                       // "" | "phases" | "mm" | "softmax" | "gelu"
+var zConn = {phases:[], softmax:[], gelu:[]};
+var zPulse = new THREE.InstancedMesh(
+  new THREE.IcosahedronGeometry(0.07,0),
+  new THREE.MeshBasicMaterial({color:KCOL.signal, toneMapped:false, transparent:true, opacity:0.95}), 120);
+zPulse.frustumCulled=false; zPulse.count=0; gZoom.add(zPulse);
+var zT = 0;
+
+/* tag: "phase:<id>" opens a mechanism on double-click; "ghost:<id>" shows an
+   inspector card; null = a plain labelled block */
+function zslab(parent, x, w, h, colHex, name, sub, tag){
+  var mat = new THREE.MeshStandardMaterial({color:0x11151d, roughness:0.6, metalness:0.15,
+    emissive:colHex, emissiveIntensity:0.16});
+  var mesh = new THREE.Mesh(new THREE.BoxGeometry(w,h,w*0.9), mat);
+  mesh.position.set(x, h/2, 0); mesh.castShadow=true;
+  mesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(mesh.geometry),
+    new THREE.LineBasicMaterial({color:colHex, transparent:true, opacity:0.6})));
+  var isPhase = tag && tag.indexOf("phase:")===0;
+  if(tag){
+    mesh.userData = isPhase ? {pick:"zphase", phase:tag.slice(6)} : {pick:"ghost", id:tag.slice(6)};
+    pickables.push(mesh);
+  }
+  parent.add(mesh);
+  parent.add(textSprite(name, 0.44, "#e7ebf2", x, h + 0.55, 0, true));
+  if(sub) parent.add(textSprite(sub, 0.34, "#9aa4b2", x, h + 0.18, 0, true));
+  if(isPhase) parent.add(textSprite("▸ double-click to open", 0.3, "#f0a755", x, -0.35, 0, true));
+  return mesh;
+}
+function zconnect(parent, x0, x1, key, y){
+  var a=new THREE.Vector3(x0,y||0.55,0), b=new THREE.Vector3(x1,y||0.55,0);
+  var m=a.clone().add(b).multiplyScalar(0.5); m.y+=0.55;
+  var c=new THREE.CatmullRomCurve3([a,m,b]);
+  zConn[key].push(c);
+  parent.add(new THREE.Mesh(new THREE.TubeGeometry(c,24,0.028,6,false),
+    new THREE.MeshBasicMaterial({color:KCOL.stream, transparent:true, opacity:0.4})));
+  return c;
+}
+(function buildPhases(){
+  zPh.add(textSprite("transformer_block_axi_top  —  double-click a phase to open its mechanism", 0.4, "#c7cfda", 0, 3.4, 0, true));
+  zslab(zPh, -7.0, 2.6, 1.4, 0x33c7a6, "MM_ultra",         "16×16 systolic · 197 DSP · 10.8k LUT", "phase:mm");
+  zslab(zPh, -3.2, 1.1, 0.7, 0x8891a3, "axis_downsizer",   "128-bit beat → 16 scalars/cyc",        "ghost:downsizer");
+  zslab(zPh,  0.5, 2.2, 1.1, 0xd98f5a, "Softmax_control",   "exp · Σ · shift · 4 DSP",              "phase:softmax");
+  zslab(zPh,  3.8, 1.1, 0.7, 0x8891a3, "axis_upsizer_fifo", "depth 512 · repack to 4 lanes",        "ghost:upsizer");
+  zslab(zPh,  7.0, 2.2, 1.1, 0x9a86c9, "EightGelus",        "4 lanes · pipelined · 4 DSP",          "phase:gelu");
+  zconnect(zPh, -5.7, -3.8, "phases");
+  zconnect(zPh, -2.6, -0.6, "phases");
+  zconnect(zPh,  1.6,  3.2, "phases");
+  zconnect(zPh,  4.4,  5.9, "phases");
+  zPh.add(textSprite("s0/s1_axis_tdata · 128-bit in", 0.34, "#bcd2ff", -9.3, 0.8, 0, true));
+  zPh.add(textSprite("m0_axis_tdata · 32-bit out",    0.34, "#bcd2ff",  9.4, 0.8, 0, true));
+  zPh.add(textSprite("no output backpressure — the FIFO must absorb a whole row", 0.3, "#8891a3", 2.15, -0.9, 0, true));
+  zPh.visible = false;
+})();
+(function buildSoftmax(){
+  zSm.add(textSprite("Softmax_control  —  finishes the attention score path (structure from transformer_block_top.v)", 0.36, "#c7cfda", 0, 2.8, 0, true));
+  zslab(zSm, -3.6, 1.8, 1.0, 0xd98f5a, "Exp_module",    "e^x lookup",              null);
+  zslab(zSm,  0.0, 1.8, 1.0, 0xd98f5a, "AdderS",        "running row Σ",           null);
+  zslab(zSm,  3.6, 1.8, 1.0, 0xd98f5a, "right_shifter", "÷ Σ · scale_out 7–12",    null);
+  zconnect(zSm, -6.0, -4.5, "softmax");
+  zconnect(zSm, -2.7, -0.9, "softmax");
+  zconnect(zSm,  0.9,  2.7, "softmax");
+  zconnect(zSm,  4.5,  6.0, "softmax");
+  zSm.add(textSprite("scalar in · 1/cyc", 0.32, "#bcd2ff", -6.9, 0.8, 0, true));
+  zSm.add(textSprite("normalised scalar out · 1/cyc", 0.32, "#bcd2ff", 6.9, 0.8, 0, true));
+  zSm.add(textSprite("row 'last' pulse  →  reset the accumulator", 0.3, "#f0a755", 0, 1.7, 0, true));
+  zSm.add(textSprite("one scalar in / one out every cycle, with NO output backpressure — this is why axis_upsizer_fifo has to sit downstream.", 0.3, "#9aa4b2", 0, -1.0, 0, true));
+  zSm.visible = false;
+})();
+(function buildGelu(){
+  zGl.add(textSprite("EightGelus  —  MLP activation, num_gelu = 4 fully-pipelined lanes", 0.36, "#c7cfda", 0, 3.0, 0, true));
+  zslab(zGl, -5.0, 1.8, 1.0, 0x9a86c9, "axis_upsizer_fifo", "depth 512 · tkeep", null);
+  var lz=[-3.0,-1.0,1.0,3.0];
+  for(var i=0;i<4;i++){
+    var mat=new THREE.MeshStandardMaterial({color:0x11151d, roughness:0.6, metalness:0.15, emissive:0x9a86c9, emissiveIntensity:0.16});
+    var b=new THREE.Mesh(new THREE.BoxGeometry(1.4,0.8,1.2), mat);
+    b.position.set(1.0, 0.4, lz[i]); b.castShadow=true;
+    b.add(new THREE.LineSegments(new THREE.EdgesGeometry(b.geometry), new THREE.LineBasicMaterial({color:0x9a86c9, transparent:true, opacity:0.55})));
+    zGl.add(b);
+    zGl.add(textSprite("gelu lane "+i, 0.3, "#cdbff0", 1.0, 0.95, lz[i], true));
+    var a=new THREE.Vector3(-4.1,0.5,0), mid=new THREE.Vector3(-1.6,0.9,lz[i]*0.6), c=new THREE.Vector3(0.3,0.5,lz[i]);
+    zConn.gelu.push(new THREE.CatmullRomCurve3([a,mid,c]));
+    var a2=new THREE.Vector3(1.7,0.5,lz[i]), m2=new THREE.Vector3(3.4,0.9,lz[i]*0.5), c2=new THREE.Vector3(5.0,0.5,0);
+    zConn.gelu.push(new THREE.CatmullRomCurve3([a2,m2,c2]));
+  }
+  zConn.gelu.forEach(function(cv){
+    zGl.add(new THREE.Mesh(new THREE.TubeGeometry(cv,20,0.022,6,false),
+      new THREE.MeshBasicMaterial({color:KCOL.stream, transparent:true, opacity:0.35})));
+  });
+  zGl.add(textSprite("4-wide + tkeep in", 0.32, "#bcd2ff", -6.7, 0.9, 0, true));
+  zGl.add(textSprite("4 × 8-bit out", 0.32, "#bcd2ff", 6.4, 0.9, 0, true));
+  zGl.add(textSprite("GELU ≈ x·σ(1.702·x), piecewise. RTL hazard: valid/last shift regs advance every clock with no skid buffer — a stalled consumer drops the in-flight beat.", 0.3, "#9aa4b2", 0, -1.9, 0, true));
+  zGl.visible = false;
+})();
+
+var ZCAM = {
+  phases:  { pos:[0, 8.5, 19], tgt:[0, 0.6, 0] },
+  softmax: { pos:[0, 5.5, 13], tgt:[0, 0.4, 0] },
+  gelu:    { pos:[0, 6.0, 13.5], tgt:[0, 0.4, 0] }
+};
+function enterZoom(z){
+  zoom = z;
+  gFloor.visible = false; gBoard.visible = false; gLogic.visible = false; gGhost.visible = false;
+  var mech = (z==="softmax" || z==="gelu" || z==="phases");
+  gZoom.visible = mech;
+  zPh.visible = z==="phases"; zSm.visible = z==="softmax"; zGl.visible = z==="gelu";
+  gArray.visible = z==="mm";
+  logicNodes.mm.visible = false;
+  document.getElementById("tour").classList.remove("open");
+  document.querySelectorAll("#left .btn[data-view]").forEach(function(b){ b.setAttribute("aria-pressed","false"); });
+  var trail = [["", "SoC"]];
+  if(z==="phases"){ flyTo(ZCAM.phases.pos, ZCAM.phases.tgt, 1.3); trail.push(["phases","Transformer"]); inspectSoc("mm"); }
+  else if(z==="mm"){
+    flyTo([arrCenter.x-7, arrCenter.y+8.5, arrCenter.z+9],[arrCenter.x, arrCenter.y+0.3, arrCenter.z], 1.4);
+    trail.push(["phases","Transformer"], ["mm","Matrix Multiply"]); inspectAcc("array");
+  }
+  else if(z==="softmax"){ flyTo(ZCAM.softmax.pos, ZCAM.softmax.tgt, 1.3); trail.push(["phases","Transformer"], ["softmax","Softmax"]); inspectGhost("softmax"); }
+  else if(z==="gelu"){ flyTo(ZCAM.gelu.pos, ZCAM.gelu.tgt, 1.3); trail.push(["phases","Transformer"], ["gelu","GELU"]); inspectGhost("gelu"); }
+  document.getElementById("zoomBar").hidden = false;
+  document.getElementById("app").classList.add("zoomed");
+  flashHint();
+  var cr=document.getElementById("zoomCrumb");
+  cr.innerHTML = trail.map(function(seg,i){
+    var last = i===trail.length-1;
+    return (i? "<span class='sep'>›</span>" : "") +
+      (last ? "<b>"+seg[1]+"</b>" : "<button data-z='"+seg[0]+"'>"+seg[1]+"</button>");
+  }).join("");
+}
+function exitZoom(){
+  zoom = "";
+  gZoom.visible=false; zPh.visible=zSm.visible=zGl.visible=false;
+  gArray.visible=false;
+  logicNodes.mm.visible=true;
+  document.getElementById("zoomBar").hidden = true;
+  document.getElementById("app").classList.remove("zoomed");
+  setLayer("logic", true);
+}
+function zoomUp(){
+  if(zoom==="mm" || zoom==="softmax" || zoom==="gelu") enterZoom("phases");
+  else exitZoom();
+}
+document.getElementById("zoomCrumb").addEventListener("click", function(e){
+  var b = e.target.closest && e.target.closest("button[data-z]");
+  if(!b) return;
+  var z = b.getAttribute("data-z");
+  if(z==="") exitZoom(); else enterZoom(z);
+});
+document.getElementById("zoomUpBtn").addEventListener("click", zoomUp);
+function updateZoom(dt){
+  if(!(zoom==="phases"||zoom==="softmax"||zoom==="gelu")) return;
+  var curves = zConn[zoom]; if(!curves || !curves.length) return;
+  if(playing && !RM) zT += dt*speed*0.5;
+  var n=0, d=_peDummy;
+  for(var i=0;i<curves.length;i++){
+    for(var k=0;k<3 && n<120;k++){
+      var t=(zT*0.6 + i*0.17 + k*0.33) % 1;
+      curves[i].getPointAt(Math.min(0.999,Math.max(0.001,t)), _P);
+      d.position.copy(_P); d.scale.setScalar(k===0?1:0.6); d.updateMatrix();
+      zPulse.setMatrixAt(n++, d.matrix);
+    }
+  }
+  zPulse.count=n; zPulse.instanceMatrix.needsUpdate=true;
+}
 
 /* ======================================================================
    GUIDED TOUR
@@ -792,15 +1045,16 @@ function enterStage(i){
   document.getElementById("explTxt").innerHTML = st.html;
   drawDia(st.dia);
   if(st.ghost){ ghostVisible = true; ghostSw.setAttribute("aria-pressed", "true"); }
-  if(st.view==="core"){ goBookmark("core"); }
+  if(st.view==="core"){ enterZoom("mm"); }
   else {
+    clearZoom();
     bookmark = "__tour";
     document.querySelectorAll("#left .btn[data-view]").forEach(function(b){ b.setAttribute("aria-pressed", false); });
     logicNodes.mm.visible = true;
     gArray.visible = false;
     setLayer("logic");
+    gGhost.visible = ghostVisible && layer==="logic";
   }
-  gGhost.visible = ghostVisible && layer==="logic";
   if(st.cam){ flyTo(st.cam, st.tgt, 1.4); }
   // emphasis
   var em={}; st.emph.forEach(function(x){ em[x]=1; });
@@ -857,7 +1111,7 @@ document.getElementById("tNext").addEventListener("click", function(){ enterStag
 /* ======================================================================
    TRANSPORT
    ====================================================================== */
-var playing = !RM, speed = 1, flowVisible = true, ghostVisible = true;
+var playing = !RM, speed = 1, flowVisible = true, ghostVisible = false;
 var tPlay=document.getElementById("tPlay");
 function setPlaying(p){ playing=p; tPlay.textContent = p?"❚❚":"▶"; tPlay.setAttribute("aria-label", p?"Pause dataflow":"Play dataflow"); }
 tPlay.addEventListener("click", function(){ setPlaying(!playing); });
@@ -875,8 +1129,9 @@ document.querySelectorAll("#left .btn[data-view]").forEach(function(b){
     [].forEach.call(stepsEl.children,function(c){ c.removeAttribute("aria-current"); });
     goBookmark(b.dataset.view); });
 });
-document.getElementById("layPhys").addEventListener("click", function(){ tourOn=false; document.getElementById("tour").classList.remove("open"); logicNodes.mm.visible=true; gArray.visible=false; setLayer("phys", true); });
-document.getElementById("layLogic").addEventListener("click", function(){ tourOn=false; document.getElementById("tour").classList.remove("open"); logicNodes.mm.visible=true; gArray.visible=false; setLayer("logic", true); });
+function clearZoom(){ if(zoom!==""){ zoom=""; gZoom.visible=false; zPh.visible=zSm.visible=zGl.visible=false; gArray.visible=false; document.getElementById("zoomBar").hidden=true; document.getElementById("app").classList.remove("zoomed"); } }
+document.getElementById("layPhys").addEventListener("click", function(){ tourOn=false; clearZoom(); document.getElementById("tour").classList.remove("open"); logicNodes.mm.visible=true; gArray.visible=false; setLayer("phys", true); });
+document.getElementById("layLogic").addEventListener("click", function(){ tourOn=false; clearZoom(); document.getElementById("tour").classList.remove("open"); logicNodes.mm.visible=true; gArray.visible=false; setLayer("logic", true); });
 var isoSw=document.getElementById("isoSw");
 function toggleIso(){ iso=!iso; isoSw.setAttribute("aria-pressed",iso); applyIsolate(); highlight("soc",null); }
 isoSw.addEventListener("click", toggleIso);
@@ -906,7 +1161,7 @@ document.addEventListener("keydown", function(e){
    ANIMATION
    ====================================================================== */
 function advanceSoc(dt){
-  if(bookmark==="core"){ if(pkMesh.count){ pkMesh.count=0; pkMesh.instanceMatrix.needsUpdate=true; } return; }
+  if(zoom!=="" || bookmark==="core"){ if(pkMesh.count){ pkMesh.count=0; pkMesh.instanceMatrix.needsUpdate=true; } return; }
   var curves = layer==="phys" ? curvesFloor : curvesLogic;
   var byKey = {};
   curves.forEach(function(o){ byKey[o.e[0]+">"+o.e[1]] = o.c; });
@@ -943,35 +1198,35 @@ function advanceSoc(dt){
   if(pkMesh.instanceColor) pkMesh.instanceColor.needsUpdate=true;
 }
 
+var _peDummy = new THREE.Object3D();
 function advancePE(dt){
   if(!gArray.visible) return;
   var half=AW/2;
   if(playing && !RM){ wf.frac += dt*speed*3.2; while(wf.frac>=1){ wf.frac-=1; wf.cycle++; } }
   var phase = wf.cycle + wf.frac;
   var band = phase % (ACC.rows+GN);
+  var d=_peDummy;
 
-  // weights streaming down columns (visual feed from in_buffer)
-  var W=flowW; if(playing&&!RM){ W.acc+=dt*speed*8; while(W.acc>=1){ W.acc-=1; W.list.push({c:(Math.random()*GN)|0,t:0}); } }
-  for(var i=W.list.length-1;i>=0;i--){ if(playing&&!RM) W.list[i].t+=dt*speed*0.55; if(W.list[i].t>=1) W.list.splice(i,1); }
-  var wc=0, d=new THREE.Object3D();
-  W.list.forEach(function(w){ var x=(w.c-(GN-1)/2)*cell, z=half - w.t*AW;
-    d.position.set(x,0.85,z); d.rotation.set(0,0,0); d.scale.set(1,1,1); d.updateMatrix(); W.im.setMatrixAt(wc++,d.matrix); });
-  W.im.count=wc; W.im.instanceMatrix.needsUpdate=true;
-
-  // activations across rows
-  var A=flowA; if(playing&&!RM){ A.acc+=dt*speed*8; while(A.acc>=1){ A.acc-=1; A.list.push({r:(Math.random()*ACC.rows)|0,t:0}); } }
-  for(var a=A.list.length-1;a>=0;a--){ if(playing&&!RM) A.list[a].t+=dt*speed*0.55; if(A.list[a].t>=1) A.list.splice(a,1); }
+  // activations: enter the WEST edge, flow +X across each row, skewed one
+  // cycle per row (the SRL delay lines) so the wavefront stays diagonal
+  var A=flowA; if(playing&&!RM){ A.acc+=dt*speed*7; while(A.acc>=1){ A.acc-=1; A.list.push({r:(Math.random()*ACC.rows)|0,t:0}); } }
+  for(var a=A.list.length-1;a>=0;a--){ if(playing&&!RM) A.list[a].t+=dt*speed*0.5; if(A.list[a].t>=1) A.list.splice(a,1); }
   var ac=0;
-  A.list.forEach(function(v){ var z=(v.r-(ACC.rows-1)/2)*cell, x=-half + v.t*AW;
-    d.position.set(x,0.66,z); d.scale.set(1,1,1); d.updateMatrix(); A.im.setMatrixAt(ac++,d.matrix); });
+  A.list.forEach(function(v){
+    var skew = v.r/ACC.rows*0.28;                 // per-row entry stagger
+    var tt = v.t - skew; if(tt<0) return;
+    var z=(v.r-(ACC.rows-1)/2)*cell, x=-half-1.0 + tt*(AW+1.0);
+    d.position.set(x,0.62,z); d.scale.set(1,1,1); d.updateMatrix(); A.im.setMatrixAt(ac++,d.matrix);
+  });
   A.im.count=ac; A.im.instanceMatrix.needsUpdate=true;
 
-  // partial sums draining up into out_buffer
-  var S=flowS; if(playing&&!RM){ S.acc+=dt*speed*5; while(S.acc>=1){ S.acc-=1; S.list.push({c:(Math.random()*GN)|0,t:0}); } }
-  for(var s2=S.list.length-1;s2>=0;s2--){ if(playing&&!RM) S.list[s2].t+=dt*speed*0.6; if(S.list[s2].t>=1) S.list.splice(s2,1); }
+  // partial sums: enter the NORTH edge, flow +Z down each column, drain south
+  // into MM_out_buffer
+  var S=flowS; if(playing&&!RM){ S.acc+=dt*speed*6; while(S.acc>=1){ S.acc-=1; S.list.push({c:(Math.random()*GN)|0,t:0}); } }
+  for(var s2=S.list.length-1;s2>=0;s2--){ if(playing&&!RM) S.list[s2].t+=dt*speed*0.55; if(S.list[s2].t>=1) S.list.splice(s2,1); }
   var sc=0;
-  S.list.forEach(function(v){ var x=(v.c-(GN-1)/2)*cell, z=-half + v.t*(AW+2.4);
-    d.position.set(x, 0.8 + v.t*0.5, z); d.scale.set(1,1,1); d.updateMatrix(); S.im.setMatrixAt(sc++,d.matrix); });
+  S.list.forEach(function(v){ var x=(v.c-(GN-1)/2)*cell, z=-half-0.6 + v.t*(AW+2.2);
+    d.position.set(x, 0.72, z); d.scale.set(1,1,1); d.updateMatrix(); S.im.setMatrixAt(sc++,d.matrix); });
   S.im.count=sc; S.im.instanceMatrix.needsUpdate=true;
 
   // diagonal compute wavefront: a moderate teal lift on the active DSP PEs --
@@ -1019,7 +1274,7 @@ var DDR_CEIL  = 4.3;           // 32-bit DDR3-1066 on the PS
 function updateTelem(dt){
   var target = 0;
   if(playing){
-    if(bookmark==="core"){
+    if(zoom==="mm"){
       var fill = Math.min(1, wf.cycle/35);           // fills over the first ~35 cycles
       target = 0.30 + 0.62*fill;                      // -> ~0.92 steady (192/205 DSP in the array)
     } else {
@@ -1029,14 +1284,14 @@ function updateTelem(dt){
   TEL.duty += (target - TEL.duty) * Math.min(1, dt*3);
   TEL.gops = GOPS_PEAK * TEL.duty;
   TEL.ddr  = flowVisible ? DDR_PEAK * (0.4 + 0.6*TEL.duty) : 0;
-  if(playing && !RM && bookmark==="core") TEL.cyc = wf.cycle;
+  if(playing && !RM && zoom==="mm") TEL.cyc = wf.cycle;
 
   if(telEl.gops){
     telEl.gops.textContent = TEL.gops.toFixed(1);
     telEl.gopsBar.style.width = (TEL.gops/GOPS_PEAK*100).toFixed(0)+"%";
     telEl.ddr.textContent = TEL.ddr.toFixed(1);
     telEl.ddrBar.style.width = Math.min(100, TEL.ddr/DDR_CEIL*100).toFixed(0)+"%";
-    telEl.cyc.textContent = bookmark==="core" ? ("cycle "+TEL.cyc+(TEL.cyc>35?" · steady":"")) : "cycle —";
+    telEl.cyc.textContent = zoom==="mm" ? ("cycle "+TEL.cyc+(TEL.cyc>35?" · steady":"")) : "cycle —";
     telEl.ddrCap.innerHTML = TEL.ddr>0.1
       ? "<b>"+Math.round(TEL.ddr/DDR_CEIL*100)+"% of the 32-bit DDR3 ceiling</b> — 16-lane config stays memory-bound-free"
       : "<b>32-bit DDR3 ≈ 4.3 GB/s</b> — peak stream demand 3.6 GB/s fits under it";
@@ -1063,6 +1318,7 @@ function loop(){
   if(flowVisible) advanceSoc(dt);
   advancePE(dt);
   updateGhost(dt);
+  updateZoom(dt);
   updateTelem(dt);
 
   if(USE_POST && composer) composer.render();
@@ -1094,5 +1350,12 @@ try{
   throw err;
 }
 
-setTimeout(function(){ var h=document.getElementById("hint"); if(h) h.style.opacity=0; }, 7000);
+var _hintTimer;
+function flashHint(){
+  var h=document.getElementById("hint"); if(!h) return;
+  h.style.opacity = 1;
+  clearTimeout(_hintTimer);
+  _hintTimer = setTimeout(function(){ h.style.opacity = 0; }, 6000);
+}
+flashHint();
 })();
