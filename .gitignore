@@ -176,3 +176,32 @@ Thumbs.db
 
 .claude/settings.local.json
 
+# --- Report authoring byproducts (report/) ---
+#
+# The report/ tree is where the Project Book / IEEE paper / final presentation
+# are generated from Markdown + reports/**/*.rpt data. These patterns keep the
+# scratch that process produces out of the repo: Python bytecode caches, the
+# Manim render tree (regenerable from report/manim/scene_taofpga.py), the
+# throwaway page-map / TOC / figure-scan dumps the layout-fix scripts emit,
+# and Word/PowerPoint lock files. The generator scripts and the final
+# .pdf/.docx/.pptx artifacts themselves are tracked.
+
+report/__pycache__/
+
+report/manim/__pycache__/
+
+report/manim/media/
+
+report/*_dump*.txt
+
+report/final_page_map*.txt
+
+report/fig*scan*.txt
+
+# Course-provided handout, not our work -- kept locally for reference only.
+report/Guidelines for Final Presentation.pdf
+
+~$*.docx
+
+~$*.pptx
+
