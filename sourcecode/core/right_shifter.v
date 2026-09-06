@@ -1,10 +1,32 @@
 `timescale 1ns / 1ps
-//ËÄÉáÎåÈë
+// ===========================================================================
+// right_shifter.v -- rounding, saturating arithmetic right shift (requantize)
+//
+// Purpose: take a wide accumulator value (`before_data_width` bits, signed)
+// and bring it back down to `after_data_width` bits by shifting right
+// `shift` places, with round-half-up and signed saturation. This is the
+// requantization step that turns a matmul partial sum back into an int8
+// activation. Instantiated once per output lane by MM_out_buffer.v; the same
+// round-then-shift-then-clip scheme is mirrored in software by
+// apps/golden_model.py's mm_soft() and the testbenches' MM_soft task.
+//
+// Combinational (no clock). Behaviour:
+//   temp1 = data_in >>> shift            (arithmetic shift, sign-extending)
+//   temp2 = temp1 + data_in[shift-1]     (round half up: add the bit that
+//                                         was shifted past the new LSB)
+//   out   = saturate(temp2) to signed [after_data_width]
+//           i.e. clamp to +2^(after-1)-1 / -2^(after-1)
+// The shift == 0 path is handled separately because `data_in[shift-1]`
+// would index bit [-1]; there it just saturates data_in with no rounding.
+// under_min / over_max detect that the value no longer fits in the narrow
+// signed range by checking that the bits above the new sign bit are not a
+// clean sign extension.
+// ===========================================================================
 module right_shifter
 #(
-    parameter before_data_width = 32,
-    parameter after_data_width = 8,
-    parameter shift_width = 5
+    parameter before_data_width = 32,   // width of the incoming accumulator
+    parameter after_data_width = 8,     // width of the requantized result
+    parameter shift_width = 5           // width of the `shift` amount port
 )
 (
     shift,

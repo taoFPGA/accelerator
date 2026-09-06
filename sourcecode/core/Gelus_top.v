@@ -1,6 +1,12 @@
 
 `timescale 1 ns / 1 ps
-
+// ===========================================================================
+// Gelus_top.v -- outer port-list wrapper around Gelus_axi.v
+//
+// Flattens Gelus_axi's ports into IP-Integrator naming (axis_aclk/aresetn,
+// s_axis_*, m_axis_*, s00_axi_*) so the GELU stage can be used as a
+// standalone block-design IP. No logic -- pure wiring.
+// ===========================================================================
 	module Gelus_top #
 	(
 		// Users to add parameters here

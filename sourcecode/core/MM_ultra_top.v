@@ -1,5 +1,13 @@
 `timescale 1ns / 1ps
-
+// ===========================================================================
+// MM_ultra_top.v -- outer port-list wrapper around MM_ultra_axi.v
+//
+// Flattens MM_ultra_axi's AXI4-Lite + AXI4-Stream ports into the exact
+// signal names Vivado IP Integrator expects (aclk / aresetn, s0_axis_*,
+// s1_axis_*, m0_axis_*, s00_axi_*) so the MatMul core can be dropped into a
+// block design as a standalone IP. No logic -- pure wiring.
+// scripts/prj.tcl instantiates this in the SoC block design.
+// ===========================================================================
 module MM_ultra_top #
 	(
 		// Users to add parameters here

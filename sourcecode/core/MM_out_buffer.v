@@ -1,7 +1,27 @@
 `timescale 1ns / 1ps
-
+// ===========================================================================
+// MM_out_buffer.v -- output accumulator BRAM + requantizer
+//
+// Last stage of MM_ultra. The systolic array produces its result matrix one
+// A_size-wide tile at a time, and along the contracted dimension the SAME
+// output element is produced in several passes. This block holds the full
+// output matrix in `F_array` (OUT_MEM_WIDTH bits/lane, wider than data_width
+// so partial sums don't clip mid-accumulation) and, for each incoming tile:
+//
+//   read F_array[addr] -> AdderS (saturating add of new tile + running sum)
+//   -> write back to F_array[addr].
+//
+// When the last contraction pass for a region lands (last_cnt ==
+// F_width_block_num -> start_trans), it streams F_array out: each lane goes
+// through right_shifter.v (arithmetic-right-shift by `shift`, round, clip to
+// data_width) to requantize back to int8, emitted on out_data with AXI-style
+// valid/ready/last. out_data_addr = col*F_length + row walks the stored
+// matrix; clear_addr zeroes each slot as it is read so the BRAM is clean for
+// the next matmul. The three F_array_out_valid_delayN stages line the BRAM
+// read latency up with the shifter and the output register.
+// ===========================================================================
 module MM_out_buffer
-#(              
+#(
     parameter integer                                        data_width = 8,
     parameter integer                                        OUT_Feature_Block_num = 2400,
     parameter integer                                        OUT_MEM_WIDTH = 32,

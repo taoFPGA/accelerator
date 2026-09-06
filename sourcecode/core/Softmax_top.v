@@ -1,6 +1,12 @@
 
 `timescale 1 ns / 1 ps
-
+// ===========================================================================
+// Softmax_top.v -- outer port-list wrapper around Softmax_top_axi.v
+//
+// Flattens the Softmax stage's AXI4-Lite + AXI4-Stream ports into
+// IP-Integrator naming so it can be used as a standalone block-design IP.
+// No logic -- pure wiring.
+// ===========================================================================
 	module Softmax_top #
 	(
 		// Users to add parameters here

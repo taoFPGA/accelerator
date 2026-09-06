@@ -1,5 +1,25 @@
 `timescale 1ns / 1ps
-
+// ===========================================================================
+// PE_array.v -- the systolic multiply-accumulate array (array_m x array_n PEs)
+//
+// This is the compute core of the matmul. `array_m` instances of PE_line.v
+// are stacked vertically; weights are pre-loaded column-major into the array
+// (one full weight tile) and then activations are streamed in row by row.
+// Each cycle every PE does psum += x * w and forwards x to its right
+// neighbour, so a full dot product falls out of the bottom of each column
+// after the array's fill latency.
+//
+// Two skew-buffer staircases keep the systolic timing correct:
+//   * x_buf  -- row i's activation input is delayed i cycles so that the
+//               wavefront of `x` reaches every column of every row in step.
+//   * out_buf -- column i's result is delayed so all `array_n` column sums
+//               leave PE_out_packed aligned on the same cycle.
+//
+// NUM_DSP_ROWS controls how many of the array_m rows map their PEs onto
+// DSP48E1 hard macros vs. LUT/CARRY4 fabric -- a device-fit knob, not a
+// functional one (see the parameter comment and report/project_story.md's
+// DSP-inference-gap investigation).
+// ===========================================================================
 module PE_array
 (
     clk,
