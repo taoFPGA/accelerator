@@ -1,0 +1,79 @@
+#!/bin/bash
+# =============================================================================
+# dump_arch.pbs -- run scripts/dump_arch.tcl on a SOCA/PBS compute node
+#
+# Submit from the repo root:
+#     qsub scripts/dump_arch.pbs
+#
+# Override the checkpoint / scope / output without editing this file:
+#     qsub -v DCP=dbs/foo.dcp,SCOPE=design_1_i/transformer_block_axi_top_0 scripts/dump_arch.pbs
+#
+# The design is a Zynq-7020 (xc7z020, single die, ~53k LUT) -- opening the routed
+# checkpoint needs only a few GB RAM, so the resource ask below is deliberately
+# modest. Adjust the two lines marked >>> CONFIRM <<< to match this cluster's
+# accepted queue names / instance-type syntax (SOCA-specific).
+# =============================================================================
+
+#PBS -N taofpga_dump_arch
+#PBS -j oe
+#PBS -o dump_arch.pbs.log
+#PBS -l walltime=00:30:00
+#PBS -q normal
+### NOTE: this cluster's only exec nodes are 1x c6i.large = 1 vCPU / ~3.9 GB RAM,
+### and it does NOT autoscale to bigger types. Anything larger => "Can Never Run".
+### Vivado peaks ~3.2 GB opening this routed checkpoint, so it barely fits a
+### compute node; it fits the DCV node (7.4 GB) comfortably. If the compute
+### fleet has no free node, run this script's body directly on the DCV node.
+#PBS -l select=1:ncpus=1:mem=3500mb
+
+set -euo pipefail
+
+# ---- locate repo root -------------------------------------------------------
+if [ -n "${PBS_O_WORKDIR:-}" ]; then
+    cd "$PBS_O_WORKDIR"
+fi
+REPO="$(pwd)"
+echo "[dump_arch.pbs] repo root : $REPO"
+echo "[dump_arch.pbs] host      : $(hostname)"
+echo "[dump_arch.pbs] date      : $(date -Is)"
+
+# ---- Vivado environment ----------------------------------------------------
+VIVADO_SETTINGS="/data/project/tsmc65/users/turgeme/xilinx/2025.2/Vivado/settings64.sh"
+if [ ! -f "$VIVADO_SETTINGS" ]; then
+    echo "ERROR: $VIVADO_SETTINGS not found" >&2
+    exit 1
+fi
+# shellcheck disable=SC1090
+source "$VIVADO_SETTINGS"
+echo "[dump_arch.pbs] vivado    : $(command -v vivado)  ($(vivado -version | head -1))"
+
+# ---- parameters (override with qsub -v) -----------------------------------
+DCP="${DCP:-workspace/myproj/project_1.runs/impl_1/design_1_wrapper_routed.dcp}"
+SCOPE="${SCOPE:-}"                       # empty = whole design; set to the accelerator instance to narrow
+OUT="${OUT:-exports/architecture_data.json}"
+CONN_DEPTH="${CONN_DEPTH:-2}"
+
+echo "[dump_arch.pbs] DCP       : $DCP"
+echo "[dump_arch.pbs] SCOPE     : ${SCOPE:-(whole design)}"
+echo "[dump_arch.pbs] OUT       : $OUT"
+
+mkdir -p "$(dirname "$OUT")"
+RUNDIR="$(mktemp -d "${TMPDIR:-/tmp}/dump_arch.XXXXXX")"
+trap 'rm -rf "$RUNDIR"' EXIT
+
+# ---- run -----------------------------------------------------------------
+vivado -mode batch -notrace -nojournal \
+    -log "$RUNDIR/vivado.log" \
+    -source scripts/dump_arch.tcl \
+    -tclargs \
+        "dcp=$DCP" \
+        "scope=$SCOPE" \
+        "out=$OUT" \
+        "conn_depth=$CONN_DEPTH"
+
+rc=$?
+cp -f "$RUNDIR/vivado.log" "$(dirname "$OUT")/arch_dump/vivado.log" 2>/dev/null || true
+echo "[dump_arch.pbs] vivado exit code: $rc"
+echo "[dump_arch.pbs] outputs:"
+ls -l "$OUT" "$(dirname "$OUT")/arch_dump/" 2>/dev/null || true
+exit $rc
