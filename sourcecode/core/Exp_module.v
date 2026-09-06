@@ -1,13 +1,33 @@
 `timescale 1ns / 1ps
+// ===========================================================================
+// Exp_module.v -- fixed-point exp(x) for x <= 0   (latency = 3 clocks)
+//
+// Evaluates e^x for non-positive x, as needed by the softmax numerator
+// (Softmax.v subtracts the row max first, so its argument is always <= 0).
+// Method: change base to 2, split the exponent into integer + fraction, do
+// the integer part as a barrel shift and the fraction with a 1st-order
+// (1 + 0.5*f) approximation, then multiply.
+//
+//   x_log2e = x * 23/16      (23 = round(log2(e) * 16), so this is x*log2(e)
+//                             in ...Q14 -> result is <= 0)
+//   take |x_log2e|; integer part -> x_int (clamped to 12), fraction -> frac
+//   e^x ~= 2^-x_int * (1 - 0.5*frac)
+//        = (1<<11 >> x_int)  *  (1 - frac/2)      -> temp_y, unsigned Q25
+//   saturate to 25'h1FFFFFF if the >1.0 guard bit is set.
+//
+// Ports (see sourcecode/README.md for SxQy): x_S9Q10 in, y_U0Q25 out
+// (unsigned, 0..~1). Registered at the input mul, the two temp products,
+// and the output.
+// ===========================================================================
 module Exp_module(//latency = 3
-	input 					clk,      
-    input  signed [19:0]    x_S9Q10, //signed
-    output reg signed [24:0]    y_U0Q25_reg1 //unsigned
+	input 					clk,
+    input  signed [19:0]    x_S9Q10, // argument, <= 0
+    output reg signed [24:0]    y_U0Q25_reg1 // e^x, unsigned 0..1
 );
 
-wire signed [24:0] x_log2e_S10Q14; //signed£¬less or equal 0
-reg  signed [24:0] x_log2e_S10Q14_reg1; //signed£¬less or equal 0
-assign x_log2e_S10Q14  = x_S9Q10 * 6'sd23;
+wire signed [24:0] x_log2e_S10Q14; // x*log2(e); <= 0
+reg  signed [24:0] x_log2e_S10Q14_reg1;
+assign x_log2e_S10Q14  = x_S9Q10 * 6'sd23; // 23/16 ~= log2(e)
 
 always@(posedge clk)begin
 	x_log2e_S10Q14_reg1 <= x_log2e_S10Q14;

@@ -1,6 +1,18 @@
 
 `timescale 1 ns / 1 ps
-
+// ===========================================================================
+// Softmax_top_axi.v -- AXI4-Lite + AXI4-Stream wrapper around Softmax_control.v
+//
+// Standalone IP wrapper for the Softmax stage. Body is the stock Xilinx
+// AXI4-Lite slave template; only the port list and the "Add user logic here"
+// block at the bottom are project code.
+//
+// AXI4-Lite register map (addr[3:2] selects 4 regs):
+//   0  length_input    (RW) row length N, <= 1023
+//   1  scale_in_input  (RW, signed [4:0]) Softmax input Q-point, -1..10
+//   2  scale_out_input (RW, [3:0])        Softmax output Q-point, 7..12
+// Stream: s_axis (int8, one element/cycle) -> softmax -> m_axis (int8).
+// ===========================================================================
 	module Softmax_top_axi #
 	(
 		// Users to add parameters here

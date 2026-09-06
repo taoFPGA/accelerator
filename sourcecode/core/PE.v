@@ -1,5 +1,14 @@
 `timescale 1ns / 1ps
-
+// ===========================================================================
+// PE.v -- one processing element of the systolic array
+//
+// A single weight-stationary multiply-accumulate cell. On `set_w` it latches
+// its weight; every cycle it computes psum_out = psum_in + x_in*reg_w and
+// passes x_in on to its right neighbour (x_out) one cycle later. array_n of
+// these form a PE_line; array_m lines form the PE_array. USE_DSP only
+// changes the physical mapping (DSP48E1 vs LUT/CARRY4) -- see the parameter
+// note below.
+// ===========================================================================
 module PE
 #(
     parameter data_width = 8,

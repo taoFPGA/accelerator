@@ -1,20 +1,39 @@
 `timescale 1ns / 1ps
-
-
+// ===========================================================================
+// Softmax_control.v -- row buffering / 3-pass replay wrapper around Softmax.v
+//
+// Softmax.v needs to see every element of a row three times (max, sum,
+// normalize). This block hides that: it accepts a row once over AXI-Stream
+// (top_*), stores the `length` elements in in_data_buffer, and replays them
+// into Softmax.v the required three times, tracking the pass with
+// cnt_stage / lengthX2 / lengthX3.
+//
+//   top_ready_in = (cnt_in < length)  -- backpressure the producer only
+//     while the current row's buffer is still filling; the two replay passes
+//     read straight from the buffer with no upstream traffic.
+//   out_addr  -- selects which buffered element Softmax.v sees this cycle,
+//     offset by 0 / length / lengthX2 depending on the pass.
+//   top_last_out = Softmax_out_last & top_last_in_reg  -- propagate the input
+//     'last' only on the final normalized element.
+//
+// scale_in / scale_out are just registered and forwarded to Softmax.v.
+// lengthX2 / lengthX3 are the precomputed 2N / 3N used everywhere as pass
+// boundaries.
+// ===========================================================================
 module Softmax_control(
     input                           clk,
     input                           rst_n,
 
-    input [9:0]                     length_input,
-    input signed [4:0]              scale_in_input,
-    input [3:0]                     scale_out_input,
-    
-    
+    input [9:0]                     length_input,     // row length N
+    input signed [4:0]              scale_in_input,   // Softmax.v scale_in (-1..10)
+    input [3:0]                     scale_out_input,  // Softmax.v scale_out (7..12)
+
+
     input signed [7:0]              top_data_in,
     input                           top_valid_in,
     output                          top_ready_in,
     input                           top_last_in,
-    
+
     output     [7:0]                top_data_out,
     output                          top_valid_out,
     output                          top_last_out

@@ -1,10 +1,31 @@
 `timescale 1ns / 1ps
 //latency=4+4
+// ===========================================================================
+// gelu.v -- one scalar int8 GELU lane   (latency = 8 clocks: 4 here + 4 in lin.v)
+//
+// Computes y = GELU(x) for a single int8 activation, matching the tanh
+// approximation used by PyTorch's F.gelu(x, approximate='tanh') and by
+// apps/golden_model.py's gelu_ref(). EightGelus.v instantiates `num_gelu` of
+// these in parallel, one per output lane.
+//
+// `in_scale` (0..14) is the caller's Q-point for x: the block first
+// re-scales x into an internal Q7 (x_in_8Q7) by shifting left/right by
+// (7 - in_scale), does the math in fixed Q7, then shifts the result back by
+// the same amount so y comes out in the caller's scale.
+//
+// Datapath:
+//   * hard clamps first: if x < 0 and x <= -2.5  -> y = 0
+//                        if x > 0 and x >=  2.5  -> y = x   (GELU ~ identity)
+//   * otherwise  y = 0.5 * (L + 1) * x   where L = lin.v( (3/4)*x ), the
+//     even quadratic tanh-shape kernel.
+// The many *_regN ladders are just pipeline delays so x, in_scale and the
+// intermediate products all arrive at the final mux on the same cycle.
+// ===========================================================================
 module gelu(
 	input                           clk,
-    input [3:0]                     in_scale,
-    input signed [7:0]              x, 
-    output reg signed [7:0]         y_reg1
+    input [3:0]                     in_scale,   // Q-point of x (fraction bits)
+    input signed [7:0]              x,
+    output reg signed [7:0]         y_reg1      // GELU(x), same scale as x
 );
 reg signed [7:0] x_reg1;
 reg signed [7:0] x_reg2;

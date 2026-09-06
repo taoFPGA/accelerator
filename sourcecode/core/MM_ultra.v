@@ -1,16 +1,47 @@
 `timescale 1ns / 1ps
-
-
+// ===========================================================================
+// MM_ultra.v -- tiled integer matrix-multiply engine (top of the MatMul core)
+//
+// Computes  OUT = requantize( F x W )  for arbitrarily large F and W by
+// streaming them in over two AXI-Stream inputs (in_F = features, in_W =
+// weights), tiling internally into A_size x A_size blocks, and streaming the
+// int8 result out on out_data. This is the "MM" stage that
+// transformer_block_top.v feeds into Softmax.
+//
+// Structure (three sub-blocks, wired in series):
+//   MM_in_buffer  -- soaks up the entire F and W matrices into BRAM and
+//                    dispatches them tile by tile.
+//   MM_buffer     -- per-tile weight/feature replay sequencer + MM.v
+//                    (weight load -> systolic PE_array -> partial sums).
+//   MM_out_buffer -- accumulates partial sums across contraction passes in a
+//                    wide BRAM, then requantizes (round/shift/saturate) to
+//                    int8 on the way out.
+//
+// Runtime config (held on dedicated ports, not AXI here -- the AXI-Lite
+// register file is one level up in MM_ultra_axi.v):
+//   shift_in              : right-shift amount for the final requantize
+//   F_length_in           : feature rows per block (the contraction length)
+//   F_width_block_num_in  : # of A_size-wide column blocks in F
+//   W_width_block_num_in  : # of A_size-wide column blocks in W (= output
+//                           column blocks)
+// Each config port is edge-captured (only sampled when it changes) so it can
+// be updated between matmuls without a separate strobe. log2_array_m =
+// clogb2(A_size) sizes the guard bits on every psum lane.
+//
+// Fixed-point: F and W are signed data_width (int8 default); internally
+// psum lanes are 2*data_width+log2_array_m; OUT_MEM_WIDTH is the accumulator
+// width in MM_out_buffer. See sourcecode/README.md for the SxQy notation.
+// ===========================================================================
 module MM_ultra
 #(
-    parameter integer                                       A_size = 16,
-    parameter integer                                       data_width = 8,
-    parameter integer                                       shift_width = 10,
-    parameter integer                                       Weight_Block_num = 2400, 
-    parameter integer                                       IN_Feature_Block_num = 2400, 
-    parameter integer                                       OUT_Feature_Block_num = 2400,
-    parameter integer                                       OUT_MEM_WIDTH = 32,
-    parameter integer                                       F_length_width = 9,
+    parameter integer                                       A_size = 16,   // systolic tile edge
+    parameter integer                                       data_width = 8, // signed activation/weight width
+    parameter integer                                       shift_width = 10, // width of shift_in
+    parameter integer                                       Weight_Block_num = 2400,     // in_W_array depth (beats)
+    parameter integer                                       IN_Feature_Block_num = 2400, // in_F_array depth (beats)
+    parameter integer                                       OUT_Feature_Block_num = 2400, // output BRAM depth (tiles)
+    parameter integer                                       OUT_MEM_WIDTH = 32, // accumulator lane width
+    parameter integer                                       F_length_width = 9,  // width of F_length_in
     parameter integer                                       F_width_block_num_width = 5,
     parameter integer                                       W_width_block_num_width = 5
 )(

@@ -1,13 +1,35 @@
 `timescale 1ns / 1ps
-
+// ===========================================================================
+// MM.v -- weight loader + activation feeder wrapped around PE_array.v
+//
+// Sits between MM_buffer.v (which sequences the stream) and PE_array.v (the
+// raw MAC grid). One shared input port `MM_in_data` carries BOTH the weight
+// tile and the activation rows; `wdata_flag` (toggled by wdata_flag_up /
+// MM_in_last from MM_buffer) selects which is currently on the bus:
+//
+//   weight phase   -- array_m beats are pushed through `weight_buffer`, a
+//                     shift register. After the array_m-th beat
+//                     (weight_buffer_cnt == array_m) `set_w` pulses for one
+//                     cycle, latching the whole tile into the PEs. The
+//                     w_packed reversal (weight_buffer[array_m-1-i]) puts
+//                     row 0 of the tile at the top of the array.
+//   feature phase  -- each beat is one activation row; it is registered once
+//                     (feature_in_reg1) and driven straight into the array.
+//
+// valid/last for the result are produced by delaying MM_in_data_valid /
+// MM_in_last through a 2*array_m-deep shift register (MM_out_*_reg_array) to
+// match the array's fill+drain latency. The commented-out right_shifter
+// block shows where requantization used to live -- it now happens later, in
+// MM_out_buffer.v, so MM.v emits the full-width partial sums unchanged.
+// ===========================================================================
 module MM
 #(
-    parameter array_m = 6, 
-    parameter array_n = 6, 
-    parameter data_width = 8, 
+    parameter array_m = 6,              // array rows (also weight-load depth)
+    parameter array_n = 6,              // array columns
+    parameter data_width = 8,           // activation / weight bit width
     // parameter shift_width = 20,
-    parameter log2_array_m = 4,
-    localparam integer axis_data_width = array_m * data_width 
+    parameter log2_array_m = 4,         // guard bits on each psum lane
+    localparam integer axis_data_width = array_m * data_width
 )
 (
     clk,
@@ -66,7 +88,7 @@ wire [data_width*array_m-1:0] x_packed;
 genvar i;
 generate
     for(i=0;i<array_m;i=i+1)begin:array_to_packed
-        assign w_packed[(data_width*array_n)*i +: (data_width*array_n)] = weight_buffer[array_m-1-i];//注意下标这里是反的
+        assign w_packed[(data_width*array_n)*i +: (data_width*array_n)] = weight_buffer[array_m-1-i];// note the reversed index: last-shifted-in beat is array row 0
     end
 endgenerate
 

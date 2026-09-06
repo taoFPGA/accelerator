@@ -1,4 +1,28 @@
 `timescale 1ns / 1ps
+// ===========================================================================
+// MM_buffer.v -- per-tile weight/feature RAM + replay sequencer around MM.v
+//
+// One instance handles a single A_size x A_size output tile. It buffers a
+// whole weight block and a whole feature block in BRAM, then replays them
+// into MM.v in the exact weight-then-feature order the systolic array needs,
+// re-issuing the same buffered weights for every feature row of the tile so
+// upstream only has to send each weight once.
+//
+// FSM (`state`): IDLE -> SET_WEIGHT -> SET_FEATURE -> (SET_WEIGHT for the
+// next weight column | IDLE when the tile is done).
+//   IDLE        : wait for `start` (both buffers filled: both_full).
+//   SET_WEIGHT  : stream array_m weight beats/column into MM.v; `set_w`
+//                 inside MM.v latches them.
+//   SET_FEATURE : stream all FL feature rows against the loaded weights;
+//                 output_feature_* comes back from MM.v.
+// weight_flag_up (raised on each output_feature_last) walks to the next
+// weight column; w_end + output_feature_last together form total_last, the
+// tile-complete pulse consumed by MM_in_buffer / MM_out_buffer.
+//
+// Addressing: input_weight_addr = row*num_blobk_W + col walks the weight
+// BRAM column-major; feature rows are linear. num_blobk_W ("num block W",
+// original spelling kept) = weight-width block count.
+// ===========================================================================
 `define IDLE 2'b00
 `define SET_WEIGHT 2'b01
 `define SET_FEATURE 2'b11
@@ -334,9 +358,9 @@ end
 
 MM
 #(
-    .array_m(array_m), //Array 行数
-    .array_n(array_n), //Array 列数
-    .data_width(data_width), //数据宽度
+    .array_m(array_m), // systolic array rows
+    .array_n(array_n), // systolic array columns
+    .data_width(data_width), // quantized data bit width
     .log2_array_m(log2_array_m)
 ) u_MM
 (

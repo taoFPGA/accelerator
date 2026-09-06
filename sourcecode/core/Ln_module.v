@@ -1,8 +1,24 @@
-`timescale 1ns / 1ps 
+`timescale 1ns / 1ps
+// ===========================================================================
+// Ln_module.v -- fixed-point natural log, ln(x) for x >= 1   (latency = 2)
+//
+// Softmax.v uses the identity  softmax_i = exp(x_i - max - ln(sum)); this
+// block supplies ln(sum), where `sum` is the accumulated exp total
+// (e_sum_U8Q8, always >= 1.0 because Softmax clamps it to >= 256 = 1.0 in
+// Q8).
+//
+// Method: normalize x to [1,2) by finding the position `w` of the leading 1
+// (priority encoder, w = 0..7), so x = 2^w * (1 + k) with k in [0,1).
+//   ln(x) = w*ln(2) + ln(1+k) ~= (w + k) * (11/16)
+// The single constant multiply by 4'b1011 (= 11, i.e. * 11/16 ~= ln(2) plus
+// the linear ln(1+k) term folded in) covers both parts at once.
+// x_U8Q8 in (unsigned, >= 1.0), y_U3Q10 out (unsigned). Registered at the
+// normalize output and the product.
+// ===========================================================================
 module Ln_module(//latency=2
 	input clk,
-    input [15:0]    x_U8Q8,    
-    output [12:0]   y_U3Q10    
+    input [15:0]    x_U8Q8,    // sum of exponentials, >= 1.0
+    output [12:0]   y_U3Q10    // ln(x)
 );
 
 reg [2:0] w; 

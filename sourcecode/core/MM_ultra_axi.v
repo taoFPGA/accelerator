@@ -1,10 +1,30 @@
 
 `timescale 1 ns / 1 ps
-
+// ===========================================================================
+// MM_ultra_axi.v -- AXI4-Lite + dual AXI4-Stream wrapper around MM_ultra.v
+//
+// Standalone bring-up wrapper for the MatMul core on its own (before it was
+// integrated into the full transformer_block pipeline). Body below is the
+// stock Xilinx "AXI4-Lite slave" template (address decode, 4 slave
+// registers, write-strobe handling) -- only the port list and the "Add user
+// logic here" section near the bottom are project code.
+//
+// AXI4-Lite register map (C_S_AXI_ADDR_WIDTH=4 -> addr[3:2] selects):
+//   0  shift_in              (RW) requantize right-shift amount
+//   1  F_length_in           (RW) feature rows per block (contraction len)
+//   2  F_width_block_num_in  (RW) # A_size-wide column blocks in F
+//   3  W_width_block_num_in  (RW) # A_size-wide column blocks in W (= out)
+// Streams: s0_axis = features, s1_axis = weights, m0_axis = int8 result.
+//
+// NOTE: this wrapper's lowercase parameter aliases (array_size, ...) drift
+// from MM_ultra.v's own names (A_size, ...); transformer_block_axi.v was
+// deliberately written NOT to repeat that (see its header + project_story.md
+// Sections 15-16).
+// ===========================================================================
 module MM_ultra_axi #
 (
 	// Users to add parameters here
-    parameter integer     array_size=24,                                      
+    parameter integer     array_size=24,
     parameter integer     data_width=8,                                       
     parameter integer     shift_width=5,                                      
     parameter integer     Weight_block_num=2500,                              
@@ -426,17 +446,17 @@ end
 // Add user logic here
 MM_ultra
 #(
-    .A_size(array_size),                                                   //决定了SA的边长，即大小
-    .data_width(data_width),                                           //决定了量化的数据位宽
-    .shift_width(shift_width),                                         //决定了移位器移位变量的位宽
-    .Weight_Block_num(Weight_block_num),                               //决定了IN_BUFFER里面weight_buffer_block的数量 一个block包含A_size个数据,数据位宽 data_width
-    .IN_Feature_Block_num(in_feature_Block_num),                       //决定了IN_BUFFER里面feature_buffer_block的数量 一个block包含A_size个数据,数据位宽 data_width
-    .OUT_Feature_Block_num(out_feature_block_num),                     //决定了OUT_BUFFER里面feature_buffer_block的数量 一个block包含A_size个数据,数据位宽OUT_MEM_WIDTH
-    .OUT_MEM_WIDTH(out_mem_width),                                     //决定了OUT_BUFFER的数据位宽
-    .F_length_width(feature_length_width),                                   //决定了F_length寄存器位宽以及MM_buffer里面bram大小
-    .F_width_block_num_width(feature_width_block_num_width),                 //决定了F_width_block_num寄存器位宽
-    .W_width_block_num_width(weight_width_block_num_width)                  //决定了W_width_block_num寄存器位宽以及MM_buffer里面bram大小
-                                                                        //F_length和W_width_block_num会有相乘，注意时序
+    .A_size(array_size),                                 // systolic array edge length
+    .data_width(data_width),                             // quantized data bit width
+    .shift_width(shift_width),                           // width of the requantize shift amount
+    .Weight_Block_num(Weight_block_num),                 // in-buffer weight block count (A_size data of data_width each)
+    .IN_Feature_Block_num(in_feature_Block_num),         // in-buffer feature block count (A_size data of data_width each)
+    .OUT_Feature_Block_num(out_feature_block_num),       // out-buffer block count (A_size data of OUT_MEM_WIDTH each)
+    .OUT_MEM_WIDTH(out_mem_width),                       // out-buffer accumulator lane width
+    .F_length_width(feature_length_width),               // F_length register width; also sizes MM_buffer BRAM
+    .F_width_block_num_width(feature_width_block_num_width), // F_width_block_num register width
+    .W_width_block_num_width(weight_width_block_num_width)   // W_width_block_num register width; also sizes MM_buffer BRAM
+                                                        // (F_length * W_width_block_num is multiplied internally -- mind timing)
 )u_MM_ultra(
     .clk(axis_aclk),
     .rst_n(aresetn),
