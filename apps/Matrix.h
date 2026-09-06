@@ -1,3 +1,19 @@
+// ===========================================================================
+// Matrix.h -- fixed-point matrix container + CPU/FPGA matmul entry points
+//
+// Matrix owns a heap buffer padded on both axes up to a multiple of A_SIZE
+// (the systolic tile edge), so the accelerator always sees whole tiles;
+// `rows`/`cols` are the logical size, `real_rows`/`real_cols` the padded
+// size, and element (r,c) lives at base_addr[r*real_cols + c].
+//
+//   Matrix_mul_soft  -- reference A*B=C on the CPU (int accumulate, optional
+//                       round-half-up right shift by R_shift, saturate int8).
+//   Matrix_mul_hard  -- same result via the FPGA: cache-flush the buffers,
+//                       program the accelerator's control regs + 3 AXI-DMA
+//                       channels, poll the S2MM channel for done.
+//   Matrix_compare   -- byte-compare two Matrix buffers.
+// See Matrix.cpp for the implementations and Defines.h for the address map.
+// ===========================================================================
 #ifndef MY_MATRIX_H
 #define MY_MATRIX_H
 #include "xil_types.h"

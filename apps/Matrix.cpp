@@ -1,3 +1,19 @@
+// ===========================================================================
+// Matrix.cpp -- Matrix class + CPU reference and FPGA-driver matmuls
+//
+// Matrix_mul_hard() is the interesting part: it hands A, B and C straight to
+// the hardware.
+//   * Xil_DCacheFlushRange on all three buffers -- the DMA engines read/write
+//     DDR directly, so dirty cache lines must be pushed out first and the
+//     result region invalidated implies here by flushing before the run.
+//   * Xil_Out32(SHIFT/FL/FWBN/WWBN_ADDR, ...) -- the accelerator's AXI-Lite
+//     control registers (right-shift amount, feature length, and the two
+//     block counts), addresses from Defines.h.
+//   * three AXI-DMA channels: RESULT (S2MM, opened first so it's ready to
+//     catch output), WEIGHT (MM2S), FEATURE (MM2S). 0x4 = reset, 0x1 = run.
+//   * spin on RESULT_S2MM_DMASR's IDLE bit until the transfer completes.
+// Matrix_mul_soft() is the plain triple loop used as the golden reference.
+// ===========================================================================
 #include "Matrix.h"
 #include "xparameters.h"
 #include "Defines.h"
@@ -7,6 +23,8 @@
 #include "xil_cache.h"
 #include <string.h>
 
+// Round both axes up to a whole number of A_SIZE-wide tiles; the extra
+// rows/cols are zero (value-initialized new[]), so they don't affect A*B.
 Matrix::Matrix(int rows, int cols) {
 	this->rows = rows;
 	this->cols= cols;
